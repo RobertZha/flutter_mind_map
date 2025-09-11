@@ -10,7 +10,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  path_drawing: ^1.0.1
   plugin_platform_interface: ^2.0.2
+  uuid: ^4.5.1
 
 dev_dependencies:
   flutter_test:

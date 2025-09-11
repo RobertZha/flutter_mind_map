@@ -1,61 +1,85 @@
 import 'package:flutter/material.dart';
-import 'dart:async';
-
-import 'package:flutter/services.dart';
-import 'package:flutter_mind_map/flutter_mind_map.dart';
+import 'package:flutter_mind_map_example/custom_page.dart';
+import 'package:flutter_mind_map_example/theme_page.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
+// ignore: must_be_immutable
 class MyApp extends StatefulWidget {
-  const MyApp({super.key});
-
+  MyApp({super.key});
   @override
   State<MyApp> createState() => _MyAppState();
+
+  CustomPage customPage = CustomPage();
+  ThemePage themePage = ThemePage();
 }
 
 class _MyAppState extends State<MyApp> {
-  String _platformVersion = 'Unknown';
-  final _flutterMindMapPlugin = FlutterMindMap();
-
   @override
   void initState() {
     super.initState();
-    initPlatformState();
   }
 
-  // Platform messages are asynchronous, so we initialize in an async method.
-  Future<void> initPlatformState() async {
-    String platformVersion;
-    // Platform messages may fail, so we use a try/catch PlatformException.
-    // We also handle the message potentially returning null.
-    try {
-      platformVersion =
-          await _flutterMindMapPlugin.getPlatformVersion() ?? 'Unknown platform version';
-    } on PlatformException {
-      platformVersion = 'Failed to get platform version.';
-    }
-
-    // If the widget was removed from the tree while the asynchronous platform
-    // message was in flight, we want to discard the reply rather than calling
-    // setState to update our non-existent appearance.
-    if (!mounted) return;
-
-    setState(() {
-      _platformVersion = platformVersion;
-    });
-  }
+  int index = 0;
+  bool readOnly = false;
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Plugin example app'),
+          title: Text(
+            'Flutter Mind Map',
+            style: Theme.of(context).textTheme.titleLarge!.copyWith(
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
+          ),
+          backgroundColor: Theme.of(context).colorScheme.primary,
+          actions: [
+            Row(
+              children: [
+                Text(
+                  "ReadOnly:",
+                  style: Theme.of(context).textTheme.labelMedium!.copyWith(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+                ),
+                Switch(
+                  value: readOnly,
+                  activeThumbColor: Theme.of(context).colorScheme.primary,
+                  activeTrackColor: Theme.of(context).colorScheme.onPrimary,
+                  onChanged: (value) {
+                    setState(() {
+                      readOnly = value;
+                      widget.customPage.mindMap.setReadOnly(value);
+                      widget.themePage.mindMap.setReadOnly(value);
+                    });
+                  },
+                ),
+              ],
+            ),
+          ],
         ),
-        body: Center(
-          child: Text('Running on: $_platformVersion\n'),
+        body: index == 0 ? widget.customPage : widget.themePage,
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: index,
+          onTap: (value) {
+            setState(() {
+              index = value;
+            });
+          },
+          items: [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.blur_linear_rounded),
+              label: "Custom",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.style_outlined),
+              label: "Theme",
+            ),
+          ],
         ),
       ),
     );
