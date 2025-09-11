@@ -66,6 +66,9 @@ abstract class IMindMapNode {
 
   Map<String, dynamic> toJson();
   void fromJson(Map<String, dynamic> json);
+
+  Map<String, dynamic> saveData();
+  void loadData(Map<String, dynamic> json);
 }
 
 enum NodeType { root, left, right }

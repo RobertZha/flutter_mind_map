@@ -7,6 +7,11 @@ import 'package:flutter_mind_map/link/i_link.dart';
 
 class BeerseLineLink implements ILink {
   @override
+  String getName() {
+    return "BeerseLineLink";
+  }
+
+  @override
   CustomPainter getPainter(IMindMapNode node) {
     return BeerseLineLinkPainter(node: node);
   }

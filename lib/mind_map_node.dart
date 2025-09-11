@@ -11,13 +11,55 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   MindMapNode({super.key});
 
   @override
+  Map<String, dynamic> saveData() {
+    Map<String, dynamic> json = {};
+    return json;
+  }
+
+  @override
+  void loadData(Map<String, dynamic> json) {
+    if (json.containsKey("id") &&
+        json.containsKey("content") &&
+        json.containsKey("nodes")) {
+      setID(json["id"].toString());
+      setTitle(json["content"].toString());
+      List<dynamic> list = json["nodes"];
+      if (list.isNotEmpty) {
+        int i = 1;
+        for (Map<String, dynamic> j in list) {
+          if (j.containsKey("id") &&
+              j.containsKey("content") &&
+              j.containsKey("nodes")) {
+            MindMapNode node = MindMapNode();
+            if (getParentNode() == null) {
+              if (i * 2 < list.length) {
+                addRightItem(node);
+              } else {
+                addLeftItem(node);
+              }
+            } else {
+              if (getNodeType() == NodeType.left) {
+                addLeftItem(node);
+              } else {
+                addRightItem(node);
+              }
+            }
+            node.loadData(j);
+          }
+          i++;
+        }
+      }
+    }
+  }
+
+  @override
   Map<String, dynamic> toJson() {
     Map<String, dynamic> properties = {};
     properties["ID"] = _id;
     properties["Title"] = _title;
     properties["Expanded"] = getExpanded().toString();
     if (_link != null) {
-      properties["Link"] = _link!.runtimeType.toString();
+      properties["Link"] = _link!.getName();
     }
     if (_linkColor != null) {
       properties["LinkColor"] = colorToString(_linkColor!);
@@ -31,6 +73,13 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     }
     if (_linkWidth != null) {
       properties["LinkWidth"] = _linkWidth.toString();
+    }
+    if (_borderColors.isNotEmpty) {
+      List<String> l = [];
+      for (Color c in _borderColors) {
+        l.add(colorToString(c));
+      }
+      properties["BorderColors"] = l;
     }
     if (_hSpace != null) {
       properties["HSpace"] = _hSpace.toString();
@@ -142,6 +191,17 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
         }
         if (proJson.containsKey("LinkWidth")) {
           setLinkWidth(double.tryParse(proJson["LinkWidth"]));
+        }
+        if (proJson.containsKey("BorderColors")) {
+          if (proJson["BorderColors"] is List) {
+            List<Color> list = [];
+            for (String s in proJson["BorderColors"]) {
+              list.add(stringToColor(s));
+            }
+            if (list.isNotEmpty) {
+              setBorderColors(list);
+            }
+          }
         }
         if (proJson.containsKey("HSpace")) {
           setHSpace(int.tryParse(proJson["HSpace"]) ?? 50);
@@ -340,8 +400,6 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     node.setParentNode(this);
     node.setTitle("New Node");
     addLeftItem(node);
-    getMindMap()?.refresh();
-    getMindMap()?.onChanged();
   }
 
   void addRightChildNode() {
@@ -349,8 +407,6 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     node.setParentNode(this);
     node.setTitle("New Node");
     addRightItem(node);
-    getMindMap()?.refresh();
-    getMindMap()?.onChanged();
   }
 
   void onTap() {
@@ -532,6 +588,39 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     getMindMap()?.onChanged();
   }
 
+  List<Color> _borderColors = [];
+  List<Color> getBorderColors() {
+    if (_borderColors.isNotEmpty) {
+      return _borderColors;
+    } else {
+      if (getMindMap()?.getTheme() != null &&
+          getMindMap()?.getTheme()?.getThemeByLevel(getLevel()) != null &&
+          getMindMap()?.getTheme()?.getThemeByLevel(getLevel())!["BorderColors"]
+              is List) {
+        List<Color> list = [];
+        for (dynamic v
+            in getMindMap()?.getTheme()?.getThemeByLevel(
+                  getLevel(),
+                )!["BorderColors"]
+                as List) {
+          if (v is Color) {
+            list.add(v);
+          }
+        }
+        if (list.isNotEmpty) {
+          return list;
+        }
+      }
+    }
+    return [];
+  }
+
+  void setBorderColors(List<Color> value) {
+    _borderColors = value;
+    refresh();
+    getMindMap()?.onChanged();
+  }
+
   IMindMapNode? _parentNode;
   @override
   IMindMapNode? getParentNode() {
@@ -603,7 +692,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   void refresh() {
     if (_state != null) {
       _state!.refresh();
-      getMindMap()?.refresh();
+      //getMindMap()?.refresh();
     }
   }
 
@@ -677,7 +766,8 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     if (_border != null) {
       return _border!;
     } else {
-      return getMindMap()?.getTheme() != null &&
+      BoxBorder border =
+          getMindMap()?.getTheme() != null &&
               getMindMap()?.getTheme()?.getThemeByLevel(getLevel()) != null &&
               getMindMap()?.getTheme()?.getThemeByLevel(getLevel())!["Border"]
                   is BoxBorder
@@ -691,6 +781,45 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
                     style: BorderStyle.solid,
                     strokeAlign: BorderSide.strokeAlignOutside,
                   ));
+
+      List<Color> list = getBorderColors();
+      if (list.isNotEmpty) {
+        int index = 0;
+        if (getParentNode() != null) {
+          if (getNodeType() == NodeType.right) {
+            index = getParentNode()!.getRightItems().indexOf(this);
+          } else {
+            index =
+                getParentNode()!.getRightItems().length +
+                getParentNode()!.getLeftItems().indexOf(this);
+          }
+        }
+        Color color = list[index % list.length];
+        BorderSide top = BorderSide.none;
+        BorderSide left = BorderSide.none;
+        BorderSide bottom = BorderSide.none;
+        BorderSide right = BorderSide.none;
+
+        if (border.top != BorderSide.none) {
+          top = border.top.copyWith(color: color);
+        }
+        if (border.bottom != BorderSide.none) {
+          bottom = border.bottom.copyWith(color: color);
+        }
+        if (border is Border && border.left != BorderSide.none) {
+          left = border.left.copyWith(color: color);
+        }
+        if (border is Border && border.right != BorderSide.none) {
+          right = border.right.copyWith(color: color);
+        }
+        border = BoxBorder.fromLTRB(
+          top: top,
+          right: right,
+          left: left,
+          bottom: bottom,
+        );
+      }
+      return border;
     }
   }
 
@@ -827,6 +956,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     item.setParentNode(this);
     item.setNodeType(NodeType.left);
     refresh();
+    // getMindMap()?.refresh();
     getMindMap()?.onChanged();
   }
 
@@ -836,6 +966,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     item.setParentNode(this);
     item.setNodeType(NodeType.right);
     refresh();
+    //getMindMap()?.refresh();
     getMindMap()?.onChanged();
   }
 
@@ -859,6 +990,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     item.setParentNode(this);
     item.setNodeType(NodeType.left);
     refresh();
+    //getMindMap()?.refresh();
     getMindMap()?.onChanged();
   }
 
@@ -872,6 +1004,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     item.setParentNode(this);
     item.setNodeType(NodeType.right);
     refresh();
+    //getMindMap()?.refresh();
     getMindMap()?.onChanged();
   }
 
@@ -879,6 +1012,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   void removeLeftItem(IMindMapNode item) {
     _leftItems.remove(item);
     refresh();
+    //getMindMap()?.refresh();
     getMindMap()?.onChanged();
   }
 
@@ -886,6 +1020,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   void removeRightItem(IMindMapNode item) {
     _rightItems.remove(item);
     refresh();
+    //getMindMap()?.refresh();
     getMindMap()?.onChanged();
   }
 
@@ -1228,6 +1363,8 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     }
     return 0;
   }
+
+  final FocusNode _focusNode = FocusNode();
 }
 
 class MindMapNodeState extends State<MindMapNode> {
@@ -1261,9 +1398,10 @@ class MindMapNodeState extends State<MindMapNode> {
   Widget build(BuildContext context) {
     widget._state = this;
     //Set Map Size
-    if (widget.getParentNode() == null) {
+    if (widget.getParentNode() == null &&
+        (!widget.getSelected() || !widget._focusNode.hasFocus)) {
       WidgetsBinding.instance.addPostFrameCallback((c) {
-        if (mounted) {
+        if (mounted && !widget.getSelected()) {
           RenderObject? ro = context.findRenderObject();
           if (ro != null && ro is RenderBox) {
             widget.getMindMap()?.setSize(ro.size);
@@ -1833,8 +1971,10 @@ class MindMapNodeTitleState extends State<MindMapNodeTitle> {
   void initState() {
     super.initState();
     widget.node.getMindMap()?.addOnZoomChangedListeners(onZoomChanged);
+    _editingController.text = widget.node.getTitle();
   }
 
+  final TextEditingController _editingController = TextEditingController();
   @override
   void dispose() {
     widget.node.getMindMap()?.removeOnZoomChangedListeners(onZoomChanged);
@@ -1850,7 +1990,8 @@ class MindMapNodeTitleState extends State<MindMapNodeTitle> {
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((c) {
-      if (mounted) {
+      if (mounted &&
+          (!widget.node.getSelected() || !widget.node._focusNode.hasFocus)) {
         RenderObject? ro = context.findRenderObject();
         if (ro != null && ro is RenderBox) {
           RenderObject? parent = ro.parent;
@@ -1924,9 +2065,50 @@ class MindMapNodeTitleState extends State<MindMapNodeTitle> {
         boxShadow: widget.node.getShadow(),
         gradient: widget.node.getGradient(),
       ),
+      constraints: BoxConstraints(minWidth: 30),
       child:
           widget.node.getChild() ??
-          Text(widget.node.getTitle(), style: widget.node.getTextStyle()),
+          (!(widget.node.getMindMap()?.getReadOnly() ?? true) &&
+                  widget.node.getSelected()
+              ? Container(
+                  constraints: BoxConstraints(
+                    maxWidth: widget.node.getSize() != null
+                        ? ((widget.node.getSize()!.width -
+                                      (widget.node.getPadding() == null
+                                          ? 0
+                                          : (widget.node.getPadding()!.left +
+                                                widget.node
+                                                    .getPadding()!
+                                                    .right))) <
+                                  30
+                              ? 30
+                              : widget.node.getSize()!.width -
+                                    (widget.node.getPadding() == null
+                                        ? 0
+                                        : (widget.node.getPadding()!.left +
+                                              widget.node.getPadding()!.right)))
+                        : 100,
+                  ),
+                  child: TextField(
+                    autofocus: true,
+                    focusNode: widget.node._focusNode,
+                    controller: _editingController,
+                    style: widget.node.getTextStyle(),
+                    scrollPadding: EdgeInsets.zero,
+                    decoration: InputDecoration(
+                      isCollapsed: true,
+                      border: InputBorder.none,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                    onChanged: (value) {
+                      widget.node.setTitle(_editingController.text);
+                    },
+                  ),
+                )
+              : Text(
+                  widget.node.getTitle(),
+                  style: widget.node.getTextStyle(),
+                )),
     );
   }
 }

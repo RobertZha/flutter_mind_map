@@ -6,6 +6,11 @@ import 'package:flutter_mind_map/i_mind_map_node.dart';
 import 'package:flutter_mind_map/link/i_link.dart';
 
 class PolyLineLink implements ILink {
+  @override
+  String getName() {
+    return "PolyLineLink";
+  }
+
   double radius = 10;
   double getRadius() {
     return radius;

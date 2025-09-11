@@ -10,11 +10,23 @@ import 'package:flutter_mind_map/link/poly_line_link.dart';
 import 'package:flutter_mind_map/mind_map_node.dart';
 import 'package:flutter_mind_map/theme/i_mind_map_theme.dart';
 import 'package:flutter_mind_map/theme/mind_map_theme_compact.dart';
+import 'package:flutter_mind_map/theme/mind_map_theme_large.dart';
+import 'package:flutter_mind_map/theme/mind_map_theme_normal.dart';
 import 'package:path_drawing/path_drawing.dart';
 
 // ignore: must_be_immutable
 class MindMap extends StatefulWidget {
   MindMap({super.key});
+
+  void loadData(Map<String, dynamic> json) {
+    if (json.containsKey("id") &&
+        json.containsKey("content") &&
+        json.containsKey("nodes")) {
+      MindMapNode rootNode = MindMapNode();
+      setRootNode(rootNode);
+      rootNode.loadData(json);
+    }
+  }
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> json = {
@@ -71,6 +83,10 @@ class MindMap extends StatefulWidget {
     }
   }
 
+  List<INodeAdapter> getNodeAdapter() {
+    return _nodeAdapter;
+  }
+
   IMindMapNode? createNode(String name) {
     for (INodeAdapter na in _nodeAdapter) {
       if (na.getName() == name) {
@@ -91,6 +107,10 @@ class MindMap extends StatefulWidget {
     }
   }
 
+  List<ILinkAdapter> getLinkAdapter() {
+    return _linkAdapter;
+  }
+
   ILink? createLink(String name) {
     for (ILinkAdapter na in _linkAdapter) {
       if (na.getName() == name) {
@@ -100,11 +120,19 @@ class MindMap extends StatefulWidget {
     return null;
   }
 
-  final List<IThemeAdapter> _themeAdapter = [MindMapThemeCompactAdapter()];
+  final List<IThemeAdapter> _themeAdapter = [
+    MindMapThemeCompactAdapter(),
+    MindMapThemeNormalAdapter(),
+    MindMapThemeLargeAdapter(),
+  ];
   void registerThemeAdapter(IThemeAdapter value) {
     if (!_themeAdapter.contains(value)) {
       _themeAdapter.add(value);
     }
+  }
+
+  List<IThemeAdapter> getThemeAdapter() {
+    return _themeAdapter;
   }
 
   IMindMapTheme? createTheme(String name) {
@@ -154,7 +182,6 @@ class MindMap extends StatefulWidget {
   }
 
   void refresh() {
-    getRootNode().setOffset(null);
     _state?.refresh();
   }
 
@@ -982,7 +1009,10 @@ class MindMapState extends State<MindMap> {
 
   void refresh() {
     if (mounted) {
-      setState(() {});
+      setState(() {
+        widget.getRootNode().setOffset(null);
+        widget.getRootNode().setSize(null);
+      });
     }
   }
 }

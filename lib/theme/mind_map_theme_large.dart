@@ -3,10 +3,10 @@ import 'package:flutter_mind_map/adapter/i_theme_adapter.dart';
 import 'package:flutter_mind_map/link/beerse_line_link.dart';
 import 'package:flutter_mind_map/theme/i_mind_map_theme.dart';
 
-class MindMapThemeCompact implements IMindMapTheme {
+class MindMapThemeLarge implements IMindMapTheme {
   @override
   String getName() {
-    return "Compact";
+    return "Large";
   }
 
   @override
@@ -16,12 +16,12 @@ class MindMapThemeCompact implements IMindMapTheme {
         return {
           "BackgroundColor": Colors.white,
           "TextColor": Colors.black,
-          "FontSize": 16.0,
+          "FontSize": 20.0,
           "Bold": true,
           "LinkColor": Colors.deepPurpleAccent,
           "LinkWidth": 1.5,
-          "HSpace": 40,
-          "VSpace": 10,
+          "HSpace": 60,
+          "VSpace": 20,
           "Border": Border.all(
             color: Colors.deepPurpleAccent,
             width: 2,
@@ -29,19 +29,19 @@ class MindMapThemeCompact implements IMindMapTheme {
             strokeAlign: BorderSide.strokeAlignOutside,
           ),
           "BorderRadius": BorderRadius.circular(100),
-          "Padding": EdgeInsets.fromLTRB(18, 9, 18, 9),
+          "Padding": EdgeInsets.fromLTRB(24, 12, 24, 12),
           "Link": BeerseLineLink(),
         };
       case 1:
         return {
           "BackgroundColor": Colors.transparent,
           "TextColor": Colors.black,
-          "FontSize": 12.0,
-          "HSpace": 40,
-          "VSpace": 10,
+          "FontSize": 15.0,
+          "HSpace": 60,
+          "VSpace": 20,
           "Border": Border.all(color: Colors.transparent, width: 0),
-          "BorderRadius": BorderRadius.circular(0),
-          "Padding": EdgeInsets.fromLTRB(6, 0, 6, 0),
+          "BorderRadius": BorderRadius.circular(100),
+          "Padding": EdgeInsets.fromLTRB(12, 0, 12, 0),
           "LinkWidth": 1.5,
           "LinkColors": [
             Colors.deepPurpleAccent,
@@ -63,14 +63,14 @@ class MindMapThemeCompact implements IMindMapTheme {
   }
 }
 
-class MindMapThemeCompactAdapter implements IThemeAdapter {
+class MindMapThemeLargeAdapter implements IThemeAdapter {
   @override
   IMindMapTheme createTheme() {
-    return MindMapThemeCompact();
+    return MindMapThemeLarge();
   }
 
   @override
   String getName() {
-    return "Compact";
+    return "Large";
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_mind_map_example/custom_page.dart';
 import 'package:flutter_mind_map_example/theme_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(MyApp());
@@ -30,6 +31,25 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+            onPressed: () async {
+              var prefs = await SharedPreferences.getInstance();
+              if (index == 0) {
+                prefs.remove("Custom");
+                widget.customPage.prefs = null;
+                await widget.customPage.init();
+              } else {
+                prefs.remove("Theme");
+                widget.themePage.prefs = null;
+                await widget.themePage.init();
+              }
+              setState(() {});
+            },
+            icon: Icon(
+              Icons.refresh,
+              color: Theme.of(context).colorScheme.onPrimary,
+            ),
+          ),
           title: Text(
             'Flutter Mind Map',
             style: Theme.of(context).textTheme.titleLarge!.copyWith(

@@ -7,6 +7,11 @@ import 'package:flutter_mind_map/link/i_link.dart';
 
 class LineLink implements ILink {
   @override
+  String getName() {
+    return "LineLink";
+  }
+
+  @override
   CustomPainter getPainter(IMindMapNode node) {
     return LineLinkPainter(node: node);
   }
