@@ -1,7 +1,7 @@
 name: flutter_mind_map
 description: "A new Flutter plugin project."
 version: 0.0.1
-homepage:
+homepage: https://github.com/RobertZha/flutter_mind_map
 
 environment:
   sdk: ^3.8.1
