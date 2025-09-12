@@ -3,6 +3,12 @@ description: "A new Flutter plugin project."
 version: 0.0.1
 repository: https://github.com/RobertZha/flutter_mind_map 
 
+screenshots:
+  - description: 'MindMap in custom'
+    path: screenshots/mindmapcustom.png
+  - description: 'MindMap in default theme'
+    path: screenshots/mindmaptheme.png
+
 environment:
   sdk: ^3.8.1
   flutter: '>=3.3.0'
