@@ -6,6 +6,7 @@ import 'package:flutter_mind_map/mind_map.dart';
 import 'package:flutter_mind_map/theme/i_mind_map_theme.dart';
 import 'package:flutter_mind_map/theme/mind_map_theme_compact.dart';
 import 'package:flutter_mind_map_example/my_theme.dart';
+import 'package:flutter_mind_map_example/my_theme1.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // ignore: must_be_immutable
@@ -13,6 +14,7 @@ class ThemePage extends StatefulWidget {
   ThemePage({super.key}) {
     //add MyTheme
     mindMap.registerThemeAdapter(MyThemeAdapter());
+    mindMap.registerThemeAdapter(MyTheme1Adapter());
     mindMap.setTheme(MindMapThemeCompact());
   }
 

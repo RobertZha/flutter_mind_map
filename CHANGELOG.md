@@ -1,3 +1,7 @@
-## 0.0.10.0.1 - (2025-09-12)
+## 0.0.2 - (2025-09-13)
+
+- Add BackgroundColors
+
+## 0.0.1 - (2025-09-12)
 
 - Describe initial release.

@@ -747,27 +747,75 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   Color getBackgroundColor() {
     if (_backgroundColor != null) {
       return _backgroundColor!;
-    } else {
-      return getMindMap()?.getTheme() != null &&
-              getMindMap()?.getTheme()?.getThemeByLevel(getLevel()) != null &&
-              getMindMap()?.getTheme()?.getThemeByLevel(
-                    getLevel(),
-                  )!["BackgroundColor"]
-                  is Color
-          ? getMindMap()?.getTheme()?.getThemeByLevel(
+    }
+    List<Color> list = getBackgroundColors();
+    if (list.isNotEmpty) {
+      int index = 0;
+      if (getParentNode() != null) {
+        if (getNodeType() == NodeType.right) {
+          index = getParentNode()!.getRightItems().indexOf(this);
+        } else {
+          index =
+              getParentNode()!.getRightItems().length +
+              getParentNode()!.getLeftItems().indexOf(this);
+        }
+      }
+      return list[index % list.length];
+    }
+    return getMindMap()?.getTheme() != null &&
+            getMindMap()?.getTheme()?.getThemeByLevel(getLevel()) != null &&
+            getMindMap()?.getTheme()?.getThemeByLevel(
                   getLevel(),
                 )!["BackgroundColor"]
-                as Color
-          : (getParentNode() != null && getParentNode() is MindMapNode
-                ? (getParentNode() as MindMapNode).getBackgroundColor()
-                : (getMindMap() != null
-                      ? getMindMap()!.getBackgroundColor()
-                      : Colors.transparent));
-    }
+                is Color
+        ? getMindMap()?.getTheme()?.getThemeByLevel(
+                getLevel(),
+              )!["BackgroundColor"]
+              as Color
+        : (getParentNode() != null && getParentNode() is MindMapNode
+              ? (getParentNode() as MindMapNode).getBackgroundColor()
+              : (getMindMap() != null
+                    ? getMindMap()!.getBackgroundColor()
+                    : Colors.transparent));
   }
 
   void setBackgroundColor(Color color) {
     _backgroundColor = color;
+    refresh();
+    getMindMap()?.onChanged();
+  }
+
+  List<Color> _backgroundColors = [];
+  List<Color> getBackgroundColors() {
+    if (_backgroundColors.isNotEmpty) {
+      return _backgroundColors;
+    } else {
+      if (getMindMap()?.getTheme() != null &&
+          getMindMap()?.getTheme()?.getThemeByLevel(getLevel()) != null &&
+          getMindMap()?.getTheme()?.getThemeByLevel(
+                getLevel(),
+              )!["BackgroundColors"]
+              is List) {
+        List<Color> list = [];
+        for (dynamic v
+            in getMindMap()?.getTheme()?.getThemeByLevel(
+                  getLevel(),
+                )!["BackgroundColors"]
+                as List) {
+          if (v is Color) {
+            list.add(v);
+          }
+        }
+        if (list.isNotEmpty) {
+          return list;
+        }
+      }
+    }
+    return [];
+  }
+
+  void setBackgroundColors(List<Color> value) {
+    _backgroundColors = value;
     refresh();
     getMindMap()?.onChanged();
   }
