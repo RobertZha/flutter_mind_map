@@ -10,14 +10,14 @@ Flutter's highly customizable and interactive mind map package features custom t
 
 ### Contents
 
--   [Load nodes from JSON](#Load nodes from JSON)
--   [Create nodes and customize node styles through code](#Create nodes and customize node styles through code)
--   [Set theme](#Set theme)
--   [Custom Theme](#Custom Theme)
--   [Register custom theme](#Register custom theme)
--   [Use custom theme](#Use custom theme)
--   [Set the type of line](#Set the type of line)
--   [Save or read data and styles](#Save or read data and styles)
+-   [Load nodes from JSON](#load-nodes-from-json)
+-   [Create nodes and customize node styles through code](#create-nodes-and-customize-node-styles-through-code)
+-   [Set theme](#set-theme)
+-   [Custom Theme](#custom-theme)
+-   [Register custom theme](#register-custom-theme)
+-   [Use custom theme](#use-custom-theme)
+-   [Set the type of line](#set-the-type-of-line)
+-   [Save or read data and styles](#save-or-read-data-and-styles)
 
 ---
 
