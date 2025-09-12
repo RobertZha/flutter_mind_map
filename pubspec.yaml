@@ -3,7 +3,7 @@ description: "Flutter's highly customizable and interactive mind map package fea
 version: 0.0.4
 homepage: http://flutterbuilder.polariscode.com
 repository: https://github.com/RobertZha/flutter_mind_map
-topics: [mindmap, mind, flutter_mind_map]
+topics: [mindmap, mind]
 
 screenshots:
   - description: 'MindMap in custom'
