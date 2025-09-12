@@ -21,7 +21,7 @@ class ThemePage extends StatefulWidget {
     if (prefs == null) {
       prefs = await SharedPreferences.getInstance();
       if (prefs != null) {
-        if (prefs!.containsKey("Theme1")) {
+        if (prefs!.containsKey("Theme")) {
           String str = prefs!.getString("Theme")!;
           try {
             Map<String, dynamic> map = jsonDecode(str);
