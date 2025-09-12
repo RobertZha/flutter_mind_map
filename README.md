@@ -351,13 +351,13 @@ class MyThemeAdapter implements IThemeAdapter {
 
 ```
 
-Register custom theme
+## Register custom theme
 
 ```dart
 mindMap.registerThemeAdapter(MyThemeAdapter());
 ```
 
-Use custom theme
+## Use custom theme
 
 ```dart
 mindMap.setTheme(MindMapThemeCompact());
