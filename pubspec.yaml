@@ -1,17 +1,8 @@
 name: flutter_mind_map
 description: "Flutter's highly customizable and interactive mind map package features custom themes, custom line formats, and custom content."
-version: 0.0.2
+version: 0.0.3
 homepage: https://flutterbuilder.polariscode.com
 repository: https://github.com/RobertZha/flutter_mind_map
-
-platforms:
-  android:
-  ios:
-  web:
-  windows:
-  macos:
-  linux:
-
 
 screenshots:
   - description: 'MindMap in custom'
@@ -60,6 +51,12 @@ flutter:
       some_platform:
         pluginClass: somePluginClass
     # -------------------
+      android:
+      ios:
+      web:
+      windows:
+      macos:
+      linux:
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:
