@@ -11,8 +11,19 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   MindMapNode({super.key});
 
   @override
-  Map<String, dynamic> saveData() {
-    Map<String, dynamic> json = {};
+  Map<String, dynamic> getData() {
+    List<Map<String, dynamic>> list = [];
+    for (IMindMapNode n in getLeftItems()) {
+      list.add(n.getData());
+    }
+    for (IMindMapNode n in getRightItems()) {
+      list.add(n.getData());
+    }
+    Map<String, dynamic> json = {
+      "id": getID(),
+      "content": getTitle(),
+      "nodes": list,
+    };
     return json;
   }
 

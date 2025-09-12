@@ -1,10 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_mind_map/adapter/i_theme_adapter.dart';
 import 'package:flutter_mind_map/i_mind_map_node.dart';
 import 'package:flutter_mind_map/mind_map.dart';
 import 'package:flutter_mind_map/theme/i_mind_map_theme.dart';
+import 'package:flutter_mind_map/theme/mind_map_theme_compact.dart';
 import 'package:flutter_mind_map_example/my_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -13,7 +13,7 @@ class ThemePage extends StatefulWidget {
   ThemePage({super.key}) {
     //add MyTheme
     mindMap.registerThemeAdapter(MyThemeAdapter());
-    mindMap.setTheme(MyTheme());
+    mindMap.setTheme(MindMapThemeCompact());
   }
 
   SharedPreferences? prefs;
@@ -21,7 +21,7 @@ class ThemePage extends StatefulWidget {
     if (prefs == null) {
       prefs = await SharedPreferences.getInstance();
       if (prefs != null) {
-        if (prefs!.containsKey("Theme")) {
+        if (prefs!.containsKey("Theme1")) {
           String str = prefs!.getString("Theme")!;
           try {
             Map<String, dynamic> map = jsonDecode(str);
@@ -553,8 +553,4 @@ class ThemePageState extends State<ThemePage> {
       ],
     );
   }
-}
-
-extension on List<IThemeAdapter> {
-  void operator -(other) {}
 }

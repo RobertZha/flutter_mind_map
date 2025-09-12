@@ -28,6 +28,10 @@ class MindMap extends StatefulWidget {
     }
   }
 
+  Map<String, dynamic> getData() {
+    return getRootNode().getData();
+  }
+
   Map<String, dynamic> toJson() {
     Map<String, dynamic> json = {
       "RootNode": getRootNode().toJson(),

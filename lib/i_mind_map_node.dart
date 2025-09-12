@@ -67,7 +67,7 @@ abstract class IMindMapNode {
   Map<String, dynamic> toJson();
   void fromJson(Map<String, dynamic> json);
 
-  Map<String, dynamic> saveData();
+  Map<String, dynamic> getData();
   void loadData(Map<String, dynamic> json);
 }
 
