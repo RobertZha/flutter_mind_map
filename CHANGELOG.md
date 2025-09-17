@@ -1,3 +1,7 @@
+## 0.0.5 - (2025-09-15)
+
+- Add `CanMove, onTap.`
+
 ## 0.0.4 - (2025-09-14)
 
 - Change homepage

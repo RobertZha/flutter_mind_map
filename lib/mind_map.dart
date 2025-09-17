@@ -173,6 +173,18 @@ class MindMap extends StatefulWidget {
     }
   }
 
+  bool _canMove = true;
+  bool getCanMove() {
+    return _canMove;
+  }
+
+  void setCanMove(bool value) {
+    if (_canMove != value) {
+      _canMove = value;
+      _state?.refresh();
+    }
+  }
+
   bool _showZoom = true;
   bool getShowZoom() {
     return _showZoom;
@@ -253,6 +265,23 @@ class MindMap extends StatefulWidget {
   void setSelectedNode(IMindMapNode? node) {
     _selectedNode = node;
     notifySelectedNodeChanged();
+  }
+
+  final List<Function()> _onTapListeners = [];
+  void addOnTapListeners(Function() callback) {
+    _onTapListeners.add(callback);
+  }
+
+  void removeOnTapListeners(Function() callback) {
+    _onTapListeners.remove(callback);
+  }
+
+  void onTap() {
+    List<Function()> list = [];
+    list.addAll(_onTapListeners);
+    for (Function() call in list) {
+      call();
+    }
   }
 
   final List<Function()> _onSelectedNodeChangedListeners = [];
@@ -483,24 +512,29 @@ class MindMapState extends State<MindMap> {
       child: GestureDetector(
         onTap: () {
           widget.setSelectedNode(null);
+          widget.onTap();
         },
         //Scale
         onScaleStart: (details) {
-          setState(() {
-            _focalPoint = moveOffset;
-            _lastFocalPoint = details.focalPoint;
-            _lastScale = widget.getZoom();
-          });
+          if (widget.getCanMove()) {
+            setState(() {
+              _focalPoint = moveOffset;
+              _lastFocalPoint = details.focalPoint;
+              _lastScale = widget.getZoom();
+            });
+          }
         },
         onScaleUpdate: (details) {
-          setState(() {
-            double scale = _lastScale * details.scale;
-            widget.setZoom(scale < 0.1 ? 0.1 : scale);
-            moveOffset = Offset(
-              _focalPoint.dx + details.focalPoint.dx - _lastFocalPoint.dx,
-              _focalPoint.dy + details.focalPoint.dy - _lastFocalPoint.dy,
-            );
-          });
+          if (widget.getCanMove()) {
+            setState(() {
+              double scale = _lastScale * details.scale;
+              widget.setZoom(scale < 0.1 ? 0.1 : scale);
+              moveOffset = Offset(
+                _focalPoint.dx + details.focalPoint.dx - _lastFocalPoint.dx,
+                _focalPoint.dy + details.focalPoint.dy - _lastFocalPoint.dy,
+              );
+            });
+          }
         },
         child: DragTarget(
           key: _pkey,

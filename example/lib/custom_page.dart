@@ -197,6 +197,8 @@ class CustomPage extends StatefulWidget {
         }
 
         mindMap.addOnChangedListeners(onChanged);
+
+        mindMap.setCanMove(false);
       }
     }
   }
