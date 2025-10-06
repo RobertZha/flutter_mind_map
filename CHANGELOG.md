@@ -1,3 +1,7 @@
+## 0.0.6 - (2025-09-16)
+
+- Add `Add delete button.`
+
 ## 0.0.5 - (2025-09-15)
 
 - Add `CanMove, onTap.`

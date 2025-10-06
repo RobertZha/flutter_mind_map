@@ -327,6 +327,17 @@ class MindMap extends StatefulWidget {
 
   bool getReadOnly() => _readOnly;
 
+  bool _hasTextField = true;
+  void setHasTextField(bool value) {
+    if (_hasTextField != value) {
+      _hasTextField = value;
+      setSelectedNode(null);
+      _state?.refresh();
+    }
+  }
+
+  bool hasTextField() => _hasTextField;
+
   Color? _backgroundColor;
   Color getBackgroundColor() =>
       _backgroundColor ??
@@ -625,10 +636,6 @@ class MindMapState extends State<MindMap> {
                                     (context, candidateData, rejectedData) {
                                       return Container(
                                         decoration: BoxDecoration(
-                                          color: Theme.of(context)
-                                              .colorScheme
-                                              .surface
-                                              .withOpacity(0.6),
                                           border: Border.all(
                                             color: widget._inRecycle
                                                 ? Colors.red
@@ -696,9 +703,6 @@ class MindMapState extends State<MindMap> {
                                   maxHeight: 32,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.surface.withOpacity(0.6),
                                   borderRadius: BorderRadius.circular(6),
                                 ),
                                 child: ToggleButtons(

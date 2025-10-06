@@ -201,6 +201,8 @@ class CustomPage extends StatefulWidget {
         mindMap.setCanMove(false);
       }
     }
+    mindMap.setHasTextField(false);
+    mindMap.setShowRecycle(false);
   }
 
   void onChanged() {

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_mind_map/adapter/i_node_adapter.dart';
 import 'package:flutter_mind_map/i_mind_map_node.dart';
@@ -1444,6 +1446,7 @@ class MindMapNodeState extends State<MindMapNode> {
         onSelectedNodeChanged,
       );
     }
+
     super.dispose();
   }
 
@@ -1628,6 +1631,14 @@ class MindMapNodeState extends State<MindMapNode> {
                                                   .getMindMap()
                                                   ?.buttonBackground ??
                                               Colors.white),
+                                          border: Border.all(
+                                            color:
+                                                (widget
+                                                    .getMindMap()
+                                                    ?.buttonColor ??
+                                                Colors.black),
+                                            width: 1,
+                                          ),
                                           borderRadius: BorderRadius.circular(
                                             (widget.getMindMap()?.buttonWidth ??
                                                 16),
@@ -1638,13 +1649,16 @@ class MindMapNodeState extends State<MindMapNode> {
                                             widget.addLeftChildNode();
                                           },
                                           padding: EdgeInsets.zero,
+                                          hoverColor: Colors.green.shade200,
+                                          highlightColor: Colors.green,
                                           icon: Icon(
-                                            Icons.add_circle_outline,
+                                            Icons.add_rounded,
                                             size:
                                                 (widget
-                                                    .getMindMap()
-                                                    ?.buttonWidth ??
-                                                16),
+                                                        .getMindMap()
+                                                        ?.buttonWidth ??
+                                                    16) -
+                                                4,
                                             color:
                                                 (widget
                                                     .getMindMap()
@@ -1653,6 +1667,82 @@ class MindMapNodeState extends State<MindMapNode> {
                                           ),
                                         ),
                                       ),
+
+                                      //Sapce
+                                      widget.getNodeType() == NodeType.root ||
+                                              (widget
+                                                      .getMindMap()
+                                                      ?.getShowRecycle() ??
+                                                  false)
+                                          ? SizedBox(width: 0, height: 0)
+                                          : SizedBox(width: 4),
+                                      //left Delete Button
+                                      widget.getNodeType() == NodeType.root ||
+                                              (widget
+                                                      .getMindMap()
+                                                      ?.getShowRecycle() ??
+                                                  false)
+                                          ? SizedBox(width: 0, height: 0)
+                                          : Container(
+                                              constraints: BoxConstraints(
+                                                maxWidth:
+                                                    (widget
+                                                        .getMindMap()
+                                                        ?.buttonWidth ??
+                                                    16),
+                                                maxHeight:
+                                                    (widget
+                                                        .getMindMap()
+                                                        ?.buttonWidth ??
+                                                    16),
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color:
+                                                    (widget
+                                                        .getMindMap()
+                                                        ?.buttonBackground ??
+                                                    Colors.white),
+                                                border: Border.all(
+                                                  color:
+                                                      (widget
+                                                          .getMindMap()
+                                                          ?.buttonColor ??
+                                                      Colors.black),
+                                                  width: 1,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                      (widget
+                                                              .getMindMap()
+                                                              ?.buttonWidth ??
+                                                          16),
+                                                    ),
+                                              ),
+                                              child: IconButton(
+                                                onPressed: () {
+                                                  widget
+                                                      .getParentNode()
+                                                      ?.removeLeftItem(widget);
+                                                },
+                                                hoverColor: Colors.red.shade200,
+                                                highlightColor: Colors.red,
+                                                padding: EdgeInsets.zero,
+                                                icon: Icon(
+                                                  Icons.close_rounded,
+                                                  size:
+                                                      (widget
+                                                              .getMindMap()
+                                                              ?.buttonWidth ??
+                                                          16) -
+                                                      4,
+                                                  color:
+                                                      (widget
+                                                          .getMindMap()
+                                                          ?.buttonColor ??
+                                                      Colors.black),
+                                                ),
+                                              ),
+                                            ),
                                     ])
                             : (widget.getReadOnly()
                                   ? (widget.getNodeType() == NodeType.left &&
@@ -1851,6 +1941,80 @@ class MindMapNodeState extends State<MindMapNode> {
                                           ]
                                         : [])
                                   : [
+                                      //left Delete Button
+                                      widget.getNodeType() == NodeType.root ||
+                                              (widget
+                                                      .getMindMap()
+                                                      ?.getShowRecycle() ??
+                                                  false)
+                                          ? SizedBox(width: 0, height: 0)
+                                          : Container(
+                                              constraints: BoxConstraints(
+                                                maxWidth:
+                                                    (widget
+                                                        .getMindMap()
+                                                        ?.buttonWidth ??
+                                                    16),
+                                                maxHeight:
+                                                    (widget
+                                                        .getMindMap()
+                                                        ?.buttonWidth ??
+                                                    16),
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color:
+                                                    (widget
+                                                        .getMindMap()
+                                                        ?.buttonBackground ??
+                                                    Colors.white),
+                                                border: Border.all(
+                                                  color:
+                                                      (widget
+                                                          .getMindMap()
+                                                          ?.buttonColor ??
+                                                      Colors.black),
+                                                  width: 1,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(
+                                                      (widget
+                                                              .getMindMap()
+                                                              ?.buttonWidth ??
+                                                          16),
+                                                    ),
+                                              ),
+                                              child: IconButton(
+                                                onPressed: () {
+                                                  widget
+                                                      .getParentNode()
+                                                      ?.removeRightItem(widget);
+                                                },
+                                                hoverColor: Colors.red.shade200,
+                                                highlightColor: Colors.red,
+                                                padding: EdgeInsets.zero,
+                                                icon: Icon(
+                                                  Icons.close_rounded,
+                                                  size:
+                                                      (widget
+                                                              .getMindMap()
+                                                              ?.buttonWidth ??
+                                                          16) -
+                                                      4,
+                                                  color:
+                                                      (widget
+                                                          .getMindMap()
+                                                          ?.buttonColor ??
+                                                      Colors.black),
+                                                ),
+                                              ),
+                                            ), //Sapce
+                                      widget.getNodeType() == NodeType.root ||
+                                              (widget
+                                                      .getMindMap()
+                                                      ?.getShowRecycle() ??
+                                                  false)
+                                          ? SizedBox(width: 0, height: 0)
+                                          : SizedBox(width: 4),
                                       //Right add Button
                                       Container(
                                         constraints: BoxConstraints(
@@ -1871,6 +2035,14 @@ class MindMapNodeState extends State<MindMapNode> {
                                                   .getMindMap()
                                                   ?.buttonBackground ??
                                               Colors.white),
+                                          border: Border.all(
+                                            color:
+                                                (widget
+                                                    .getMindMap()
+                                                    ?.buttonColor ??
+                                                Colors.black),
+                                            width: 1,
+                                          ),
                                           borderRadius: BorderRadius.circular(
                                             (widget.getMindMap()?.buttonWidth ??
                                                 16),
@@ -1881,13 +2053,16 @@ class MindMapNodeState extends State<MindMapNode> {
                                             widget.addRightChildNode();
                                           },
                                           padding: EdgeInsets.zero,
+                                          hoverColor: Colors.green.shade200,
+                                          highlightColor: Colors.green,
                                           icon: Icon(
-                                            Icons.add_circle_outline,
+                                            Icons.add_rounded,
                                             size:
                                                 (widget
-                                                    .getMindMap()
-                                                    ?.buttonWidth ??
-                                                16),
+                                                        .getMindMap()
+                                                        ?.buttonWidth ??
+                                                    16) -
+                                                4,
                                             color:
                                                 (widget
                                                     .getMindMap()
@@ -2128,6 +2303,7 @@ class MindMapNodeTitleState extends State<MindMapNodeTitle> {
       child:
           widget.node.getChild() ??
           (!(widget.node.getMindMap()?.getReadOnly() ?? true) &&
+                  (widget.node.getMindMap()?.hasTextField() ?? false) &&
                   widget.node.getSelected()
               ? Container(
                   constraints: BoxConstraints(
