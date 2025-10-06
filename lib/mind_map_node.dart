@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_mind_map/adapter/i_node_adapter.dart';
 import 'package:flutter_mind_map/i_mind_map_node.dart';
