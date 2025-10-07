@@ -1,3 +1,7 @@
+## 0.0.8 - (2025-09-18)
+
+- Add `Add onMove`
+
 ## 0.0.7 - (2025-09-17)
 
 - Add `Add MoveOffset`

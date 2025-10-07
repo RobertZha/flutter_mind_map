@@ -380,6 +380,21 @@ class MindMap extends StatefulWidget {
     }
   }
 
+  final List<Function()> _onMoveListeners = [];
+  void addOnMoveListeners(Function() callback) {
+    _onMoveListeners.add(callback);
+  }
+
+  void removeOnMoveListeners(Function() callback) {
+    _onMoveListeners.remove(callback);
+  }
+
+  void onMove() {
+    for (var listener in _onMoveListeners) {
+      listener();
+    }
+  }
+
   @override
   State<StatefulWidget> createState() => MindMapState();
 
@@ -396,7 +411,10 @@ class MindMap extends StatefulWidget {
 
   Offset moveOffset = Offset.zero;
   void setMoveOffset(Offset value) {
-    moveOffset = value;
+    if (moveOffset.dx != value.dx || moveOffset.dy != value.dy) {
+      moveOffset = value;
+      onMove();
+    }
   }
 
   Offset getMoveOffset() => moveOffset;
