@@ -394,6 +394,13 @@ class MindMap extends StatefulWidget {
 
   Offset? getOffset() => _offset;
 
+  Offset moveOffset = Offset.zero;
+  void setMoveOffset(Offset value) {
+    moveOffset = value;
+  }
+
+  Offset getMoveOffset() => moveOffset;
+
   Size? _size;
   void setSize(Size? value) {
     if (_size == null ||
@@ -443,7 +450,6 @@ class MindMapState extends State<MindMap> {
 
   Size s = Size.zero;
 
-  Offset moveOffset = Offset.zero;
   Offset _focalPoint = Offset.zero;
   Offset _lastFocalPoint = Offset.zero;
   double _lastScale = 1.0;
@@ -529,7 +535,7 @@ class MindMapState extends State<MindMap> {
         onScaleStart: (details) {
           if (widget.getCanMove()) {
             setState(() {
-              _focalPoint = moveOffset;
+              _focalPoint = widget.getMoveOffset();
               _lastFocalPoint = details.focalPoint;
               _lastScale = widget.getZoom();
             });
@@ -540,9 +546,11 @@ class MindMapState extends State<MindMap> {
             setState(() {
               double scale = _lastScale * details.scale;
               widget.setZoom(scale < 0.1 ? 0.1 : scale);
-              moveOffset = Offset(
-                _focalPoint.dx + details.focalPoint.dx - _lastFocalPoint.dx,
-                _focalPoint.dy + details.focalPoint.dy - _lastFocalPoint.dy,
+              widget.setMoveOffset(
+                Offset(
+                  _focalPoint.dx + details.focalPoint.dx - _lastFocalPoint.dx,
+                  _focalPoint.dy + details.focalPoint.dy - _lastFocalPoint.dy,
+                ),
               );
             });
           }
@@ -559,11 +567,11 @@ class MindMapState extends State<MindMap> {
                   Positioned(
                     left:
                         x +
-                        moveOffset.dx -
+                        widget.getMoveOffset().dx -
                         widget.mindMapPadding * widget.getZoom(),
                     top:
                         y +
-                        moveOffset.dy -
+                        widget.getMoveOffset().dy -
                         widget.mindMapPadding * widget.getZoom(),
                     child: Transform.scale(
                       scale: widget.getZoom(),
@@ -728,7 +736,7 @@ class MindMapState extends State<MindMap> {
                                         break;
                                       case 1:
                                         setState(() {
-                                          moveOffset = Offset.zero;
+                                          widget.setMoveOffset(Offset.zero);
                                           widget.setZoom(1);
                                         });
                                       case 2:
