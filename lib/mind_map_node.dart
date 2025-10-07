@@ -13,17 +13,28 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   @override
   Map<String, dynamic> getData() {
     List<Map<String, dynamic>> list = [];
+    List<Map<String, dynamic>> leftlist = [];
+
     for (IMindMapNode n in getLeftItems()) {
-      list.add(n.getData());
+      if (getNodeType() == NodeType.root) {
+        leftlist.add(n.getData());
+      } else {
+        list.add(n.getData());
+      }
     }
+
     for (IMindMapNode n in getRightItems()) {
       list.add(n.getData());
     }
-    Map<String, dynamic> json = {
-      "id": getID(),
-      "content": getTitle(),
-      "nodes": list,
-    };
+
+    Map<String, dynamic> json = leftlist.isEmpty
+        ? {"id": getID(), "content": getTitle(), "nodes": list}
+        : {
+            "id": getID(),
+            "content": getTitle(),
+            "leftNodes": leftlist,
+            "nodes": list,
+          };
     return json;
   }
 
@@ -36,18 +47,13 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
       setTitle(json["content"].toString());
       List<dynamic> list = json["nodes"];
       if (list.isNotEmpty) {
-        int i = 1;
         for (Map<String, dynamic> j in list) {
           if (j.containsKey("id") &&
               j.containsKey("content") &&
               j.containsKey("nodes")) {
             MindMapNode node = MindMapNode();
             if (getParentNode() == null) {
-              if (i * 2 < list.length) {
-                addRightItem(node);
-              } else {
-                addLeftItem(node);
-              }
+              addRightItem(node);
             } else {
               if (getNodeType() == NodeType.left) {
                 addLeftItem(node);
@@ -57,7 +63,17 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
             }
             node.loadData(j);
           }
-          i++;
+        }
+        if (json["leftNodes"] != null) {
+          for (Map<String, dynamic> j in list) {
+            if (j.containsKey("id") &&
+                j.containsKey("content") &&
+                j.containsKey("nodes")) {
+              MindMapNode node = MindMapNode();
+              addLeftItem(node);
+              node.loadData(j);
+            }
+          }
         }
       }
     }

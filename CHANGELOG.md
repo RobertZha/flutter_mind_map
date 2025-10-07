@@ -1,3 +1,7 @@
+## 0.0.9 - (2025-09-19)
+
+- Add `Fix bug of loadData().`
+
 ## 0.0.8 - (2025-09-18)
 
 - Add `Add onMove`
