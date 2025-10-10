@@ -84,6 +84,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     Map<String, dynamic> properties = {};
     properties["ID"] = _id;
     properties["Title"] = _title;
+    properties["Extended"] = _extended;
     properties["Expanded"] = getExpanded().toString();
     if (_link != null) {
       properties["Link"] = _link!.getName();
@@ -193,6 +194,10 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
         if (proJson.containsKey("Title")) {
           setTitle(proJson["Title"].toString());
         }
+        if (proJson.containsKey("Extended")) {
+          setExtended(proJson["Extended"].toString());
+        }
+
         if (proJson.containsKey("Expanded")) {
           setExpanded(bool.tryParse(proJson["Expanded"].toString()) ?? true);
         }
@@ -748,6 +753,17 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
       refresh();
       getMindMap()?.onChanged();
     }
+  }
+
+  String _extended = "";
+  @override
+  String getExtended() {
+    return _extended;
+  }
+
+  @override
+  void setExtended(String value) {
+    _extended = value;
   }
 
   Widget? _child;

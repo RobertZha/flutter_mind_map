@@ -1,3 +1,7 @@
+## 1.0.0 - (2025-09-20)
+
+- Add `Add Extended`
+
 ## 0.0.9 - (2025-09-19)
 
 - Add `Fix bug of loadData().`

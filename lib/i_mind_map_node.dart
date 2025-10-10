@@ -82,15 +82,20 @@ Color stringToColor(String value) {
       colorValue >> 16,
       (colorValue >> 8) & 0xFF,
       colorValue & 0xFF,
-    ).withOpacity(alpha / 255);
+    ).withAlpha(alpha);
   }
   return Colors.black;
 }
 
 String colorToString(Color color) {
-  String ax = color.alpha < 16 ? "0" : "";
-  String rx = color.red < 16 ? "0" : "";
-  String gx = color.green < 16 ? "0" : "";
-  String bx = color.blue < 16 ? "0" : "";
-  return "#${ax}${color.alpha.toRadixString(16)}${rx}${color.red.toRadixString(16)}${gx}${color.green.toRadixString(16)}${bx}${color.blue.toRadixString(16)}";
+  int a = (color.a * 255).toInt();
+  int r = (color.r * 255).toInt();
+  int g = (color.g * 255).toInt();
+  int b = (color.b * 255).toInt();
+  String ax = a < 16 ? "0" : "";
+  String rx = r < 16 ? "0" : "";
+  String gx = g < 16 ? "0" : "";
+  String bx = b < 16 ? "0" : "";
+
+  return "#$ax${a.toRadixString(16)}$rx${r.toRadixString(16)}$gx${g.toRadixString(16)}$bx${b.toRadixString(16)}";
 }
