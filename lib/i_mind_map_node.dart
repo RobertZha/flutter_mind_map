@@ -7,6 +7,9 @@ abstract class IMindMapNode {
   String getTitle();
   void setTitle(String value);
 
+  String getExtended();
+  void setExtended(String value);
+
   MindMap? getMindMap();
   void setMindMap(MindMap value);
   NodeType getNodeType();
