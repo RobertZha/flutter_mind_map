@@ -1,3 +1,7 @@
+## 1.0.1 - (2025-09-21)
+
+- Add `Add Extended`
+
 ## 1.0.0 - (2025-09-20)
 
 - Add `Add Extended`
