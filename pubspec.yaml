@@ -1,6 +1,6 @@
 name: flutter_mind_map
 description: "Flutter's highly customizable and interactive mind map package features custom themes, custom line formats, and custom content."
-version: 1.0.1
+version: 1.0.2
 homepage: https://www.polariscode.com
 repository: https://github.com/RobertZha/flutter_mind_map
 topics: [mind-map, mindmap, mind]

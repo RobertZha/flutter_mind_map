@@ -1676,6 +1676,7 @@ class MindMapNodeState extends State<MindMapNode> {
                                         ),
                                         child: IconButton(
                                           onPressed: () {
+                                            widget._focusNode.unfocus();
                                             widget.addLeftChildNode();
                                           },
                                           padding: EdgeInsets.zero,
@@ -2080,6 +2081,7 @@ class MindMapNodeState extends State<MindMapNode> {
                                         ),
                                         child: IconButton(
                                           onPressed: () {
+                                            widget._focusNode.unfocus();
                                             widget.addRightChildNode();
                                           },
                                           padding: EdgeInsets.zero,

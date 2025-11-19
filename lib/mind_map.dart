@@ -863,6 +863,7 @@ class MindMapState extends State<MindMap> {
                   }
                   widget.getRootNode().refresh();
                 }
+                widget.refresh();
                 widget._dragInNode = null;
               });
             }
