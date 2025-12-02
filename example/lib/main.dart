@@ -1,9 +1,16 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mind_map_example/custom_page.dart';
 import 'package:flutter_mind_map_example/theme_page.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   runApp(MyApp());
 }
 
@@ -21,6 +28,23 @@ class _MyAppState extends State<MyApp> {
   @override
   void initState() {
     super.initState();
+
+    requestPermission();
+  }
+
+  Future<void> requestPermission() async {
+    if (Platform.isAndroid || Platform.isIOS) {
+      if (await Permission.storage.request().isDenied) {
+        debugPrint("storage denied");
+      } else {
+        debugPrint("permission");
+      }
+      if (await Permission.manageExternalStorage.request().isDenied) {
+        debugPrint("manageExternalStorage denied");
+      } else {
+        debugPrint("permission");
+      }
+    }
   }
 
   int index = 0;
@@ -60,6 +84,33 @@ class _MyAppState extends State<MyApp> {
           actions: [
             Row(
               children: [
+                TextButton(
+                  onPressed: () async {
+                    Uint8List? image;
+                    if (index == 0) {
+                      image = await widget.customPage.mindMap.toPng();
+                    } else {
+                      image = await widget.themePage.mindMap.toPng();
+                    }
+                    if (image != null) {
+                      String? filename = await FilePicker.platform.saveFile(
+                        type: FileType.custom,
+                        allowedExtensions: ["png"],
+                      );
+                      if (filename != null) {
+                        File file = File(filename);
+                        await file.writeAsBytes(image);
+                      }
+                    }
+                  },
+                  child: Text(
+                    "Export Image",
+                    style: Theme.of(
+                      context,
+                    ).textTheme.labelMedium!.copyWith(color: Colors.white),
+                  ),
+                ),
+                SizedBox(width: 20),
                 Text(
                   "ReadOnly:",
                   style: Theme.of(context).textTheme.labelMedium!.copyWith(

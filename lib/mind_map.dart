@@ -1,4 +1,8 @@
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_mind_map/adapter/i_link_adapter.dart';
 import 'package:flutter_mind_map/adapter/i_node_adapter.dart';
 import 'package:flutter_mind_map/adapter/i_theme_adapter.dart';
@@ -17,6 +21,20 @@ import 'package:path_drawing/path_drawing.dart';
 // ignore: must_be_immutable
 class MindMap extends StatefulWidget {
   MindMap({super.key});
+  final GlobalKey _key = GlobalKey();
+
+  Future<Uint8List?> toPng() async {
+    RenderRepaintBoundary boundary =
+        _key.currentContext!.findRenderObject() as RenderRepaintBoundary;
+
+    ui.Image image = await boundary.toImage();
+    ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+
+    if (byteData != null) {
+      return byteData.buffer.asUint8List();
+    }
+    return null;
+  }
 
   void loadData(Map<String, dynamic> json) {
     if (json.containsKey("id") &&
@@ -471,7 +489,7 @@ class MindMapState extends State<MindMap> {
   Offset _focalPoint = Offset.zero;
   Offset _lastFocalPoint = Offset.zero;
   double _lastScale = 1.0;
-  final GlobalKey _key = GlobalKey();
+
   final GlobalKey _pkey = GlobalKey();
 
   @override
@@ -593,8 +611,8 @@ class MindMapState extends State<MindMap> {
                         widget.mindMapPadding * widget.getZoom(),
                     child: Transform.scale(
                       scale: widget.getZoom(),
-                      child: Container(
-                        key: _key,
+                      child: RepaintBoundary(
+                        key: widget._key,
                         child: CustomPaint(
                           painter: MindMapPainter(mindMap: widget),
                           child: Container(
@@ -882,7 +900,7 @@ class MindMapState extends State<MindMap> {
               widget._dragInNode = details.data as IMindMapNode;
               Size dataSize =
                   (details.data as IMindMapNode).getSize() ?? Size.zero;
-              RenderObject? ro = _key.currentContext?.findRenderObject();
+              RenderObject? ro = widget._key.currentContext?.findRenderObject();
               widget._renderObject = ro;
               if (ro != null && ro is RenderBox) {
                 Offset r = ro.localToGlobal(Offset.zero);

@@ -1047,6 +1047,9 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     item.setParentNode(this);
     item.setNodeType(NodeType.left);
     refresh();
+    //if (getNodeType() == NodeType.root && _leftItems.length == 1) {
+    getMindMap()?.refresh();
+    //}
     // getMindMap()?.refresh();
     getMindMap()?.onChanged();
   }
@@ -1057,6 +1060,9 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     item.setParentNode(this);
     item.setNodeType(NodeType.right);
     refresh();
+    //if (getNodeType() == NodeType.root && _rightItems.length == 1) {
+    getMindMap()?.refresh();
+    //}
     //getMindMap()?.refresh();
     getMindMap()?.onChanged();
   }
