@@ -18,6 +18,9 @@ Flutter's highly customizable and interactive mind map package features custom t
 -   [Use custom theme](#use-custom-theme)
 -   [Set the type of line](#set-the-type-of-line)
 -   [Save or read data and styles](#save-or-read-data-and-styles)
+-   [Set CanMove](#set-canmove)
+-   [Export Image](#export-image)
+-   [Watermark](#watermark)
 
 ---
 
