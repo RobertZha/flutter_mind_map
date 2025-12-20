@@ -23,6 +23,71 @@ class MindMap extends StatefulWidget {
   MindMap({super.key});
   final GlobalKey _key = GlobalKey();
 
+  //WaterMark
+  String _watermark = "";
+  String getWatermark() {
+    return _watermark;
+  }
+
+  void setWatermark(String value) {
+    _watermark = value;
+  }
+
+  Color _watermarkColor = Colors.black;
+  Color getWatermarkColor() {
+    return _watermarkColor;
+  }
+
+  void setWatermarkColor(Color value) {
+    _watermarkColor = value;
+  }
+
+  double _watermarkOpacity = 0.1;
+  double getWatermarkOpacity() {
+    return _watermarkOpacity;
+  }
+
+  void setWatermarkOpacity(double value) {
+    _watermarkOpacity = value;
+  }
+
+  double _watermarkFontSize = 15;
+  double getWatermarkFontSize() {
+    return _watermarkFontSize;
+  }
+
+  void setWatermarkFontSize(double value) {
+    _watermarkFontSize = value;
+  }
+
+  double _watermarkRotationAngle = -0.5;
+  double getWatermarkRotationAngle() {
+    return _watermarkRotationAngle;
+  }
+
+  void setWatermarkRotationAngle(double value) {
+    _watermarkRotationAngle = value;
+  }
+
+  double _watermarkHorizontalInterval = 100;
+  double getWatermarkHorizontalInterval() {
+    return _watermarkHorizontalInterval;
+  }
+
+  void setWatermarkHorizontalInterval(double value) {
+    _watermarkHorizontalInterval = value;
+  }
+
+  double _watermarkVerticalInterval = 50;
+  double getWatermarkVerticalInterval() {
+    return _watermarkVerticalInterval;
+  }
+
+  void setWatermarkVerticalInterval(double value) {
+    _watermarkVerticalInterval = value;
+  }
+  //End Watermark
+
   Future<Uint8List?> toPng() async {
     RenderRepaintBoundary boundary =
         _key.currentContext!.findRenderObject() as RenderRepaintBoundary;
@@ -90,12 +155,77 @@ class MindMap extends StatefulWidget {
     _isLoading = false;
   }
 
-  double buttonWidth = 16;
-  Color buttonColor = Colors.black;
-  Color buttonBackground = Colors.white;
-  Color dragInBorderColor = Colors.cyan;
-  double dragInBorderWidth = 3;
-  double mindMapPadding = 80;
+  int _buttonWidth = 24;
+  int getButtonWidth() {
+    return _buttonWidth;
+  }
+
+  void setButtonWidth(int value) {
+    if (_buttonWidth != value) {
+      _buttonWidth = value;
+      _state?.refresh();
+    }
+  }
+
+  Color _buttonColor = Colors.black;
+  Color getButtonColor() {
+    return _buttonColor;
+  }
+
+  void setButtonColor(Color value) {
+    if (_buttonColor != value) {
+      _buttonColor = value;
+      _state?.refresh();
+    }
+  }
+
+  Color _buttonBackground = Colors.white;
+  Color getButtonBackground() {
+    return _buttonBackground;
+  }
+
+  void setButtonBackground(Color value) {
+    if (_buttonBackground != value) {
+      _buttonBackground = value;
+      _state?.refresh();
+    }
+  }
+
+  Color _dragInBorderColor = Colors.cyan;
+  Color getDragInBorderColor() {
+    return _dragInBorderColor;
+  }
+
+  void setDragInBorderColor(Color value) {
+    if (_dragInBorderColor != value) {
+      _dragInBorderColor = value;
+      _state?.refresh();
+    }
+  }
+
+  double _dragInBorderWidth = 3;
+  double getDragInBorderWidth() {
+    return _dragInBorderWidth;
+  }
+
+  void setDragInBorderWidth(double value) {
+    if (_dragInBorderWidth != value) {
+      _dragInBorderWidth = value;
+      _state?.refresh();
+    }
+  }
+
+  double _mindMapPadding = 80;
+  double getMindMapPadding() {
+    return _mindMapPadding;
+  }
+
+  void setMindMapPadding(double value) {
+    if (_mindMapPadding != value) {
+      _mindMapPadding = value;
+      _state?.refresh();
+    }
+  }
 
   //Adapter
   final List<INodeAdapter> _nodeAdapter = [MindMapNodeAdapter()];
@@ -600,15 +730,68 @@ class MindMapState extends State<MindMap> {
               height: double.infinity,
               child: Stack(
                 children: [
+                  widget.getWatermark().isEmpty
+                      ? Container()
+                      : ListView.builder(
+                          scrollDirection: Axis.horizontal,
+                          itemCount: 100,
+                          itemBuilder: (context, index1) {
+                            return Column(
+                              children: List.generate(100, (index) => "Item $index")
+                                  .map(
+                                    (item) => Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Transform.rotate(
+                                              angle: widget
+                                                  .getWatermarkRotationAngle(),
+                                              child: Opacity(
+                                                opacity: widget
+                                                    .getWatermarkOpacity(),
+                                                child: Text(
+                                                  widget.getWatermark(),
+                                                  style: TextStyle(
+                                                    color: widget
+                                                        .getWatermarkColor(),
+                                                    fontSize: widget
+                                                        .getWatermarkFontSize(),
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width: widget
+                                                  .getWatermarkHorizontalInterval(),
+                                            ),
+                                          ],
+                                        ),
+                                        SizedBox(
+                                          height: widget
+                                              .getWatermarkVerticalInterval(),
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                  .toList(),
+                            );
+                          },
+                        ),
+
                   Positioned(
                     left:
                         x +
                         widget.getMoveOffset().dx -
-                        widget.mindMapPadding * widget.getZoom(),
+                        widget.getMindMapPadding() * widget.getZoom(),
                     top:
                         y +
                         widget.getMoveOffset().dy -
-                        widget.mindMapPadding * widget.getZoom(),
+                        widget.getMindMapPadding() * widget.getZoom(),
                     child: Transform.scale(
                       scale: widget.getZoom(),
                       child: RepaintBoundary(
@@ -616,9 +799,8 @@ class MindMapState extends State<MindMap> {
                         child: CustomPaint(
                           painter: MindMapPainter(mindMap: widget),
                           child: Container(
-                            //color: Colors.grey,
                             padding: EdgeInsets.all(
-                              widget.mindMapPadding * widget.getZoom(),
+                              widget.getMindMapPadding() * widget.getZoom(),
                             ),
                             child: widget.getRootNode() as Widget,
                           ),
@@ -1113,8 +1295,8 @@ class MindMapPainter extends CustomPainter {
     Paint paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round
-      ..strokeWidth = mindMap.dragInBorderWidth
-      ..color = mindMap.dragInBorderColor;
+      ..strokeWidth = mindMap.getDragInBorderWidth()
+      ..color = mindMap.getDragInBorderColor();
     if (mindMap._dragInNode != null) {
       //canvas.drawLine(Offset.zero, Offset(size.width, size.height), paint);
       RenderObject? ro = mindMap._dragInNode!.getRenderObject();
@@ -1129,21 +1311,21 @@ class MindMapPainter extends CustomPainter {
             o.dx +
                 (mindMap._dragInNode!.getOffset()?.dx ?? 0) -
                 3 -
-                mindMap.dragInBorderWidth,
+                mindMap.getDragInBorderWidth(),
             o.dy +
                 (mindMap._dragInNode!.getOffset()?.dy ?? 0) -
                 3 -
-                mindMap.dragInBorderWidth,
+                mindMap.getDragInBorderWidth(),
             o.dx +
                 (mindMap._dragInNode!.getOffset()?.dx ?? 0) +
                 (mindMap._dragInNode!.getSize()?.width ?? 0) +
                 3 +
-                mindMap.dragInBorderWidth,
+                mindMap.getDragInBorderWidth(),
             o.dy +
                 (mindMap._dragInNode!.getOffset()?.dy ?? 0) +
                 (mindMap._dragInNode!.getSize()?.height ?? 0) +
                 3 +
-                mindMap.dragInBorderWidth,
+                mindMap.getDragInBorderWidth(),
             Radius.circular(6),
           ),
         );

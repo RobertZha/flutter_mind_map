@@ -400,3 +400,30 @@ Map<String, dynamic> data = mindMap.toJson();
 mindMap.fromJson(data);
 
 ```
+
+## Set CanMove
+
+```dart
+mindMap.setCanMove(false);
+
+```
+
+## Export Image
+
+```dart
+Uint8List? image = mindMap.toPng();
+
+```
+
+## Watermark
+
+```dart
+mindMap.setWatermark("Flutter Mind Map");
+mindMap.setWatermarkColor(Colors.red);
+mindMap.setWatermarkFontSize(12);
+mindMap.setWatermarkOpacity(0.1);
+mindMap.setWatermarkRotationAngle(-0.5);
+mindMap.setWatermarkHorizontalInterval(200);
+mindMap.setWatermarkVerticalInterval(100);
+
+```

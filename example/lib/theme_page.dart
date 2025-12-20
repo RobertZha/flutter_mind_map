@@ -16,6 +16,13 @@ class ThemePage extends StatefulWidget {
     mindMap.registerThemeAdapter(MyThemeAdapter());
     mindMap.registerThemeAdapter(MyTheme1Adapter());
     mindMap.setTheme(MindMapThemeCompact());
+    mindMap.setWatermark("Flutter Mind Map");
+    mindMap.setWatermarkColor(Colors.red);
+    mindMap.setWatermarkFontSize(12);
+    mindMap.setWatermarkOpacity(0.1);
+    mindMap.setWatermarkRotationAngle(-0.5);
+    mindMap.setWatermarkHorizontalInterval(200);
+    mindMap.setWatermarkVerticalInterval(100);
   }
 
   SharedPreferences? prefs;

@@ -1,6 +1,10 @@
+## 1.0.4 - (2025-12-21)
+
+- Add `Watermark`
+
 ## 1.0.3 - (2025-11-20)
 
-- Add `Add Export Image`
+- Add `Export Image`
 
 ## 1.0.2 - (2025-11-19)
 
@@ -8,27 +12,27 @@
 
 ## 1.0.1 - (2025-09-21)
 
-- Add `Add Extended`
+- Add `Extended`
 
 ## 1.0.0 - (2025-09-20)
 
-- Add `Add Extended`
+- Add `Extended`
 
 ## 0.0.9 - (2025-09-19)
 
-- Add `Fix bug of loadData().`
+- Fix bug of loadData().
 
 ## 0.0.8 - (2025-09-18)
 
-- Add `Add onMove`
+- Add `onMove`
 
 ## 0.0.7 - (2025-09-17)
 
-- Add `Add MoveOffset`
+- Add `MoveOffset`
 
 ## 0.0.6 - (2025-09-16)
 
-- Add `Add delete button.`
+- Add `delete button.`
 
 ## 0.0.5 - (2025-09-15)
 
@@ -44,7 +48,7 @@
 
 ## 0.0.2 - (2025-09-13)
 
-- Add BackgroundColors
+- Add `BackgroundColors`
 
 ## 0.0.1 - (2025-09-12)
 

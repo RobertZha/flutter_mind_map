@@ -33,6 +33,7 @@ class CustomPage extends StatefulWidget {
           mindMap.getRootNode().getRightItems().clear();
           mindMap.getRootNode().setTitle("OS Types");
           mindMap.getRootNode().setLinkColor(Colors.blue);
+          // (mindMap.getRootNode() as MindMapNode).
 
           (mindMap.getRootNode() as MindMapNode).setBorderRadius(
             BorderRadiusGeometry.circular(100),
@@ -202,7 +203,7 @@ class CustomPage extends StatefulWidget {
 
         mindMap.addOnChangedListeners(onChanged);
 
-        mindMap.setCanMove(false);
+        mindMap.setCanMove(true);
       }
     }
     mindMap.setHasTextField(false);
