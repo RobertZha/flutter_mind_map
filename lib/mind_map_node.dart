@@ -10,6 +10,7 @@ import 'package:uuid/uuid.dart';
 class MindMapNode extends StatefulWidget implements IMindMapNode {
   MindMapNode({super.key});
 
+  //Export Data to JSON
   @override
   Map<String, dynamic> getData() {
     List<Map<String, dynamic>> list = [];
@@ -38,6 +39,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     return json;
   }
 
+  //Import Data from JSON
   @override
   void loadData(Map<String, dynamic> json) {
     if (json.containsKey("id") &&
@@ -64,21 +66,23 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
             node.loadData(j);
           }
         }
-        if (json["leftNodes"] != null) {
-          for (Map<String, dynamic> j in list) {
-            if (j.containsKey("id") &&
-                j.containsKey("content") &&
-                j.containsKey("nodes")) {
-              MindMapNode node = MindMapNode();
-              addLeftItem(node);
-              node.loadData(j);
-            }
+      }
+      if (json["leftNodes"] != null) {
+        List<dynamic> leftList = json["leftNodes"];
+        for (Map<String, dynamic> j in leftList) {
+          if (j.containsKey("id") &&
+              j.containsKey("content") &&
+              j.containsKey("nodes")) {
+            MindMapNode node = MindMapNode();
+            addLeftItem(node);
+            node.loadData(j);
           }
         }
       }
     }
   }
 
+  //Export Data&Style to JSON
   @override
   Map<String, dynamic> toJson() {
     Map<String, dynamic> properties = {};
@@ -181,6 +185,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     return json;
   }
 
+  //Load Data&Style from JSON
   @override
   void fromJson(Map<String, dynamic> json) {
     if (json.containsKey("MindMapNode")) {
@@ -427,6 +432,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     }
   }
 
+  // add left child node
   void addLeftChildNode() {
     MindMapNode node = MindMapNode();
     node.setParentNode(this);
@@ -434,6 +440,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     addLeftItem(node);
   }
 
+  // add right child node
   void addRightChildNode() {
     MindMapNode node = MindMapNode();
     node.setParentNode(this);
@@ -441,6 +448,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     addRightItem(node);
   }
 
+  // on tap
   void onTap() {
     if (getMindMap() != null) {
       getMindMap()!.setSelectedNode(this);
@@ -448,10 +456,12 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   }
 
   bool? _canExpand;
+  //set can expand
   void setCanExpand(bool value) {
     _canExpand = value;
   }
 
+  // can expand
   @override
   bool canExpand() {
     if (_canExpand != null) {
@@ -462,11 +472,13 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   }
 
   bool _expanded = true;
+  //Expanded
   @override
   bool getExpanded() {
     return _expanded;
   }
 
+  // set expanded
   @override
   void setExpanded(bool value) {
     if (_expanded != value) {
@@ -479,6 +491,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     }
   }
 
+  // Selected
   bool getSelected() {
     if (getMindMap() != null && getMindMap()!.getSelectedNode() == this) {
       return true;
@@ -486,6 +499,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     return false;
   }
 
+  // Level
   @override
   int getLevel() {
     if (getParentNode() != null) {
@@ -496,6 +510,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   }
 
   ILink? _link;
+  // Link
   @override
   ILink getLink() {
     return _link != null
@@ -512,6 +527,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
                     : BeerseLineLink()));
   }
 
+  // set link
   @override
   void setLink(ILink? value) {
     _link = value;
@@ -519,6 +535,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   }
 
   Color? _linkColor;
+  // Link Color
   @override
   Color getLinkColor() {
     if (_linkColor != null) {
@@ -549,6 +566,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
               : Colors.black));
   }
 
+  // set link color
   @override
   void setLinkColor(Color? value) {
     _linkColor = value;
@@ -557,6 +575,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   }
 
   List<Color> _linkColors = [];
+  // Link Colors
   List<Color> getLinkColors() {
     if (_linkColors.isNotEmpty) {
       return _linkColors;
@@ -583,6 +602,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     return [];
   }
 
+  // set link colors
   void setLinkColors(List<Color> value) {
     _linkColors = value;
     refresh();
@@ -590,6 +610,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   }
 
   double? _linkWidth;
+  // Link Width
   @override
   double getLinkWidth() {
     return _linkWidth != null
@@ -613,6 +634,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
                     : 1));
   }
 
+  // set link width
   @override
   void setLinkWidth(double? value) {
     _linkWidth = value;
@@ -621,6 +643,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   }
 
   List<Color> _borderColors = [];
+  // Border Colors
   List<Color> getBorderColors() {
     if (_borderColors.isNotEmpty) {
       return _borderColors;
@@ -647,6 +670,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     return [];
   }
 
+  // set border colors
   void setBorderColors(List<Color> value) {
     _borderColors = value;
     refresh();
@@ -654,11 +678,13 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   }
 
   IMindMapNode? _parentNode;
+  // Parent Node
   @override
   IMindMapNode? getParentNode() {
     return _parentNode;
   }
 
+  // set parent node
   @override
   void setParentNode(IMindMapNode value) {
     _parentNode = value;
@@ -666,6 +692,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
 
   int? _hSpace;
   int? _vSpace;
+  // HSpace
   @override
   int getHSpace() {
     int bw = getMindMap()?.getButtonWidth() ?? 24;
@@ -688,12 +715,14 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
                   : (bw * 2 + 40)));
   }
 
+  // set hspace
   void setHSpace(int value) {
     _hSpace = value;
     refresh();
     getMindMap()?.onChanged();
   }
 
+  // VSpace
   @override
   int getVSpace() {
     return _vSpace ??
@@ -713,6 +742,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
             : (getParentNode() != null ? getParentNode()!.getVSpace() : 20));
   }
 
+  // set vspace
   void setVSpace(int value) {
     _vSpace = value;
     refresh();
@@ -723,6 +753,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   State<StatefulWidget> createState() => MindMapNodeState();
 
   MindMapNodeState? _state;
+  // refresh
   @override
   void refresh() {
     if (_state != null) {
@@ -732,23 +763,26 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   }
 
   String _id = Uuid().v1();
+  // ID
   @override
   String getID() {
     return _id;
   }
 
+  // set id
   void setID(String id) {
     _id = id;
     getMindMap()?.onChanged();
   }
 
   String _title = "";
-
+  // Title
   @override
   String getTitle() {
     return _title;
   }
 
+  // set title
   @override
   void setTitle(String value) {
     if (_title != value) {
@@ -759,26 +793,31 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   }
 
   String _extended = "";
+  // Extended
   @override
   String getExtended() {
     return _extended;
   }
 
+  // set extended
   @override
   void setExtended(String value) {
     _extended = value;
   }
 
   Widget? _child;
+  // Child
   Widget? getChild() {
     return _child;
   }
 
+  // set child
   void setChild(Widget? value) {
     _child = value;
   }
 
   Color? _backgroundColor;
+  // Background Color
   Color getBackgroundColor() {
     if (_backgroundColor != null) {
       return _backgroundColor!;
@@ -814,6 +853,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
                     : Colors.transparent));
   }
 
+  // set background color
   void setBackgroundColor(Color color) {
     _backgroundColor = color;
     refresh();
@@ -821,6 +861,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   }
 
   List<Color> _backgroundColors = [];
+  // Background Colors
   List<Color> getBackgroundColors() {
     if (_backgroundColors.isNotEmpty) {
       return _backgroundColors;
@@ -849,6 +890,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     return [];
   }
 
+  // set background colors
   void setBackgroundColors(List<Color> value) {
     _backgroundColors = value;
     refresh();
@@ -856,6 +898,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   }
 
   BoxBorder? _border;
+  // Border
   BoxBorder getBorder() {
     if (_border != null) {
       return _border!;
@@ -917,6 +960,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     }
   }
 
+  // set border
   void setBorder(BoxBorder border) {
     _border = border;
     refresh();
@@ -924,6 +968,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   }
 
   BorderRadiusGeometry? _borderRadius;
+  // Border Radius
   BorderRadiusGeometry getBorderRadius() {
     if (_borderRadius != null) {
       return _borderRadius!;
@@ -944,6 +989,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     }
   }
 
+  // set border radius
   void setBorderRadius(BorderRadiusGeometry borderRadius) {
     _borderRadius = borderRadius;
     refresh();
@@ -951,26 +997,31 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   }
 
   List<BoxShadow>? _shadow;
+  // Shadow
   List<BoxShadow>? getShadow() {
     return _shadow;
   }
 
+  // set shadow
   void setShadow(List<BoxShadow>? shadow) {
     _shadow = shadow;
     refresh();
   }
 
   Gradient? _gradient;
+  // Gradient
   Gradient? getGradient() {
     return _gradient;
   }
 
+  // set gradient
   void setGradient(Gradient? gradient) {
     _gradient = gradient;
     refresh();
   }
 
   EdgeInsets? _padding;
+  // Padding
   EdgeInsets? getPadding() {
     if (_padding != null) {
       return _padding!;
@@ -987,6 +1038,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     }
   }
 
+  // set padding
   void setPadding(EdgeInsets? padding) {
     _padding = padding;
     refresh();
@@ -994,6 +1046,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   }
 
   TextStyle? _textStyle;
+  // Text Style
   TextStyle? getTextStyle() {
     if (_textStyle != null) {
       return _textStyle;
@@ -1036,6 +1089,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     }
   }
 
+  // set text style
   void setTextStyle(TextStyle? textStyle) {
     _textStyle = textStyle;
     refresh();
@@ -1044,6 +1098,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
 
   List<IMindMapNode> _leftItems = [];
   List<IMindMapNode> _rightItems = [];
+  //Add Left Item
   @override
   void addLeftItem(IMindMapNode item) {
     _leftItems.add(item);
@@ -1057,6 +1112,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     getMindMap()?.onChanged();
   }
 
+  //Add Right Item
   @override
   void addRightItem(IMindMapNode item) {
     _rightItems.add(item);
@@ -1070,16 +1126,19 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     getMindMap()?.onChanged();
   }
 
+  //Get Left Items
   @override
   List<IMindMapNode> getLeftItems() {
     return _leftItems;
   }
 
+  //Get Right Items
   @override
   List<IMindMapNode> getRightItems() {
     return _rightItems;
   }
 
+  //Insert Left Item
   @override
   void insertLeftItem(IMindMapNode item, int index) {
     if (index >= _leftItems.length) {
@@ -1094,6 +1153,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     getMindMap()?.onChanged();
   }
 
+  //Insert Right Item
   @override
   void insertRightItem(IMindMapNode item, int index) {
     if (index >= _rightItems.length) {
@@ -1108,6 +1168,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     getMindMap()?.onChanged();
   }
 
+  //Remove Left Item
   @override
   void removeLeftItem(IMindMapNode item) {
     _leftItems.remove(item);
@@ -1116,6 +1177,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     getMindMap()?.onChanged();
   }
 
+  //Remove Right Item
   @override
   void removeRightItem(IMindMapNode item) {
     _rightItems.remove(item);
@@ -1124,6 +1186,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     getMindMap()?.onChanged();
   }
 
+  //Set Left Items
   @override
   void setLeftItems(List<IMindMapNode> value) {
     _leftItems = value;
@@ -1131,6 +1194,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     getMindMap()?.onChanged();
   }
 
+  //Set Right Items
   @override
   void setRightItems(List<IMindMapNode> value) {
     _rightItems = value;
@@ -1139,11 +1203,13 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   }
 
   NodeType _nodeType = NodeType.root;
+  // Get Node Type
   @override
   NodeType getNodeType() {
     return _nodeType;
   }
 
+  // Set Node Type
   @override
   void setNodeType(NodeType value) {
     _nodeType = value;
@@ -1165,6 +1231,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   }
 
   MindMap? _mindMap;
+  // Get Mind Map
   @override
   MindMap? getMindMap() {
     if (_mindMap != null) {
@@ -1174,11 +1241,13 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     }
   }
 
+  // Set Mind Map
   @override
   void setMindMap(MindMap value) {
     _mindMap = value;
   }
 
+  // Get Read Only
   @override
   bool getReadOnly() {
     if (getParentNode() != null) {
@@ -1188,21 +1257,25 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   }
 
   Offset _dragOffset = Offset.zero;
+  // Set Drag Offset
   void setDragOfset(Offset value) {
     _dragOffset = value;
   }
 
+  // Get Drag Offset
   @override
   Offset getDragOffset() {
     return _dragOffset;
   }
 
   Offset? _offset;
+  // Get Offset
   @override
   Offset? getOffset() {
     return _offset;
   }
 
+  // Set Offset
   @override
   void setOffset(Offset? value) {
     if (_offset == null ||
@@ -1223,11 +1296,13 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   }
 
   Offset? _offsetParent;
+  // Get Offset By Parent
   @override
   Offset? getOffsetByParent() {
     return _offsetParent;
   }
 
+  // Set Offset By Parent
   @override
   void setOffsetByParent(Offset? value) {
     if (_offsetParent == null ||
@@ -1242,17 +1317,21 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   }
 
   Size? _size;
+  // Get Size
   @override
   Size? getSize() {
     return _size;
   }
 
+  // Set Size
   @override
   void setSize(Size? value) {
     if (_size == null ||
         (_size != null &&
             value != null &&
-            (_size!.width != value.width || _size!.height != value.height))) {
+            (_size!.width > value.width + 10 ||
+                _size!.width < value.width - 10 ||
+                _size!.height != value.height))) {
       _size = value;
       if (getParentNode() != null) {
         getParentNode()!.refresh();
@@ -1260,6 +1339,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     }
   }
 
+  // Get Left Area
   @override
   Rect? getLeftArea() {
     Offset o = Offset(_offset?.dx ?? 0, _offset?.dy ?? 0);
@@ -1304,6 +1384,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     return rect;
   }
 
+  // Get Right Area
   @override
   Rect? getRightArea() {
     Offset o = Offset(_offset?.dx ?? 0, _offset?.dy ?? 0);
@@ -1348,11 +1429,13 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     return rect;
   }
 
+  // Get Node Area
   @override
   Rect? getNodeArea() {
     return null;
   }
 
+  // Get Link In Area
   @override
   RenderObject? getRenderObject() {
     if (_state != null) {
@@ -1362,7 +1445,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   }
 
   MindMapNodeLinkOffsetMode? _linkInOffsetMode;
-
+  // Set Link In Offset Mode
   MindMapNodeLinkOffsetMode getLinkInOffsetMode() {
     if (_linkInOffsetMode != null) {
       return _linkInOffsetMode!;
@@ -1383,6 +1466,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     }
   }
 
+  // Set Link In Offset Mode
   void setLinkInOffsetMode(MindMapNodeLinkOffsetMode value) {
     if (_linkInOffsetMode != value) {
       _linkInOffsetMode = value;
@@ -1393,6 +1477,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     }
   }
 
+  // Get Link In Offset
   @override
   double getLinkInOffset() {
     if (getLinkInOffsetMode() == MindMapNodeLinkOffsetMode.top) {
@@ -1413,7 +1498,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   }
 
   MindMapNodeLinkOffsetMode? _linkOutOffsetMode;
-
+  // Set Link Out Offset Mode
   MindMapNodeLinkOffsetMode getLinkOutOffsetMode() {
     if (_linkOutOffsetMode != null) {
       return _linkOutOffsetMode!;
@@ -1434,6 +1519,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     }
   }
 
+  // Set Link Out Offset Mode
   void setLinkOutOffsetMode(MindMapNodeLinkOffsetMode value) {
     if (_linkOutOffsetMode != value) {
       _linkOutOffsetMode = value;
@@ -1444,6 +1530,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     }
   }
 
+  // Get Link Out Offset
   @override
   double getLinkOutOffset() {
     if (getLinkOutOffsetMode() == MindMapNodeLinkOffsetMode.top) {
@@ -1535,7 +1622,9 @@ class MindMapNodeState extends State<MindMapNode> {
         //spacing: widget.getHSpace().toDouble(),
         children: [
           //Left Items
-          ...(leftItems.isEmpty || !widget.getExpanded()
+          ...(leftItems.isEmpty ||
+                  (!widget.getExpanded() &&
+                      (widget.getMindMap()?.getReadOnly() ?? false))
               ? []
               : [
                   Column(
@@ -1708,7 +1797,7 @@ class MindMapNodeState extends State<MindMapNode> {
                                                         .getMindMap()
                                                         ?.getButtonWidth() ??
                                                     24) -
-                                                4,
+                                                6,
                                             color:
                                                 (widget
                                                     .getMindMap()
@@ -1819,7 +1908,7 @@ class MindMapNodeState extends State<MindMapNode> {
                                                               .getMindMap()
                                                               ?.getButtonWidth() ??
                                                           24) -
-                                                      4,
+                                                      6,
                                                   color:
                                                       (widget
                                                           .getMindMap()
@@ -1828,6 +1917,87 @@ class MindMapNodeState extends State<MindMapNode> {
                                                 ),
                                               ),
                                             ),
+
+                                      //Space
+                                      !(widget.getMindMap()?.hasTextField() ??
+                                                  true) &&
+                                              (widget
+                                                      .getMindMap()
+                                                      ?.hasEditButton() ??
+                                                  false)
+                                          ? SizedBox(width: 6)
+                                          : SizedBox(width: 0),
+                                      //Edit Button
+                                      !(widget.getMindMap()?.hasTextField() ??
+                                                  true) &&
+                                              (widget
+                                                      .getMindMap()
+                                                      ?.hasEditButton() ??
+                                                  false)
+                                          ? Container(
+                                              constraints: BoxConstraints(
+                                                maxWidth:
+                                                    (widget
+                                                                .getMindMap()
+                                                                ?.getButtonWidth() ??
+                                                            24)
+                                                        .toDouble(),
+                                                maxHeight:
+                                                    (widget
+                                                                .getMindMap()
+                                                                ?.getButtonWidth() ??
+                                                            24)
+                                                        .toDouble(),
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color:
+                                                    (widget
+                                                        .getMindMap()
+                                                        ?.getButtonBackground() ??
+                                                    Colors.white),
+                                                border: Border.all(
+                                                  color:
+                                                      (widget
+                                                          .getMindMap()
+                                                          ?.getButtonColor() ??
+                                                      Colors.black),
+                                                  width: 1,
+                                                ),
+                                                borderRadius: BorderRadius.circular(
+                                                  (widget
+                                                              .getMindMap()
+                                                              ?.getButtonWidth() ??
+                                                          24)
+                                                      .toDouble(),
+                                                ),
+                                              ),
+                                              child: IconButton(
+                                                onPressed: () {
+                                                  widget
+                                                      .getMindMap()
+                                                      ?.onDoubleTap(widget);
+                                                },
+                                                hoverColor:
+                                                    Colors.blue.shade200,
+                                                highlightColor: Colors.blue,
+                                                padding: EdgeInsets.zero,
+                                                icon: Icon(
+                                                  Icons.edit_outlined,
+                                                  size:
+                                                      (widget
+                                                              .getMindMap()
+                                                              ?.getButtonWidth() ??
+                                                          24) -
+                                                      8,
+                                                  color:
+                                                      (widget
+                                                          .getMindMap()
+                                                          ?.getButtonColor() ??
+                                                      Colors.black),
+                                                ),
+                                              ),
+                                            )
+                                          : SizedBox(width: 0, height: 0),
                                     ])
                             : (widget.getReadOnly()
                                   ? (widget.getNodeType() == NodeType.left &&
@@ -2035,6 +2205,87 @@ class MindMapNodeState extends State<MindMapNode> {
                                           ]
                                         : [])
                                   : [
+                                      //Edit Button
+                                      !(widget.getMindMap()?.hasTextField() ??
+                                                  true) &&
+                                              (widget
+                                                      .getMindMap()
+                                                      ?.hasEditButton() ??
+                                                  false)
+                                          ? Container(
+                                              constraints: BoxConstraints(
+                                                maxWidth:
+                                                    (widget
+                                                                .getMindMap()
+                                                                ?.getButtonWidth() ??
+                                                            24)
+                                                        .toDouble(),
+                                                maxHeight:
+                                                    (widget
+                                                                .getMindMap()
+                                                                ?.getButtonWidth() ??
+                                                            24)
+                                                        .toDouble(),
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color:
+                                                    (widget
+                                                        .getMindMap()
+                                                        ?.getButtonBackground() ??
+                                                    Colors.white),
+                                                border: Border.all(
+                                                  color:
+                                                      (widget
+                                                          .getMindMap()
+                                                          ?.getButtonColor() ??
+                                                      Colors.black),
+                                                  width: 1,
+                                                ),
+                                                borderRadius: BorderRadius.circular(
+                                                  (widget
+                                                              .getMindMap()
+                                                              ?.getButtonWidth() ??
+                                                          24)
+                                                      .toDouble(),
+                                                ),
+                                              ),
+                                              child: IconButton(
+                                                onPressed: () {
+                                                  widget
+                                                      .getMindMap()
+                                                      ?.onDoubleTap(widget);
+                                                },
+                                                hoverColor:
+                                                    Colors.blue.shade200,
+                                                highlightColor: Colors.blue,
+                                                padding: EdgeInsets.zero,
+                                                icon: Icon(
+                                                  Icons.edit_outlined,
+                                                  size:
+                                                      (widget
+                                                              .getMindMap()
+                                                              ?.getButtonWidth() ??
+                                                          24) -
+                                                      8,
+                                                  color:
+                                                      (widget
+                                                          .getMindMap()
+                                                          ?.getButtonColor() ??
+                                                      Colors.black),
+                                                ),
+                                              ),
+                                            )
+                                          : SizedBox(width: 0, height: 0),
+
+                                      //Space
+                                      !(widget.getMindMap()?.hasTextField() ??
+                                                  true) &&
+                                              (widget
+                                                      .getMindMap()
+                                                      ?.hasEditButton() ??
+                                                  false)
+                                          ? SizedBox(width: 6)
+                                          : SizedBox(width: 0),
                                       //Right Delete Button
                                       widget.getNodeType() == NodeType.root ||
                                               (widget
@@ -2127,7 +2378,7 @@ class MindMapNodeState extends State<MindMapNode> {
                                                               .getMindMap()
                                                               ?.getButtonWidth() ??
                                                           24) -
-                                                      4,
+                                                      6,
                                                   color:
                                                       (widget
                                                           .getMindMap()
@@ -2196,7 +2447,7 @@ class MindMapNodeState extends State<MindMapNode> {
                                                         .getMindMap()
                                                         ?.getButtonWidth() ??
                                                     24) -
-                                                4,
+                                                6,
                                             color:
                                                 (widget
                                                     .getMindMap()
@@ -2302,7 +2553,9 @@ class MindMapNodeState extends State<MindMapNode> {
                 ]
               : []),
           //Right Items
-          ...(rightItems.isEmpty || !widget.getExpanded()
+          ...(rightItems.isEmpty ||
+                  (!widget.getExpanded() &&
+                      (widget.getMindMap()?.getReadOnly() ?? false))
               ? []
               : [
                   Column(
@@ -2329,6 +2582,7 @@ class MindMapNodeState extends State<MindMapNode> {
   }
 }
 
+// Title
 // ignore: must_be_immutable
 class MindMapNodeTitle extends StatefulWidget {
   MindMapNodeTitle({super.key, required this.node});
@@ -2343,14 +2597,22 @@ class MindMapNodeTitleState extends State<MindMapNodeTitle> {
   void initState() {
     super.initState();
     widget.node.getMindMap()?.addOnZoomChangedListeners(onZoomChanged);
+    widget.node.getMindMap()?.addOnChangedListeners(onChanged);
     _editingController.text = widget.node.getTitle();
   }
 
   final TextEditingController _editingController = TextEditingController();
   @override
   void dispose() {
+    widget.node.getMindMap()?.removeOnChangedListeners(onChanged);
     widget.node.getMindMap()?.removeOnZoomChangedListeners(onZoomChanged);
     super.dispose();
+  }
+
+  void onChanged() {
+    if (!widget.node.getSelected() || !widget.node._focusNode.hasFocus) {
+      _editingController.text = widget.node.getTitle();
+    }
   }
 
   void onZoomChanged() {
@@ -2410,11 +2672,13 @@ class MindMapNodeTitleState extends State<MindMapNodeTitle> {
         widget.node.onTap();
       },
       onDoubleTap: () {
+        widget.node.getMindMap()?.setSelectedNode(widget.node);
         widget.node.getMindMap()?.onDoubleTap(widget.node);
       },
       child:
           widget.node.getParentNode() == null ||
-              widget.node.getMindMap()?.getReadOnly() == true
+              widget.node.getMindMap()?.getReadOnly() == true ||
+              (widget.node.getMindMap()?.getIsScaling() ?? false)
           ? getBody(border)
           : Draggable(
               data: widget.node,
@@ -2442,7 +2706,8 @@ class MindMapNodeTitleState extends State<MindMapNodeTitle> {
           widget.node.getChild() ??
           (!(widget.node.getMindMap()?.getReadOnly() ?? true) &&
                   (widget.node.getMindMap()?.hasTextField() ?? false) &&
-                  widget.node.getSelected()
+                  widget.node.getSelected() &&
+                  !(widget.node.getMindMap()?.getIsScaling() ?? false)
               ? Container(
                   constraints: BoxConstraints(
                     maxWidth: widget.node.getSize() != null

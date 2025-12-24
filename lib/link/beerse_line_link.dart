@@ -5,6 +5,7 @@ import 'package:flutter_mind_map/adapter/i_link_adapter.dart';
 import 'package:flutter_mind_map/i_mind_map_node.dart';
 import 'package:flutter_mind_map/link/i_link.dart';
 
+//Beeres Line Link
 class BeerseLineLink implements ILink {
   @override
   String getName() {
@@ -22,7 +23,7 @@ class BeerseLineLinkPainter extends CustomPainter {
   IMindMapNode node;
   @override
   void paint(Canvas canvas, Size size) {
-    if (node.getExpanded()) {
+    if (node.getExpanded() || !(node.getMindMap()?.getReadOnly() ?? false)) {
       Offset? offset = node.getOffset();
       Size? s = node.getSize();
       if (offset != null && s != null) {

@@ -21,7 +21,7 @@ Flutter's highly customizable and interactive mind map package features custom t
 -   [Set CanMove](#set-canmove)
 -   [Export Image](#export-image)
 -   [Watermark](#watermark)
-
+-   [Json to Theme](#json-to-theme)
 ---
 
 ## Load nodes from JSON
@@ -428,5 +428,89 @@ mindMap.setWatermarkOpacity(0.1);
 mindMap.setWatermarkRotationAngle(-0.5);
 mindMap.setWatermarkHorizontalInterval(200);
 mindMap.setWatermarkVerticalInterval(100);
+
+```
+
+## Json to Theme
+
+```dart
+JsonTheme jsonTheme = JsonTheme("Json Theme", {
+      "0": {
+        "BackgroundColor": "#FF7C4DFF",
+        "TextColor": "#FFFFFFFF",
+        "FontSize": 16.0,
+        "Bold": true,
+        "LinkColor": "#FF7C4DFF",
+        "LinkWidth": 1.5,
+        "HSpace": 50,
+        "VSpace": 20,
+        "Border": {"color": "#FF7C4DFF", "width": 2},
+        "BorderRadius": 100,
+        "Padding": {"left": 20, "top": 10, "right": 20, "bottom": 10},
+        "Link": "PolyLineLink",
+      },
+      "1": {
+        "BackgroundColor": "#00000000",
+        "TextColor": "#FFFFFFFF",
+        "FontSize": 14.0,
+        "HSpace": 50,
+        "VSpace": 20,
+        "Border": {"color": "#00000000", "width": 1},
+        "BorderRadius": 8,
+        "Padding": {"left": 12, "top": 6, "right": 12, "bottom": 6},
+        "LinkWidth": 1.5,
+        "LinkColors": [
+          "#FF7C4DFF",
+          "#FF448AFF",
+          "#FF4CAF50",
+          "#FFFF6E40",
+          "#FF00BCD4",
+          "#FFFF5252",
+          "#FF795548",
+        ],
+        "BorderColors": [
+          "#FF7C4DFF",
+          "#FF448AFF",
+          "#FF4CAF50",
+          "#FFFF6E40",
+          "#FF00BCD4",
+          "#FFFF5252",
+          "#FF795548",
+        ],
+        "BackgroundColors": [
+          "#FF7C4DFF",
+          "#FF448AFF",
+          "#FF4CAF50",
+          "#FFFF6E40",
+          "#FF00BCD4",
+          "#FFFF5252",
+          "#FF795548",
+        ],
+      },
+      "2": {
+        "BackgroundColor": "#00000000",
+        "TextColor": "#FF000000",
+        "FontSize": 14.0,
+        "HSpace": 50,
+        "VSpace": 20,
+        "BorderRadius": 8,
+        "Padding": {"left": 12, "top": 6, "right": 12, "bottom": 6},
+        "LinkWidth": 1.5,
+        "Link": "BeerseLineLink",
+      },
+      "3": {
+        "BackgroundColor": "#00000000",
+        "TextColor": "#FF000000",
+        "FontSize": 12.0,
+        "HSpace": 40,
+        "VSpace": 10,
+        "Border": {"color": "#00000000", "width": 0},
+        "BorderRadius": 0,
+        "Padding": {"left": 6, "top": 0, "right": 6, "bottom": 0},
+        "LinkWidth": 1.0,
+      },
+    }
+);
+mindMap.registerThemeAdapter(JsonThemeAdapter(jsonTheme));
 
 ```

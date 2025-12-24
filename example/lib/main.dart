@@ -93,10 +93,20 @@ class _MyAppState extends State<MyApp> {
                       image = await widget.themePage.mindMap.toPng();
                     }
                     if (image != null) {
-                      String? filename = await FilePicker.platform.saveFile(
-                        type: FileType.custom,
-                        allowedExtensions: ["png"],
-                      );
+                      String? filename;
+                      if (Platform.isAndroid || Platform.isIOS) {
+                        filename = await FilePicker.platform.saveFile(
+                          type: FileType.custom,
+                          allowedExtensions: ["png"],
+                          fileName: "MindMap.png",
+                          bytes: image,
+                        );
+                      } else {
+                        filename = await FilePicker.platform.saveFile(
+                          type: FileType.custom,
+                          allowedExtensions: ["png"],
+                        );
+                      }
                       if (filename != null) {
                         File file = File(filename);
                         await file.writeAsBytes(image);

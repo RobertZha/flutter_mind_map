@@ -3,6 +3,7 @@ import 'package:flutter_mind_map/adapter/i_theme_adapter.dart';
 import 'package:flutter_mind_map/link/beerse_line_link.dart';
 import 'package:flutter_mind_map/theme/i_mind_map_theme.dart';
 
+//Normal Theme
 class MindMapThemeNormal implements IMindMapTheme {
   @override
   String getName() {

@@ -23,71 +23,85 @@ class MindMap extends StatefulWidget {
   MindMap({super.key});
   final GlobalKey _key = GlobalKey();
 
-  //WaterMark
   String _watermark = "";
+  //WaterMark
   String getWatermark() {
     return _watermark;
   }
 
+  //Set Watermark
   void setWatermark(String value) {
     _watermark = value;
   }
 
   Color _watermarkColor = Colors.black;
+  //WaterMark Color
   Color getWatermarkColor() {
     return _watermarkColor;
   }
 
+  //Set Watermark Color
   void setWatermarkColor(Color value) {
     _watermarkColor = value;
   }
 
   double _watermarkOpacity = 0.1;
+  //WaterMark Opacity
   double getWatermarkOpacity() {
     return _watermarkOpacity;
   }
 
+  //Set Watermark Opacity
   void setWatermarkOpacity(double value) {
     _watermarkOpacity = value;
   }
 
   double _watermarkFontSize = 15;
+  //WaterMark Font Size
   double getWatermarkFontSize() {
     return _watermarkFontSize;
   }
 
+  //Set Watermark Font Size
   void setWatermarkFontSize(double value) {
     _watermarkFontSize = value;
   }
 
   double _watermarkRotationAngle = -0.5;
+  //WaterMark Rotation Angle
   double getWatermarkRotationAngle() {
     return _watermarkRotationAngle;
   }
 
+  //Set Watermark Rotation Angle
   void setWatermarkRotationAngle(double value) {
     _watermarkRotationAngle = value;
   }
 
   double _watermarkHorizontalInterval = 100;
+  //WaterMark Horizontal Interval
   double getWatermarkHorizontalInterval() {
     return _watermarkHorizontalInterval;
   }
 
+  //Set Watermark Horizontal Interval
   void setWatermarkHorizontalInterval(double value) {
     _watermarkHorizontalInterval = value;
   }
 
   double _watermarkVerticalInterval = 50;
+  //WaterMark Vertical Interval
   double getWatermarkVerticalInterval() {
     return _watermarkVerticalInterval;
   }
 
+  //Set Watermark Vertical Interval
   void setWatermarkVerticalInterval(double value) {
     _watermarkVerticalInterval = value;
   }
   //End Watermark
 
+  //Export to PNG
   Future<Uint8List?> toPng() async {
     RenderRepaintBoundary boundary =
         _key.currentContext!.findRenderObject() as RenderRepaintBoundary;
@@ -101,6 +115,7 @@ class MindMap extends StatefulWidget {
     return null;
   }
 
+  //Load Data from Json
   void loadData(Map<String, dynamic> json) {
     if (json.containsKey("id") &&
         json.containsKey("content") &&
@@ -111,10 +126,12 @@ class MindMap extends StatefulWidget {
     }
   }
 
+  //Export Data to Json
   Map<String, dynamic> getData() {
     return getRootNode().getData();
   }
 
+  //Export Data&Style to Json
   Map<String, dynamic> toJson() {
     Map<String, dynamic> json = {
       "RootNode": getRootNode().toJson(),
@@ -129,6 +146,7 @@ class MindMap extends StatefulWidget {
   }
 
   bool _isLoading = false;
+  //Load Data&Style from Json
   void fromJson(Map<String, dynamic> json) {
     _isLoading = true;
     if (json.containsKey("Zoom")) {
@@ -156,10 +174,12 @@ class MindMap extends StatefulWidget {
   }
 
   int _buttonWidth = 24;
+  //Button Width
   int getButtonWidth() {
     return _buttonWidth;
   }
 
+  //Set Button Width
   void setButtonWidth(int value) {
     if (_buttonWidth != value) {
       _buttonWidth = value;
@@ -168,10 +188,12 @@ class MindMap extends StatefulWidget {
   }
 
   Color _buttonColor = Colors.black;
+  //Button Color
   Color getButtonColor() {
     return _buttonColor;
   }
 
+  //Set Button Color
   void setButtonColor(Color value) {
     if (_buttonColor != value) {
       _buttonColor = value;
@@ -180,10 +202,12 @@ class MindMap extends StatefulWidget {
   }
 
   Color _buttonBackground = Colors.white;
+  //Button Background
   Color getButtonBackground() {
     return _buttonBackground;
   }
 
+  //Set Button Background
   void setButtonBackground(Color value) {
     if (_buttonBackground != value) {
       _buttonBackground = value;
@@ -192,10 +216,12 @@ class MindMap extends StatefulWidget {
   }
 
   Color _dragInBorderColor = Colors.cyan;
+  //Drag In Border Color
   Color getDragInBorderColor() {
     return _dragInBorderColor;
   }
 
+  //Set Drag In Border Color
   void setDragInBorderColor(Color value) {
     if (_dragInBorderColor != value) {
       _dragInBorderColor = value;
@@ -204,10 +230,12 @@ class MindMap extends StatefulWidget {
   }
 
   double _dragInBorderWidth = 3;
+  //Drag In Border Width
   double getDragInBorderWidth() {
     return _dragInBorderWidth;
   }
 
+  //Set Drag In Border Width
   void setDragInBorderWidth(double value) {
     if (_dragInBorderWidth != value) {
       _dragInBorderWidth = value;
@@ -216,10 +244,12 @@ class MindMap extends StatefulWidget {
   }
 
   double _mindMapPadding = 80;
+  //MindMap Padding
   double getMindMapPadding() {
     return _mindMapPadding;
   }
 
+  //Set MindMap Padding
   void setMindMapPadding(double value) {
     if (_mindMapPadding != value) {
       _mindMapPadding = value;
@@ -229,16 +259,19 @@ class MindMap extends StatefulWidget {
 
   //Adapter
   final List<INodeAdapter> _nodeAdapter = [MindMapNodeAdapter()];
+  //Register Node Adapter
   void registerNodeAdapter(INodeAdapter value) {
     if (!_nodeAdapter.contains(value)) {
       _nodeAdapter.add(value);
     }
   }
 
+  //Get Node Adapter
   List<INodeAdapter> getNodeAdapter() {
     return _nodeAdapter;
   }
 
+  //Create Node
   IMindMapNode? createNode(String name) {
     for (INodeAdapter na in _nodeAdapter) {
       if (na.getName() == name) {
@@ -253,16 +286,19 @@ class MindMap extends StatefulWidget {
     LineLinkAdapter(),
     PolyLineLinkAdapter(),
   ];
+  //Register Link Adapter
   void registerLinkAdapter(ILinkAdapter value) {
     if (!_linkAdapter.contains(value)) {
       _linkAdapter.add(value);
     }
   }
 
+  //Get Link Adapter
   List<ILinkAdapter> getLinkAdapter() {
     return _linkAdapter;
   }
 
+  //Create Link
   ILink? createLink(String name) {
     for (ILinkAdapter na in _linkAdapter) {
       if (na.getName() == name) {
@@ -277,16 +313,19 @@ class MindMap extends StatefulWidget {
     MindMapThemeNormalAdapter(),
     MindMapThemeLargeAdapter(),
   ];
+  //Register Theme Adapter
   void registerThemeAdapter(IThemeAdapter value) {
     if (!_themeAdapter.contains(value)) {
       _themeAdapter.add(value);
     }
   }
 
+  //Get Theme Adapter
   List<IThemeAdapter> getThemeAdapter() {
     return _themeAdapter;
   }
 
+  //Create Theme
   IMindMapTheme? createTheme(String name) {
     for (IThemeAdapter na in _themeAdapter) {
       if (na.getName() == name) {
@@ -298,10 +337,12 @@ class MindMap extends StatefulWidget {
   //End Adapter
 
   bool _showRecycle = true;
+  //Show Recycle
   bool getShowRecycle() {
     return _showRecycle;
   }
 
+  //Set Show Recycle
   void setShowRecycle(bool value) {
     if (_showRecycle != value) {
       _showRecycle = value;
@@ -310,10 +351,12 @@ class MindMap extends StatefulWidget {
   }
 
   String _recycleTitle = "Drag here to delete";
+  //Recycle Title
   String getRecycleTitle() {
     return _recycleTitle;
   }
 
+  //Set Recycle Title
   void setRecycleTitle(String value) {
     if (_recycleTitle != value) {
       _recycleTitle = value;
@@ -322,10 +365,12 @@ class MindMap extends StatefulWidget {
   }
 
   bool _canMove = true;
+  //Can Move
   bool getCanMove() {
     return _canMove;
   }
 
+  //  Set Can Move
   void setCanMove(bool value) {
     if (_canMove != value) {
       _canMove = value;
@@ -334,10 +379,12 @@ class MindMap extends StatefulWidget {
   }
 
   bool _showZoom = true;
+  //Show Zoom
   bool getShowZoom() {
     return _showZoom;
   }
 
+  //Set Show Zoom
   void setShowZoom(bool value) {
     if (_showZoom != value) {
       _showZoom = value;
@@ -345,15 +392,18 @@ class MindMap extends StatefulWidget {
     }
   }
 
+  //refresh MindMap
   void refresh() {
     _state?.refresh();
   }
 
   double _zoom = 1;
+  //Zoom
   double getZoom() {
     return _zoom;
   }
 
+  //Set Zoom
   void setZoom(double value) {
     if (value > 0) {
       _zoom = value;
@@ -366,15 +416,29 @@ class MindMap extends StatefulWidget {
     }
   }
 
+  bool _isScaling = false;
+  bool getIsScaling() {
+    return _isScaling;
+  }
+
+  void setIsScaling(bool value) {
+    if (_isScaling != value) {
+      _isScaling = value;
+    }
+  }
+
   final List<Function()> _onChangedListeners = [];
+  //Add On Changed Listeners
   void addOnChangedListeners(Function() value) {
     _onChangedListeners.add(value);
   }
 
+  //Remove On Changed Listeners
   void removeOnChangedListeners(Function() value) {
     _onChangedListeners.remove(value);
   }
 
+  //On Changed
   void onChanged() {
     if (!_isLoading) {
       List<Function()> list = [];
@@ -386,10 +450,12 @@ class MindMap extends StatefulWidget {
   }
 
   IMindMapTheme? _theme;
+  //Theme
   IMindMapTheme? getTheme() {
     return _theme;
   }
 
+  //Set Theme
   void setTheme(IMindMapTheme? value) {
     _theme = value;
     refresh();
@@ -397,33 +463,40 @@ class MindMap extends StatefulWidget {
   }
 
   final List<Function()> _onZoomChangedListeners = [];
+  //Add On Zoom Changed Listeners
   void addOnZoomChangedListeners(Function() value) {
     _onZoomChangedListeners.add(value);
   }
 
+  //Remove On Zoom Changed Listeners
   void removeOnZoomChangedListeners(Function() value) {
     _onZoomChangedListeners.remove(value);
   }
 
   IMindMapNode? _selectedNode;
+  //Selected Node
   IMindMapNode? getSelectedNode() {
     return _selectedNode;
   }
 
+  //Set Selected Node
   void setSelectedNode(IMindMapNode? node) {
     _selectedNode = node;
     notifySelectedNodeChanged();
   }
 
   final List<Function()> _onTapListeners = [];
+  //Add On Tap Listeners
   void addOnTapListeners(Function() callback) {
     _onTapListeners.add(callback);
   }
 
+  //Remove On Tap Listeners
   void removeOnTapListeners(Function() callback) {
     _onTapListeners.remove(callback);
   }
 
+  //On Tap
   void onTap() {
     List<Function()> list = [];
     list.addAll(_onTapListeners);
@@ -433,14 +506,17 @@ class MindMap extends StatefulWidget {
   }
 
   final List<Function()> _onSelectedNodeChangedListeners = [];
+  //Add On Selected Node Changed Listeners
   void addOnSelectedNodeChangedListeners(Function() callback) {
     _onSelectedNodeChangedListeners.add(callback);
   }
 
+  //Remove On Selected Node Changed Listeners
   void removeOnSelectedNodeChangedListeners(Function() callback) {
     _onSelectedNodeChangedListeners.remove(callback);
   }
 
+  //Notify Selected Node Changed
   void notifySelectedNodeChanged() {
     for (var listener in _onSelectedNodeChangedListeners) {
       listener();
@@ -448,14 +524,17 @@ class MindMap extends StatefulWidget {
   }
 
   final List<Function(IMindMapNode)> _onDoubleTapListeners = [];
+  //Add On Double Tap Listeners
   void addOnDoubleTapListeners(Function(IMindMapNode) value) {
     _onDoubleTapListeners.add(value);
   }
 
+  //Remove On Double Tap Listeners
   void removeOnDoubleTapListeners(Function(IMindMapNode) value) {
     _onDoubleTapListeners.remove(value);
   }
 
+  //On Double Tap
   void onDoubleTap(IMindMapNode node) {
     List<Function(IMindMapNode)> list = [];
     list.addAll(_onDoubleTapListeners);
@@ -464,7 +543,28 @@ class MindMap extends StatefulWidget {
     }
   }
 
+  final List<Function(IMindMapNode)> _onEditListeners = [];
+  //Add On Edit Listeners
+  void addOnEditListeners(Function(IMindMapNode) value) {
+    _onEditListeners.add(value);
+  }
+
+  //Remove On Edit Listeners
+  void removeOnEditListeners(Function(IMindMapNode) value) {
+    _onEditListeners.remove(value);
+  }
+
+  //On Edit
+  void onEdit(IMindMapNode node) {
+    List<Function(IMindMapNode)> list = [];
+    list.addAll(_onEditListeners);
+    for (Function(IMindMapNode) call in list) {
+      call(node);
+    }
+  }
+
   bool _readOnly = false;
+  //Set Read Only
   void setReadOnly(bool value) {
     if (_readOnly != value) {
       _readOnly = value;
@@ -473,9 +573,11 @@ class MindMap extends StatefulWidget {
     }
   }
 
+  //Read Only
   bool getReadOnly() => _readOnly;
 
   bool _hasTextField = true;
+  //Has TextField
   void setHasTextField(bool value) {
     if (_hasTextField != value) {
       _hasTextField = value;
@@ -484,14 +586,30 @@ class MindMap extends StatefulWidget {
     }
   }
 
+  //Has TextField
   bool hasTextField() => _hasTextField;
 
+  bool _hasEditButton = false;
+  //set Has Edit Button
+  void setHasEditButton(bool value) {
+    if (_hasEditButton != value) {
+      _hasEditButton = value;
+      setSelectedNode(null);
+      _state?.refresh();
+    }
+  }
+
+  //Has Edit Button
+  bool hasEditButton() => _hasEditButton;
+
   Color? _backgroundColor;
+  //Background Color
   Color getBackgroundColor() =>
       _backgroundColor ??
       (getTheme() != null
           ? getTheme()!.getBackgroundColor()
           : Colors.transparent);
+  //Set Background Color
   void setBackgroundColor(Color color) {
     _backgroundColor = color;
     _state?.refresh();
@@ -499,6 +617,7 @@ class MindMap extends StatefulWidget {
   }
 
   IMindMapNode _rootNode = MindMapNode();
+  //Root Node
   IMindMapNode getRootNode() {
     if (_rootNode.getMindMap() == null) {
       _rootNode.setMindMap(this);
@@ -506,6 +625,7 @@ class MindMap extends StatefulWidget {
     return _rootNode;
   }
 
+  //Set Root Node
   void setRootNode(IMindMapNode rootNode) {
     _rootNode = rootNode;
     _rootNode.setMindMap(this);
@@ -514,14 +634,17 @@ class MindMap extends StatefulWidget {
   }
 
   final List<Function()> _onRootNodeChangeListeners = [];
+  //Add On Root Node Change Listeners
   void addOnRootNodeChangeListener(Function() listener) {
     _onRootNodeChangeListeners.add(listener);
   }
 
+  //Remove On Root Node Change Listeners
   void removeOnRootNodeChangeListener(Function() listener) {
     _onRootNodeChangeListeners.remove(listener);
   }
 
+  //Notify Root Node Changed
   void onRootNodeChanged() {
     for (var listener in _onRootNodeChangeListeners) {
       listener();
@@ -529,14 +652,17 @@ class MindMap extends StatefulWidget {
   }
 
   final List<Function()> _onMoveListeners = [];
+  //Add On Move Listeners
   void addOnMoveListeners(Function() callback) {
     _onMoveListeners.add(callback);
   }
 
+  //Remove On Move Listeners
   void removeOnMoveListeners(Function() callback) {
     _onMoveListeners.remove(callback);
   }
 
+  //On Move
   void onMove() {
     for (var listener in _onMoveListeners) {
       listener();
@@ -549,15 +675,18 @@ class MindMap extends StatefulWidget {
   MindMapState? _state;
 
   Offset? _offset;
+  //Set Offset
   void setOffset(Offset? value) {
     _offset = value;
     _state?.refresh();
     onChanged();
   }
 
+  //Get Offset
   Offset? getOffset() => _offset;
-
+  //Move Offset
   Offset moveOffset = Offset.zero;
+  //Set Move Offset
   void setMoveOffset(Offset value) {
     if (moveOffset.dx != value.dx || moveOffset.dy != value.dy) {
       moveOffset = value;
@@ -565,9 +694,11 @@ class MindMap extends StatefulWidget {
     }
   }
 
+  //Get Move Offset
   Offset getMoveOffset() => moveOffset;
 
   Size? _size;
+  //Set Size
   void setSize(Size? value) {
     if (_size == null ||
         (value != null &&
@@ -577,9 +708,11 @@ class MindMap extends StatefulWidget {
     }
   }
 
+  //Get Size
   Size? getSize() => _size;
 
   RenderObject? _renderObject;
+
   RenderObject? getRenderObject() {
     return _renderObject;
   }
@@ -694,13 +827,17 @@ class MindMapState extends State<MindMap> {
       height: double.infinity,
       child: GestureDetector(
         onTap: () {
+          widget.setIsScaling(false);
           widget.setSelectedNode(null);
           widget.onTap();
         },
         //Scale
         onScaleStart: (details) {
           if (widget.getCanMove()) {
+            widget.setIsScaling(true);
             setState(() {
+              widget._dragInNode = null;
+              widget._dragNode = null;
               _focalPoint = widget.getMoveOffset();
               _lastFocalPoint = details.focalPoint;
               _lastScale = widget.getZoom();
@@ -720,6 +857,9 @@ class MindMapState extends State<MindMap> {
               );
             });
           }
+        },
+        onScaleEnd: (details) {
+          widget.setIsScaling(false);
         },
         child: DragTarget(
           key: _pkey,
@@ -823,7 +963,8 @@ class MindMapState extends State<MindMap> {
                             ? Container()
                             : DragTarget(
                                 onWillAcceptWithDetails: (details) {
-                                  if (details.data is IMindMapNode) {
+                                  if (!widget.getIsScaling() &&
+                                      details.data is IMindMapNode) {
                                     setState(() {
                                       widget._inRecycle = true;
                                       widget._dragNode =
@@ -834,7 +975,8 @@ class MindMapState extends State<MindMap> {
                                   return false;
                                 },
                                 onAcceptWithDetails: (details) {
-                                  if (widget._dragNode != null) {
+                                  if (!widget.getIsScaling() &&
+                                      widget._dragNode != null) {
                                     setState(() {
                                       if (widget._dragNode!.getNodeType() ==
                                           NodeType.left) {
@@ -1025,51 +1167,55 @@ class MindMapState extends State<MindMap> {
             );
           },
           onWillAcceptWithDetails: (details) {
-            if (details.data is IMindMapNode) {
+            if (!widget.getIsScaling()) {
+              if (details.data is IMindMapNode) {
+                setState(() {
+                  widget._dragNode = details.data as IMindMapNode;
+                });
+                return true;
+              }
               setState(() {
-                widget._dragNode = details.data as IMindMapNode;
+                widget._dragNode = null;
               });
-              return true;
             }
-            setState(() {
-              widget._dragNode = null;
-            });
             return false;
           },
           onAcceptWithDetails: (details) {
-            if (details.data is IMindMapNode) {
+            if (!widget.getIsScaling()) {
+              if (details.data is IMindMapNode) {
+                setState(() {
+                  if (widget._dragInNode != null) {
+                    if ((details.data as IMindMapNode).getNodeType() ==
+                        NodeType.left) {
+                      (details.data as IMindMapNode)
+                          .getParentNode()
+                          ?.removeLeftItem((details.data as IMindMapNode));
+                    } else {
+                      (details.data as IMindMapNode)
+                          .getParentNode()
+                          ?.removeRightItem((details.data as IMindMapNode));
+                    }
+                    if (widget._leftDrag) {
+                      widget._dragInNode!.insertLeftItem(
+                        (details.data as IMindMapNode),
+                        _dragIndex,
+                      );
+                    } else {
+                      widget._dragInNode!.insertRightItem(
+                        (details.data as IMindMapNode),
+                        _dragIndex,
+                      );
+                    }
+                    widget.getRootNode().refresh();
+                  }
+                  widget.refresh();
+                  widget._dragInNode = null;
+                });
+              }
               setState(() {
-                if (widget._dragInNode != null) {
-                  if ((details.data as IMindMapNode).getNodeType() ==
-                      NodeType.left) {
-                    (details.data as IMindMapNode)
-                        .getParentNode()
-                        ?.removeLeftItem((details.data as IMindMapNode));
-                  } else {
-                    (details.data as IMindMapNode)
-                        .getParentNode()
-                        ?.removeRightItem((details.data as IMindMapNode));
-                  }
-                  if (widget._leftDrag) {
-                    widget._dragInNode!.insertLeftItem(
-                      (details.data as IMindMapNode),
-                      _dragIndex,
-                    );
-                  } else {
-                    widget._dragInNode!.insertRightItem(
-                      (details.data as IMindMapNode),
-                      _dragIndex,
-                    );
-                  }
-                  widget.getRootNode().refresh();
-                }
-                widget.refresh();
-                widget._dragInNode = null;
+                widget._dragNode = null;
               });
             }
-            setState(() {
-              widget._dragNode = null;
-            });
           },
           onLeave: (data) {
             setState(() {
@@ -1078,65 +1224,68 @@ class MindMapState extends State<MindMap> {
             });
           },
           onMove: (details) {
-            if (details.data is IMindMapNode) {
-              widget._dragInNode = details.data as IMindMapNode;
-              Size dataSize =
-                  (details.data as IMindMapNode).getSize() ?? Size.zero;
-              RenderObject? ro = widget._key.currentContext?.findRenderObject();
-              widget._renderObject = ro;
-              if (ro != null && ro is RenderBox) {
-                Offset r = ro.localToGlobal(Offset.zero);
-                Offset offset = Offset(
-                  details.offset.dx -
-                      r.dx +
-                      dataSize.width +
-                      (dataSize.width * widget.getZoom() / 2) -
-                      dataSize.width / 2,
-                  details.offset.dy - r.dy + dataSize.height / 2,
-                );
+            if (!widget.getIsScaling()) {
+              if (details.data is IMindMapNode) {
+                widget._dragInNode = details.data as IMindMapNode;
+                Size dataSize =
+                    (details.data as IMindMapNode).getSize() ?? Size.zero;
+                RenderObject? ro = widget._key.currentContext
+                    ?.findRenderObject();
+                widget._renderObject = ro;
+                if (ro != null && ro is RenderBox) {
+                  Offset r = ro.localToGlobal(Offset.zero);
+                  Offset offset = Offset(
+                    details.offset.dx -
+                        r.dx +
+                        dataSize.width +
+                        (dataSize.width * widget.getZoom() / 2) -
+                        dataSize.width / 2,
+                    details.offset.dy - r.dy + dataSize.height / 2,
+                  );
 
-                IMindMapNode? leftDragNode = inLeftDrag(
-                  details.data as IMindMapNode,
-                  offset,
-                );
-                if (leftDragNode != null &&
-                    !isParent(details.data as IMindMapNode, leftDragNode)) {
+                  IMindMapNode? leftDragNode = inLeftDrag(
+                    details.data as IMindMapNode,
+                    offset,
+                  );
+                  if (leftDragNode != null &&
+                      !isParent(details.data as IMindMapNode, leftDragNode)) {
+                    setState(() {
+                      widget._leftDrag = true;
+                      widget._dragInNode = leftDragNode;
+                      widget._dragOffset = offset;
+                    });
+                    return;
+                  }
+
+                  offset = Offset(
+                    details.offset.dx -
+                        r.dx -
+                        (dataSize.width * widget.getZoom() / 2) +
+                        dataSize.width / 2,
+                    details.offset.dy - r.dy + dataSize.height / 2,
+                  );
+                  debugPrint(
+                    "${offset.dx} :${offset.dy}  dx:${details.offset.dx} rdx:${r.dx} rowidth:${ro.size.width}  :${size!.width}",
+                  );
+
+                  IMindMapNode? rightDragNode = inRightDrag(
+                    details.data as IMindMapNode,
+                    offset,
+                  );
+                  if (rightDragNode != null &&
+                      !isParent(details.data as IMindMapNode, rightDragNode)) {
+                    setState(() {
+                      widget._leftDrag = false;
+                      widget._dragInNode = rightDragNode;
+                      widget._dragOffset = offset;
+                    });
+                    return;
+                  }
+
                   setState(() {
-                    widget._leftDrag = true;
-                    widget._dragInNode = leftDragNode;
-                    widget._dragOffset = offset;
+                    widget._dragInNode = null;
                   });
-                  return;
                 }
-
-                offset = Offset(
-                  details.offset.dx -
-                      r.dx -
-                      (dataSize.width * widget.getZoom() / 2) +
-                      dataSize.width / 2,
-                  details.offset.dy - r.dy + dataSize.height / 2,
-                );
-                debugPrint(
-                  "${offset.dx} :${offset.dy}  dx:${details.offset.dx} rdx:${r.dx} rowidth:${ro.size.width}  :${size!.width}",
-                );
-
-                IMindMapNode? rightDragNode = inRightDrag(
-                  details.data as IMindMapNode,
-                  offset,
-                );
-                if (rightDragNode != null &&
-                    !isParent(details.data as IMindMapNode, rightDragNode)) {
-                  setState(() {
-                    widget._leftDrag = false;
-                    widget._dragInNode = rightDragNode;
-                    widget._dragOffset = offset;
-                  });
-                  return;
-                }
-
-                setState(() {
-                  widget._dragInNode = null;
-                });
               }
             }
           },
@@ -1297,7 +1446,7 @@ class MindMapPainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..strokeWidth = mindMap.getDragInBorderWidth()
       ..color = mindMap.getDragInBorderColor();
-    if (mindMap._dragInNode != null) {
+    if (mindMap._dragInNode != null && !mindMap.getIsScaling()) {
       //canvas.drawLine(Offset.zero, Offset(size.width, size.height), paint);
       RenderObject? ro = mindMap._dragInNode!.getRenderObject();
       if (ro != null && mindMap._renderObject != null) {

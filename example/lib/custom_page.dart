@@ -207,6 +207,7 @@ class CustomPage extends StatefulWidget {
       }
     }
     mindMap.setHasTextField(false);
+    mindMap.setHasEditButton(true);
     mindMap.setShowRecycle(false);
   }
 
@@ -230,10 +231,12 @@ class CustomPageState extends State<CustomPage> {
     super.initState();
     widget.init();
     widget.mindMap.addOnDoubleTapListeners(onDoubleTap);
+    widget.mindMap.addOnEditListeners(onDoubleTap);
   }
 
   @override
   void dispose() {
+    widget.mindMap.removeOnEditListeners(onDoubleTap);
     widget.mindMap.removeOnDoubleTapListeners(onDoubleTap);
     super.dispose();
   }
