@@ -24,84 +24,92 @@ class MindMap extends StatefulWidget {
   final GlobalKey _key = GlobalKey();
 
   String _watermark = "";
-  //WaterMark
+
+  ///WaterMark
   String getWatermark() {
     return _watermark;
   }
 
-  //Set Watermark
+  ///Set Watermark
   void setWatermark(String value) {
     _watermark = value;
   }
 
   Color _watermarkColor = Colors.black;
-  //WaterMark Color
+
+  ///WaterMark Color
   Color getWatermarkColor() {
     return _watermarkColor;
   }
 
-  //Set Watermark Color
+  ///Set Watermark Color
   void setWatermarkColor(Color value) {
     _watermarkColor = value;
   }
 
   double _watermarkOpacity = 0.1;
-  //WaterMark Opacity
+
+  ///WaterMark Opacity
   double getWatermarkOpacity() {
     return _watermarkOpacity;
   }
 
-  //Set Watermark Opacity
+  ///Set Watermark Opacity
   void setWatermarkOpacity(double value) {
     _watermarkOpacity = value;
   }
 
   double _watermarkFontSize = 15;
-  //WaterMark Font Size
+
+  ///WaterMark Font Size
   double getWatermarkFontSize() {
     return _watermarkFontSize;
   }
 
-  //Set Watermark Font Size
+  ///Set Watermark Font Size
   void setWatermarkFontSize(double value) {
     _watermarkFontSize = value;
   }
 
   double _watermarkRotationAngle = -0.5;
-  //WaterMark Rotation Angle
+
+  ///WaterMark Rotation Angle
   double getWatermarkRotationAngle() {
     return _watermarkRotationAngle;
   }
 
-  //Set Watermark Rotation Angle
+  ///Set Watermark Rotation Angle
   void setWatermarkRotationAngle(double value) {
     _watermarkRotationAngle = value;
   }
 
   double _watermarkHorizontalInterval = 100;
-  //WaterMark Horizontal Interval
+
+  ///WaterMark Horizontal Interval
   double getWatermarkHorizontalInterval() {
     return _watermarkHorizontalInterval;
   }
 
-  //Set Watermark Horizontal Interval
+  ///Set Watermark Horizontal Interval
   void setWatermarkHorizontalInterval(double value) {
     _watermarkHorizontalInterval = value;
   }
 
   double _watermarkVerticalInterval = 50;
-  //WaterMark Vertical Interval
+
+  ///WaterMark Vertical Interval
   double getWatermarkVerticalInterval() {
     return _watermarkVerticalInterval;
   }
 
-  //Set Watermark Vertical Interval
+  ///Set Watermark Vertical Interval
   void setWatermarkVerticalInterval(double value) {
     _watermarkVerticalInterval = value;
   }
-  //End Watermark
 
-  //Export to PNG
+  ///End Watermark
+
+  ///Export to PNG
   Future<Uint8List?> toPng() async {
     RenderRepaintBoundary boundary =
         _key.currentContext!.findRenderObject() as RenderRepaintBoundary;
@@ -115,7 +123,7 @@ class MindMap extends StatefulWidget {
     return null;
   }
 
-  //Load Data from Json
+  ///Load Data from Json
   void loadData(Map<String, dynamic> json) {
     if (json.containsKey("id") &&
         json.containsKey("content") &&
@@ -126,12 +134,12 @@ class MindMap extends StatefulWidget {
     }
   }
 
-  //Export Data to Json
+  ///Export Data to Json
   Map<String, dynamic> getData() {
     return getRootNode().getData();
   }
 
-  //Export Data&Style to Json
+  ///Export Data&Style to Json
   Map<String, dynamic> toJson() {
     Map<String, dynamic> json = {
       "RootNode": getRootNode().toJson(),
@@ -146,7 +154,8 @@ class MindMap extends StatefulWidget {
   }
 
   bool _isLoading = false;
-  //Load Data&Style from Json
+
+  ///Load Data&Style from Json
   void fromJson(Map<String, dynamic> json) {
     _isLoading = true;
     if (json.containsKey("Zoom")) {
@@ -174,12 +183,13 @@ class MindMap extends StatefulWidget {
   }
 
   int _buttonWidth = 24;
-  //Button Width
+
+  ///Button Width
   int getButtonWidth() {
     return _buttonWidth;
   }
 
-  //Set Button Width
+  ///Set Button Width
   void setButtonWidth(int value) {
     if (_buttonWidth != value) {
       _buttonWidth = value;
@@ -188,12 +198,13 @@ class MindMap extends StatefulWidget {
   }
 
   Color _buttonColor = Colors.black;
-  //Button Color
+
+  ///Button Color
   Color getButtonColor() {
     return _buttonColor;
   }
 
-  //Set Button Color
+  ///Set Button Color
   void setButtonColor(Color value) {
     if (_buttonColor != value) {
       _buttonColor = value;
@@ -202,12 +213,13 @@ class MindMap extends StatefulWidget {
   }
 
   Color _buttonBackground = Colors.white;
-  //Button Background
+
+  ///Button Background
   Color getButtonBackground() {
     return _buttonBackground;
   }
 
-  //Set Button Background
+  ///Set Button Background
   void setButtonBackground(Color value) {
     if (_buttonBackground != value) {
       _buttonBackground = value;
@@ -216,12 +228,13 @@ class MindMap extends StatefulWidget {
   }
 
   Color _dragInBorderColor = Colors.cyan;
-  //Drag In Border Color
+
+  ///Drag In Border Color
   Color getDragInBorderColor() {
     return _dragInBorderColor;
   }
 
-  //Set Drag In Border Color
+  ///Set Drag In Border Color
   void setDragInBorderColor(Color value) {
     if (_dragInBorderColor != value) {
       _dragInBorderColor = value;
@@ -230,12 +243,13 @@ class MindMap extends StatefulWidget {
   }
 
   double _dragInBorderWidth = 3;
-  //Drag In Border Width
+
+  ///Drag In Border Width
   double getDragInBorderWidth() {
     return _dragInBorderWidth;
   }
 
-  //Set Drag In Border Width
+  ///Set Drag In Border Width
   void setDragInBorderWidth(double value) {
     if (_dragInBorderWidth != value) {
       _dragInBorderWidth = value;
@@ -244,12 +258,13 @@ class MindMap extends StatefulWidget {
   }
 
   double _mindMapPadding = 80;
-  //MindMap Padding
+
+  ///MindMap Padding
   double getMindMapPadding() {
     return _mindMapPadding;
   }
 
-  //Set MindMap Padding
+  ///Set MindMap Padding
   void setMindMapPadding(double value) {
     if (_mindMapPadding != value) {
       _mindMapPadding = value;
@@ -257,21 +272,22 @@ class MindMap extends StatefulWidget {
     }
   }
 
-  //Adapter
+  ///Adapter
   final List<INodeAdapter> _nodeAdapter = [MindMapNodeAdapter()];
-  //Register Node Adapter
+
+  ///Register Node Adapter
   void registerNodeAdapter(INodeAdapter value) {
     if (!_nodeAdapter.contains(value)) {
       _nodeAdapter.add(value);
     }
   }
 
-  //Get Node Adapter
+  ///Get Node Adapter
   List<INodeAdapter> getNodeAdapter() {
     return _nodeAdapter;
   }
 
-  //Create Node
+  ///Create Node
   IMindMapNode? createNode(String name) {
     for (INodeAdapter na in _nodeAdapter) {
       if (na.getName() == name) {
@@ -286,19 +302,20 @@ class MindMap extends StatefulWidget {
     LineLinkAdapter(),
     PolyLineLinkAdapter(),
   ];
-  //Register Link Adapter
+
+  ///Register Link Adapter
   void registerLinkAdapter(ILinkAdapter value) {
     if (!_linkAdapter.contains(value)) {
       _linkAdapter.add(value);
     }
   }
 
-  //Get Link Adapter
+  ///Get Link Adapter
   List<ILinkAdapter> getLinkAdapter() {
     return _linkAdapter;
   }
 
-  //Create Link
+  ///Create Link
   ILink? createLink(String name) {
     for (ILinkAdapter na in _linkAdapter) {
       if (na.getName() == name) {
@@ -313,19 +330,20 @@ class MindMap extends StatefulWidget {
     MindMapThemeNormalAdapter(),
     MindMapThemeLargeAdapter(),
   ];
-  //Register Theme Adapter
+
+  ///Register Theme Adapter
   void registerThemeAdapter(IThemeAdapter value) {
     if (!_themeAdapter.contains(value)) {
       _themeAdapter.add(value);
     }
   }
 
-  //Get Theme Adapter
+  ///Get Theme Adapter
   List<IThemeAdapter> getThemeAdapter() {
     return _themeAdapter;
   }
 
-  //Create Theme
+  ///Create Theme
   IMindMapTheme? createTheme(String name) {
     for (IThemeAdapter na in _themeAdapter) {
       if (na.getName() == name) {
@@ -334,15 +352,17 @@ class MindMap extends StatefulWidget {
     }
     return null;
   }
-  //End Adapter
+
+  ///End Adapter
 
   bool _showRecycle = true;
-  //Show Recycle
+
+  ///Show Recycle
   bool getShowRecycle() {
     return _showRecycle;
   }
 
-  //Set Show Recycle
+  ///Set Show Recycle
   void setShowRecycle(bool value) {
     if (_showRecycle != value) {
       _showRecycle = value;
@@ -351,12 +371,13 @@ class MindMap extends StatefulWidget {
   }
 
   String _recycleTitle = "Drag here to delete";
-  //Recycle Title
+
+  ///Recycle Title
   String getRecycleTitle() {
     return _recycleTitle;
   }
 
-  //Set Recycle Title
+  ///Set Recycle Title
   void setRecycleTitle(String value) {
     if (_recycleTitle != value) {
       _recycleTitle = value;
@@ -365,12 +386,13 @@ class MindMap extends StatefulWidget {
   }
 
   bool _canMove = true;
-  //Can Move
+
+  ///Can Move
   bool getCanMove() {
     return _canMove;
   }
 
-  //  Set Can Move
+  ///  Set Can Move
   void setCanMove(bool value) {
     if (_canMove != value) {
       _canMove = value;
@@ -379,12 +401,13 @@ class MindMap extends StatefulWidget {
   }
 
   bool _showZoom = true;
-  //Show Zoom
+
+  ///Show Zoom
   bool getShowZoom() {
     return _showZoom;
   }
 
-  //Set Show Zoom
+  ///Set Show Zoom
   void setShowZoom(bool value) {
     if (_showZoom != value) {
       _showZoom = value;
@@ -392,18 +415,19 @@ class MindMap extends StatefulWidget {
     }
   }
 
-  //refresh MindMap
+  ///refresh MindMap
   void refresh() {
     _state?.refresh();
   }
 
   double _zoom = 1;
-  //Zoom
+
+  ///Zoom
   double getZoom() {
     return _zoom;
   }
 
-  //Set Zoom
+  ///Set Zoom
   void setZoom(double value) {
     if (value > 0) {
       _zoom = value;
@@ -428,17 +452,18 @@ class MindMap extends StatefulWidget {
   }
 
   final List<Function()> _onChangedListeners = [];
-  //Add On Changed Listeners
+
+  ///Add On Changed Listeners
   void addOnChangedListeners(Function() value) {
     _onChangedListeners.add(value);
   }
 
-  //Remove On Changed Listeners
+  ///Remove On Changed Listeners
   void removeOnChangedListeners(Function() value) {
     _onChangedListeners.remove(value);
   }
 
-  //On Changed
+  ///On Changed
   void onChanged() {
     if (!_isLoading) {
       List<Function()> list = [];
@@ -450,12 +475,13 @@ class MindMap extends StatefulWidget {
   }
 
   IMindMapTheme? _theme;
-  //Theme
+
+  ///Theme
   IMindMapTheme? getTheme() {
     return _theme;
   }
 
-  //Set Theme
+  ///Set Theme
   void setTheme(IMindMapTheme? value) {
     _theme = value;
     refresh();
@@ -463,40 +489,43 @@ class MindMap extends StatefulWidget {
   }
 
   final List<Function()> _onZoomChangedListeners = [];
-  //Add On Zoom Changed Listeners
+
+  ///Add On Zoom Changed Listeners
   void addOnZoomChangedListeners(Function() value) {
     _onZoomChangedListeners.add(value);
   }
 
-  //Remove On Zoom Changed Listeners
+  ///Remove On Zoom Changed Listeners
   void removeOnZoomChangedListeners(Function() value) {
     _onZoomChangedListeners.remove(value);
   }
 
   IMindMapNode? _selectedNode;
-  //Selected Node
+
+  ///Selected Node
   IMindMapNode? getSelectedNode() {
     return _selectedNode;
   }
 
-  //Set Selected Node
+  ///Set Selected Node
   void setSelectedNode(IMindMapNode? node) {
     _selectedNode = node;
     notifySelectedNodeChanged();
   }
 
   final List<Function()> _onTapListeners = [];
-  //Add On Tap Listeners
+
+  ///Add On Tap Listeners
   void addOnTapListeners(Function() callback) {
     _onTapListeners.add(callback);
   }
 
-  //Remove On Tap Listeners
+  ///Remove On Tap Listeners
   void removeOnTapListeners(Function() callback) {
     _onTapListeners.remove(callback);
   }
 
-  //On Tap
+  ///On Tap
   void onTap() {
     List<Function()> list = [];
     list.addAll(_onTapListeners);
@@ -506,17 +535,18 @@ class MindMap extends StatefulWidget {
   }
 
   final List<Function()> _onSelectedNodeChangedListeners = [];
-  //Add On Selected Node Changed Listeners
+
+  ///Add On Selected Node Changed Listeners
   void addOnSelectedNodeChangedListeners(Function() callback) {
     _onSelectedNodeChangedListeners.add(callback);
   }
 
-  //Remove On Selected Node Changed Listeners
+  ///Remove On Selected Node Changed Listeners
   void removeOnSelectedNodeChangedListeners(Function() callback) {
     _onSelectedNodeChangedListeners.remove(callback);
   }
 
-  //Notify Selected Node Changed
+  ///Notify Selected Node Changed
   void notifySelectedNodeChanged() {
     for (var listener in _onSelectedNodeChangedListeners) {
       listener();
@@ -524,17 +554,18 @@ class MindMap extends StatefulWidget {
   }
 
   final List<Function(IMindMapNode)> _onDoubleTapListeners = [];
-  //Add On Double Tap Listeners
+
+  ///Add On Double Tap Listeners
   void addOnDoubleTapListeners(Function(IMindMapNode) value) {
     _onDoubleTapListeners.add(value);
   }
 
-  //Remove On Double Tap Listeners
+  ///Remove On Double Tap Listeners
   void removeOnDoubleTapListeners(Function(IMindMapNode) value) {
     _onDoubleTapListeners.remove(value);
   }
 
-  //On Double Tap
+  ///On Double Tap
   void onDoubleTap(IMindMapNode node) {
     List<Function(IMindMapNode)> list = [];
     list.addAll(_onDoubleTapListeners);
@@ -544,17 +575,18 @@ class MindMap extends StatefulWidget {
   }
 
   final List<Function(IMindMapNode)> _onEditListeners = [];
-  //Add On Edit Listeners
+
+  ///Add On Edit Listeners
   void addOnEditListeners(Function(IMindMapNode) value) {
     _onEditListeners.add(value);
   }
 
-  //Remove On Edit Listeners
+  ///Remove On Edit Listeners
   void removeOnEditListeners(Function(IMindMapNode) value) {
     _onEditListeners.remove(value);
   }
 
-  //On Edit
+  ///On Edit
   void onEdit(IMindMapNode node) {
     List<Function(IMindMapNode)> list = [];
     list.addAll(_onEditListeners);
@@ -564,7 +596,8 @@ class MindMap extends StatefulWidget {
   }
 
   bool _readOnly = false;
-  //Set Read Only
+
+  ///Set Read Only
   void setReadOnly(bool value) {
     if (_readOnly != value) {
       _readOnly = value;
@@ -573,11 +606,12 @@ class MindMap extends StatefulWidget {
     }
   }
 
-  //Read Only
+  ///Read Only
   bool getReadOnly() => _readOnly;
 
   bool _hasTextField = true;
-  //Has TextField
+
+  ///Has TextField
   void setHasTextField(bool value) {
     if (_hasTextField != value) {
       _hasTextField = value;
@@ -586,11 +620,12 @@ class MindMap extends StatefulWidget {
     }
   }
 
-  //Has TextField
+  ///Has TextField
   bool hasTextField() => _hasTextField;
 
   bool _hasEditButton = false;
-  //set Has Edit Button
+
+  ///set Has Edit Button
   void setHasEditButton(bool value) {
     if (_hasEditButton != value) {
       _hasEditButton = value;
@@ -599,17 +634,19 @@ class MindMap extends StatefulWidget {
     }
   }
 
-  //Has Edit Button
+  ///Has Edit Button
   bool hasEditButton() => _hasEditButton;
 
   Color? _backgroundColor;
-  //Background Color
+
+  ///Background Color
   Color getBackgroundColor() =>
       _backgroundColor ??
       (getTheme() != null
           ? getTheme()!.getBackgroundColor()
           : Colors.transparent);
-  //Set Background Color
+
+  ///Set Background Color
   void setBackgroundColor(Color color) {
     _backgroundColor = color;
     _state?.refresh();
@@ -617,7 +654,8 @@ class MindMap extends StatefulWidget {
   }
 
   IMindMapNode _rootNode = MindMapNode();
-  //Root Node
+
+  ///Root Node
   IMindMapNode getRootNode() {
     if (_rootNode.getMindMap() == null) {
       _rootNode.setMindMap(this);
@@ -625,7 +663,7 @@ class MindMap extends StatefulWidget {
     return _rootNode;
   }
 
-  //Set Root Node
+  ///Set Root Node
   void setRootNode(IMindMapNode rootNode) {
     _rootNode = rootNode;
     _rootNode.setMindMap(this);
@@ -634,17 +672,18 @@ class MindMap extends StatefulWidget {
   }
 
   final List<Function()> _onRootNodeChangeListeners = [];
-  //Add On Root Node Change Listeners
+
+  ///Add On Root Node Change Listeners
   void addOnRootNodeChangeListener(Function() listener) {
     _onRootNodeChangeListeners.add(listener);
   }
 
-  //Remove On Root Node Change Listeners
+  ///Remove On Root Node Change Listeners
   void removeOnRootNodeChangeListener(Function() listener) {
     _onRootNodeChangeListeners.remove(listener);
   }
 
-  //Notify Root Node Changed
+  ///Notify Root Node Changed
   void onRootNodeChanged() {
     for (var listener in _onRootNodeChangeListeners) {
       listener();
@@ -652,17 +691,18 @@ class MindMap extends StatefulWidget {
   }
 
   final List<Function()> _onMoveListeners = [];
-  //Add On Move Listeners
+
+  ///Add On Move Listeners
   void addOnMoveListeners(Function() callback) {
     _onMoveListeners.add(callback);
   }
 
-  //Remove On Move Listeners
+  ///Remove On Move Listeners
   void removeOnMoveListeners(Function() callback) {
     _onMoveListeners.remove(callback);
   }
 
-  //On Move
+  ///On Move
   void onMove() {
     for (var listener in _onMoveListeners) {
       listener();
@@ -675,18 +715,21 @@ class MindMap extends StatefulWidget {
   MindMapState? _state;
 
   Offset? _offset;
-  //Set Offset
+
+  ///Set Offset
   void setOffset(Offset? value) {
     _offset = value;
     _state?.refresh();
     onChanged();
   }
 
-  //Get Offset
+  ///Get Offset
   Offset? getOffset() => _offset;
-  //Move Offset
+
+  ///Move Offset
   Offset moveOffset = Offset.zero;
-  //Set Move Offset
+
+  ///Set Move Offset
   void setMoveOffset(Offset value) {
     if (moveOffset.dx != value.dx || moveOffset.dy != value.dy) {
       moveOffset = value;
@@ -694,11 +737,12 @@ class MindMap extends StatefulWidget {
     }
   }
 
-  //Get Move Offset
+  ///Get Move Offset
   Offset getMoveOffset() => moveOffset;
 
   Size? _size;
-  //Set Size
+
+  ///Set Size
   void setSize(Size? value) {
     if (_size == null ||
         (value != null &&
@@ -708,7 +752,7 @@ class MindMap extends StatefulWidget {
     }
   }
 
-  //Get Size
+  ///Get Size
   Size? getSize() => _size;
 
   RenderObject? _renderObject;
@@ -782,7 +826,8 @@ class MindMapState extends State<MindMap> {
         size.height > 0) {
       x = (s.width - size.width * widget.getZoom()) / 2;
       y = (s.height - size.height * widget.getZoom()) / 2;
-      //set RooetNode Center
+
+      ///set RooetNode Center
       Size? rs = widget.getRootNode().getSize();
       Offset? ro = widget.getRootNode().getOffset();
       if (rs != null && ro != null) {
@@ -831,7 +876,8 @@ class MindMapState extends State<MindMap> {
           widget.setSelectedNode(null);
           widget.onTap();
         },
-        //Scale
+
+        ///Scale
         onScaleStart: (details) {
           if (widget.getCanMove()) {
             widget.setIsScaling(true);
@@ -958,7 +1004,8 @@ class MindMapState extends State<MindMap> {
                         MediaQuery.of(context).size.width > 600
                             ? Container()
                             : Spacer(),
-                        //Recycle
+
+                        ///Recycle
                         widget.getReadOnly() || !widget.getShowRecycle()
                             ? Container()
                             : DragTarget(
@@ -1063,7 +1110,8 @@ class MindMapState extends State<MindMap> {
                         (widget.getShowZoom()
                             ? SizedBox(width: 20)
                             : Container()),
-                        //Zoom
+
+                        ///Zoom
                         widget.getShowZoom()
                             ? Container(
                                 constraints: const BoxConstraints(
@@ -1447,7 +1495,7 @@ class MindMapPainter extends CustomPainter {
       ..strokeWidth = mindMap.getDragInBorderWidth()
       ..color = mindMap.getDragInBorderColor();
     if (mindMap._dragInNode != null && !mindMap.getIsScaling()) {
-      //canvas.drawLine(Offset.zero, Offset(size.width, size.height), paint);
+      ///canvas.drawLine(Offset.zero, Offset(size.width, size.height), paint);
       RenderObject? ro = mindMap._dragInNode!.getRenderObject();
       if (ro != null && mindMap._renderObject != null) {
         Offset o = (ro as RenderBox).localToGlobal(

@@ -1,11 +1,12 @@
 import 'dart:ui';
 
+// ignore: implementation_imports
 import 'package:flutter/src/rendering/custom_paint.dart';
 import 'package:flutter_mind_map/adapter/i_link_adapter.dart';
 import 'package:flutter_mind_map/i_mind_map_node.dart';
 import 'package:flutter_mind_map/link/i_link.dart';
 
-//Line Link
+///Line Link
 class LineLink implements ILink {
   @override
   String getName() {

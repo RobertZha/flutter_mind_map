@@ -1,8 +1,6 @@
 // ignore_for_file: deprecated_member_use
 
-import 'dart:convert';
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_mind_map/adapter/i_theme_adapter.dart';
 import 'package:flutter_mind_map/link/beerse_line_link.dart';
@@ -10,7 +8,12 @@ import 'package:flutter_mind_map/link/line_link.dart';
 import 'package:flutter_mind_map/link/poly_line_link.dart';
 import 'package:flutter_mind_map/theme/i_mind_map_theme.dart';
 
+///Create a Theme by json
 class JsonTheme implements IMindMapTheme {
+  /*
+   * name: theme name 
+   * json: theme json
+   */
   JsonTheme(this.name, this.json) {
     for (String key in json.keys) {
       int? level = int.tryParse(key);
@@ -115,23 +118,29 @@ class JsonTheme implements IMindMapTheme {
 
   Map<String, dynamic> json;
 
+  /// BackgroundColor
   @override
   Color getBackgroundColor() {
     return Colors.transparent;
   }
 
   String name = "";
+
+  /// Theme name
   @override
   String getName() {
     return name;
   }
 
   Map<int, Map<String, dynamic>> jsonList = {};
+
+  /// Get theme by level
   @override
   Map<String, dynamic>? getThemeByLevel(int level) {
     return jsonList[level];
   }
 
+  /// Convert hex to color
   Color fromHex(String hexString) {
     if (hexString.startsWith("#") && hexString.length == 9) {
       int? alpha = int.tryParse(hexString.substring(1, 3), radix: 16);
@@ -148,6 +157,7 @@ class JsonTheme implements IMindMapTheme {
     return Colors.transparent;
   }
 
+  /// Convert color to hex
   String toHex(
     Color color, {
     bool includeHashSign = false,
@@ -166,6 +176,7 @@ class JsonTheme implements IMindMapTheme {
   String _radix(int value) => value.toRadixString(16).padLeft(2, '0');
 }
 
+///Json theme adapter
 class JsonThemeAdapter implements IThemeAdapter {
   JsonThemeAdapter(this.theme);
   @override
