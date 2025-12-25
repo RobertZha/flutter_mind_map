@@ -1,6 +1,5 @@
 // ignore_for_file: deprecated_member_use
 
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_mind_map/adapter/i_theme_adapter.dart';
 import 'package:flutter_mind_map/link/beerse_line_link.dart';
