@@ -620,7 +620,7 @@ class MindMap extends StatefulWidget {
     }
   }
 
-  ///Has TextField
+  ///Display text input box
   bool hasTextField() => _hasTextField;
 
   bool _hasEditButton = false;
@@ -634,7 +634,7 @@ class MindMap extends StatefulWidget {
     }
   }
 
-  ///Has Edit Button
+  ///Display edit button
   bool hasEditButton() => _hasEditButton;
 
   Color? _backgroundColor;

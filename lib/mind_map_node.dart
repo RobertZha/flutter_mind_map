@@ -2017,9 +2017,9 @@ class MindMapNodeState extends State<MindMapNode> {
                                               ),
                                               child: IconButton(
                                                 onPressed: () {
-                                                  widget
-                                                      .getMindMap()
-                                                      ?.onDoubleTap(widget);
+                                                  widget.getMindMap()?.onEdit(
+                                                    widget,
+                                                  );
                                                 },
                                                 hoverColor:
                                                     Colors.blue.shade200,
@@ -2297,9 +2297,9 @@ class MindMapNodeState extends State<MindMapNode> {
                                               ),
                                               child: IconButton(
                                                 onPressed: () {
-                                                  widget
-                                                      .getMindMap()
-                                                      ?.onDoubleTap(widget);
+                                                  widget.getMindMap()?.onEdit(
+                                                    widget,
+                                                  );
                                                 },
                                                 hoverColor:
                                                     Colors.blue.shade200,
