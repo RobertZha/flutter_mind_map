@@ -7,7 +7,7 @@ import 'package:flutter_mind_map/theme/i_mind_map_theme.dart';
 import 'package:flutter_mind_map/theme/mind_map_theme_compact.dart';
 import 'package:flutter_mind_map_example/my_theme.dart';
 import 'package:flutter_mind_map_example/my_theme1.dart';
-import 'package:flutter_mind_map/theme/JsonTheme.dart';
+import 'package:flutter_mind_map/theme/json_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // ignore: must_be_immutable
