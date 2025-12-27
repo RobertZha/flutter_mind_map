@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_mind_map/adapter/i_link_adapter.dart';
 import 'package:flutter_mind_map/i_mind_map_node.dart';
@@ -41,12 +39,6 @@ class ObliqueBrokenLinePainter extends CustomPainter {
             Size? itemSize = item.getSize();
             if (itemOffset != null && itemSize != null) {
               double w = (offset.dx - itemOffset.dx - itemSize.width) / 2;
-              double h =
-                  ((offset.dy + s.height / 2 + node.getLinkOutOffset()) -
-                      (itemOffset.dy +
-                          itemSize.height / 2 +
-                          item.getLinkInOffset())) /
-                  2;
 
               //Left HLine
               canvas.drawLine(
