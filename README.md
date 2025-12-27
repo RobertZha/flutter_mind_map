@@ -393,6 +393,14 @@ mindMap.setTheme(mindMap.createTheme("MyTheme")!);
 node1.setLink(PolyLineLink());
 node2.setLink(BeerseLineLink());
 node3.setLink(LineLink());
+node4.setLink(ObliqueBrokenLine());
+
+or
+
+ILink? link = createLink("PolyLineLink");
+if(link != null){
+  node1.setLink(link);
+}
 
 ```
 
