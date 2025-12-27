@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_mind_map/i_mind_map_node.dart';
+import 'package:flutter_mind_map/link/oblique_broken_line.dart';
 import 'package:flutter_mind_map/link/poly_line_link.dart';
 import 'package:flutter_mind_map/mind_map.dart';
 import 'package:flutter_mind_map/mind_map_node.dart';
@@ -164,6 +165,8 @@ class CustomPage extends StatefulWidget {
           MindMapNode node5 = MindMapNode();
           node5.setTitle("By Time");
           node5.setLinkColor(Colors.cyan);
+          node5.setLink(ObliqueBrokenLine());
+
           node5.setBorder(
             BoxBorder.all(
               color: Colors.cyan,

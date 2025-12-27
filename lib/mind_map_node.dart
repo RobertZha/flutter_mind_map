@@ -534,6 +534,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   @override
   void setLink(ILink? value) {
     _link = value;
+    _state?.refresh();
     getMindMap()?.onChanged();
   }
 
