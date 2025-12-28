@@ -95,7 +95,6 @@ class ThemePage extends StatefulWidget {
       },
     });
 
-    //String s = jsonEncode(jsonTheme);
     mindMap.registerThemeAdapter(JsonThemeAdapter(jsonTheme));
 
     //Add default theme

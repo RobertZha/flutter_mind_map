@@ -80,12 +80,6 @@ class ObliqueBrokenLinePainter extends CustomPainter {
             Size? itemSize = item.getSize();
             if (itemOffset != null && itemSize != null) {
               double w = (itemOffset.dx - offset.dx - s.width) / 2;
-              double h =
-                  ((offset.dy + s.height / 2 + node.getLinkOutOffset()) -
-                      (itemOffset.dy +
-                          itemSize.height / 2 +
-                          item.getLinkInOffset())) /
-                  2;
 
               //Right HLine
               canvas.drawLine(

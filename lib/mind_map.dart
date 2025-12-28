@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -14,6 +15,7 @@ import 'package:flutter_mind_map/link/oblique_broken_line.dart';
 import 'package:flutter_mind_map/link/poly_line_link.dart';
 import 'package:flutter_mind_map/mind_map_node.dart';
 import 'package:flutter_mind_map/theme/i_mind_map_theme.dart';
+import 'package:flutter_mind_map/theme/json_theme.dart';
 import 'package:flutter_mind_map/theme/mind_map_theme_compact.dart';
 import 'package:flutter_mind_map/theme/mind_map_theme_large.dart';
 import 'package:flutter_mind_map/theme/mind_map_theme_normal.dart';
@@ -146,6 +148,9 @@ class MindMap extends StatefulWidget {
       "RootNode": getRootNode().toJson(),
       "Zoom": getZoom().toString(),
       "BackgroundColor": colorToString(getBackgroundColor()),
+      "Theme": getTheme() is JsonTheme
+          ? jsonEncode((getTheme() as JsonTheme).json)
+          : "",
     };
     if (getOffset() != null) {
       json["x"] = getOffset()!.dx.toString();
@@ -177,6 +182,15 @@ class MindMap extends StatefulWidget {
         if (node != null) {
           setRootNode(node);
           node.fromJson(map);
+        }
+      }
+    }
+    if (json.containsKey("Theme")) {
+      String themeName = json["Theme"];
+      if (themeName.isNotEmpty) {
+        Map<String, dynamic>? themeJson = jsonDecode(themeName);
+        if (themeJson != null) {
+          setTheme(JsonTheme("jsonTheme", themeJson));
         }
       }
     }
