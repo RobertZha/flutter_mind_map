@@ -12,7 +12,6 @@ import 'package:flutter_mind_map/link/i_link.dart';
 import 'package:flutter_mind_map/link/line_link.dart';
 import 'package:flutter_mind_map/link/oblique_broken_line.dart';
 import 'package:flutter_mind_map/link/poly_line_link.dart';
-import 'package:flutter_mind_map/link/oblique_broken_line.dart';
 import 'package:flutter_mind_map/mind_map_node.dart';
 import 'package:flutter_mind_map/theme/i_mind_map_theme.dart';
 import 'package:flutter_mind_map/theme/mind_map_theme_compact.dart';
@@ -486,6 +485,7 @@ class MindMap extends StatefulWidget {
 
   ///Set Theme
   void setTheme(IMindMapTheme? value) {
+    getRootNode().clearStyle();
     _theme = value;
     refresh();
     onChanged();

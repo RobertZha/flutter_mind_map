@@ -72,6 +72,8 @@ abstract class IMindMapNode {
 
   Map<String, dynamic> getData();
   void loadData(Map<String, dynamic> json);
+
+  void clearStyle();
 }
 
 enum NodeType { root, left, right }

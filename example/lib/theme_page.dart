@@ -94,6 +94,8 @@ class ThemePage extends StatefulWidget {
         "LinkWidth": 1.0,
       },
     });
+
+    //String s = jsonEncode(jsonTheme);
     mindMap.registerThemeAdapter(JsonThemeAdapter(jsonTheme));
 
     //Add default theme

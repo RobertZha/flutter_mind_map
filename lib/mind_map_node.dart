@@ -10,6 +10,29 @@ import 'package:uuid/uuid.dart';
 class MindMapNode extends StatefulWidget implements IMindMapNode {
   MindMapNode({super.key});
 
+  @override
+  void clearStyle() {
+    _backgroundColor = null;
+    _backgroundColors = [];
+    _border = null;
+    _borderColors = [];
+    _borderRadius = null;
+    _hSpace = null;
+    _vSpace = null;
+    _link = null;
+    _linkColor = null;
+    _linkColors = [];
+    _padding = null;
+    _shadow = null;
+    _textStyle = null;
+    for (IMindMapNode node in getLeftItems()) {
+      node.clearStyle();
+    }
+    for (IMindMapNode node in getRightItems()) {
+      node.clearStyle();
+    }
+  }
+
   ///Export Data to JSON
   @override
   Map<String, dynamic> getData() {
