@@ -1,3 +1,7 @@
+## 1.0.10 - (2025-12-30)
+
+- Add `JsonTheme add LinkInOffset&LinkOOutOffset`
+
 ## 1.0.9 - (2025-12-29)
 
 - Fix bug

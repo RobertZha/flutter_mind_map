@@ -6,6 +6,7 @@ import 'package:flutter_mind_map/link/oblique_broken_line.dart';
 import 'package:flutter_mind_map/link/poly_line_link.dart';
 import 'package:flutter_mind_map/mind_map.dart';
 import 'package:flutter_mind_map/mind_map_node.dart';
+import 'package:flutter_mind_map/theme/json_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // ignore: must_be_immutable
@@ -121,8 +122,8 @@ class CustomPage extends StatefulWidget {
           node3.setPadding(EdgeInsets.fromLTRB(20, 2, 20, 2));
           node3.setBorderRadius(BorderRadius.circular(0));
           node3.setLinkColor(Colors.deepOrange);
-          node3.setLinkInOffsetMode(MindMapNodeLinkOffsetMode.bottom);
-          node3.setLinkOutOffsetMode(MindMapNodeLinkOffsetMode.bottom);
+          //node3.setLinkInOffsetMode(MindMapNodeLinkOffsetMode.bottom);
+          //node3.setLinkOutOffsetMode(MindMapNodeLinkOffsetMode.bottom);
           mindMap.getRootNode().addLeftItem(node3);
 
           MindMapNode node31 = MindMapNode();
@@ -141,8 +142,8 @@ class CustomPage extends StatefulWidget {
 
           MindMapNode node4 = MindMapNode();
           node4.setLinkColor(Colors.red);
-          node4.setLinkInOffsetMode(MindMapNodeLinkOffsetMode.top);
-          node4.setLinkOutOffsetMode(MindMapNodeLinkOffsetMode.bottom);
+          //node4.setLinkInOffsetMode(MindMapNodeLinkOffsetMode.top);
+          //node4.setLinkOutOffsetMode(MindMapNodeLinkOffsetMode.bottom);
           node4.setBorderRadius(BorderRadiusGeometry.circular(5));
           node4.setTitle("By Kernel");
           node4.setLink(PolyLineLink());
@@ -213,63 +214,65 @@ class CustomPage extends StatefulWidget {
     /*
     Map<String, dynamic> json = {
       "0": {
-        "BackgroundColor": "#FF7C4DFF",
-        "TextColor": "#FFFFFFFF",
-        "FontSize": 16.0,
+        "BackgroundColor": "##FFFFFF",
+        "TextColor": "#FF000000",
+        "FontSize": 18.0,
         "Bold": true,
         "LinkColor": "#FF7C4DFF",
-        "LinkWidth": 1.5,
+        "LinkWidth": 2,
         "Border": {"color": "#FF7C4DFF", "width": 2},
-        "BorderRadius": 100,
-        "Padding": {"left": 20, "top": 10, "right": 20, "bottom": 10},
-        "Link": "PolyLineLink",
+        "BorderRadius": 8,
+        "Padding": {"left": 30, "top": 10, "right": 30, "bottom": 10},
+        "Link": "BeerseLineLink",
       },
       "1": {
         "BackgroundColor": "#00000000",
-        "TextColor": "#FFFFFFFF",
-        "FontSize": 14.0,
-        "Border": {"color": "#00000000", "width": 1},
-        "BorderRadius": 8,
-        "Padding": {"left": 12, "top": 6, "right": 12, "bottom": 6},
-        "LinkWidth": 1.5,
+        "TextColor": "#FF000000",
+        "FontSize": 16.0,
+        "Border": {"color": "#00000000", "width": "0,0,0,2"},
+        "BorderRadius": 0,
+        "Padding": {"left": 20, "top": 3, "right": 20, "bottom": 3},
+        "LinkInOffsetMode": "bottom",
+        "LinkOutOffsetMode": "bottom",
+        "LinkWidth": 2,
         "LinkColors": [
-          "#FF7C4DFF",
-          "#FF448AFF",
-          "#FF4CAF50",
-          "#FFFF6E40",
-          "#FF00BCD4",
-          "#FFFF5252",
-          "#FF795548",
+          "#FF6A48C2",
+          "#FFDA2892",
+          "#FF0072BE",
+          "#FF007078",
+          "#FFB12BB6",
+          "#FF00A2F1",
+          "#FF1CB0A8",
+          "#FFFD3C42",
+          "#FFFA485E",
+          "#FF74B633",
+          "#FF1E4EBF",
+          "#FFFAB02A",
+          "#FFF68015",
+          "#FF79B83D",
         ],
         "BorderColors": [
-          "#FF7C4DFF",
-          "#FF448AFF",
-          "#FF4CAF50",
-          "#FFFF6E40",
-          "#FF00BCD4",
-          "#FFFF5252",
-          "#FF795548",
-        ],
-        "BackgroundColors": [
-          "#FF7C4DFF",
-          "#FF448AFF",
-          "#FF4CAF50",
-          "#FFFF6E40",
-          "#FF00BCD4",
-          "#FFFF5252",
-          "#FF795548",
+          "#FF6A48C2",
+          "#FFDA2892",
+          "#FF0072BE",
+          "#FF007078",
+          "#FFB12BB6",
+          "#FF00A2F1",
+          "#FF1CB0A8",
+          "#FFFD3C42",
+          "#FFFA485E",
+          "#FF74B633",
+          "#FF1E4EBF",
+          "#FFFAB02A",
+          "#FFF68015",
+          "#FF79B83D",
         ],
       },
       "2": {
-        "BackgroundColor": "#FFFFFFFF",
+        "BackgroundColor": "#00000000",
         "TextColor": "#FF000000",
         "FontSize": 14.0,
-        "HSpace": 50,
-        "VSpace": 20,
-        "BorderRadius": 8,
-        "Padding": {"left": 12, "top": 6, "right": 12, "bottom": 6},
-        "LinkWidth": 1.5,
-        "Link": "BeerseLineLink",
+        "Padding": {"left": 12, "top": 3, "right": 12, "bottom": 3},
       },
     };
     JsonTheme jsonTheme = JsonTheme("Json Theme", json);
@@ -277,8 +280,7 @@ class CustomPage extends StatefulWidget {
     print("------------------------------------------");
     print(s);
     print("------------------------------------------");
-    mindMap.setTheme(jsonTheme);
-    */
+    mindMap.setTheme(jsonTheme);*/
   }
 
   void onChanged() {

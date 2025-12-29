@@ -175,6 +175,15 @@ class MindMap extends StatefulWidget {
       double y = double.tryParse(json["y"].toString()) ?? 0;
       setOffset(Offset(x, y));
     }
+    if (json.containsKey("Theme")) {
+      String themeName = json["Theme"];
+      if (themeName.isNotEmpty) {
+        Map<String, dynamic>? themeJson = jsonDecode(themeName);
+        if (themeJson != null) {
+          setTheme(JsonTheme("jsonTheme", themeJson));
+        }
+      }
+    }
     if (json.containsKey("RootNode")) {
       Map<String, dynamic> map = json["RootNode"];
       if (map.isNotEmpty) {
@@ -182,15 +191,6 @@ class MindMap extends StatefulWidget {
         if (node != null) {
           setRootNode(node);
           node.fromJson(map);
-        }
-      }
-    }
-    if (json.containsKey("Theme")) {
-      String themeName = json["Theme"];
-      if (themeName.isNotEmpty) {
-        Map<String, dynamic>? themeJson = jsonDecode(themeName);
-        if (themeJson != null) {
-          setTheme(JsonTheme("jsonTheme", themeJson));
         }
       }
     }

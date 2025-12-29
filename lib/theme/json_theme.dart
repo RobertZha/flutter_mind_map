@@ -5,6 +5,7 @@ import 'package:flutter_mind_map/adapter/i_theme_adapter.dart';
 import 'package:flutter_mind_map/link/beerse_line_link.dart';
 import 'package:flutter_mind_map/link/line_link.dart';
 import 'package:flutter_mind_map/link/poly_line_link.dart';
+import 'package:flutter_mind_map/mind_map_node.dart';
 import 'package:flutter_mind_map/theme/i_mind_map_theme.dart';
 
 ///Create a Theme by json
@@ -48,18 +49,71 @@ class JsonTheme implements IMindMapTheme {
             Map<String, dynamic> border = theme["Border"];
             Color color = Colors.transparent;
             double width = 0;
+            double lw = 0;
+            double tw = 0;
+            double rw = 0;
+            double bw = 0;
             if (border.containsKey("color")) {
               color = fromHex(border["color"].toString());
             }
             if (border.containsKey("width")) {
-              width = double.tryParse(border["width"].toString()) ?? 0;
+              if (border["width"] is String) {
+                List<String> ls = border["width"].toString().split(",");
+                if (ls.length == 4) {
+                  lw = double.tryParse(ls[0]) ?? 0;
+                  tw = double.tryParse(ls[1]) ?? 0;
+                  rw = double.tryParse(ls[2]) ?? 0;
+                  bw = double.tryParse(ls[3]) ?? 0;
+                } else {
+                  width = double.tryParse(ls[0]) ?? 0;
+                }
+              } else {
+                width = double.tryParse(border["width"].toString()) ?? 0;
+              }
             }
-            l["Border"] = Border.all(
-              color: color,
-              width: width,
-              style: BorderStyle.solid,
-              strokeAlign: BorderSide.strokeAlignOutside,
-            );
+            if (lw > 0 || tw > 0 || rw > 0 || bw > 0) {
+              l["Border"] = Border(
+                left: lw == 0
+                    ? BorderSide.none
+                    : BorderSide(
+                        color: color,
+                        width: lw,
+                        style: BorderStyle.solid,
+                        strokeAlign: BorderSide.strokeAlignOutside,
+                      ),
+                top: tw == 0
+                    ? BorderSide.none
+                    : BorderSide(
+                        color: color,
+                        width: tw,
+                        style: BorderStyle.solid,
+                        strokeAlign: BorderSide.strokeAlignOutside,
+                      ),
+                right: rw == 0
+                    ? BorderSide.none
+                    : BorderSide(
+                        color: color,
+                        width: rw,
+                        style: BorderStyle.solid,
+                        strokeAlign: BorderSide.strokeAlignOutside,
+                      ),
+                bottom: bw == 0
+                    ? BorderSide.none
+                    : BorderSide(
+                        color: color,
+                        width: bw,
+                        style: BorderStyle.solid,
+                        strokeAlign: BorderSide.strokeAlignOutside,
+                      ),
+              );
+            } else {
+              l["Border"] = Border.all(
+                color: color,
+                width: width,
+                style: BorderStyle.solid,
+                strokeAlign: BorderSide.strokeAlignOutside,
+              );
+            }
           }
           if (theme.containsKey("BorderRadius")) {
             l["BorderRadius"] = BorderRadius.circular(
@@ -106,6 +160,32 @@ class JsonTheme implements IMindMapTheme {
             l["BackgroundColors"] = [];
             for (int i = 0; i < theme["BackgroundColors"].length; i++) {
               l["BackgroundColors"].add(fromHex(theme["BackgroundColors"][i]));
+            }
+          }
+          if (theme.containsKey("LinkOutOffsetMode")) {
+            switch (theme["LinkOutOffsetMode"]) {
+              case "top":
+                l["LinkOutOffsetMode"] = MindMapNodeLinkOffsetMode.top;
+                break;
+              case "center":
+                l["LinkOutOffsetMode"] = MindMapNodeLinkOffsetMode.center;
+                break;
+              case "bottom":
+                l["LinkOutOffsetMode"] = MindMapNodeLinkOffsetMode.bottom;
+                break;
+            }
+          }
+          if (theme.containsKey("LinkInOffsetMode")) {
+            switch (theme["LinkInOffsetMode"]) {
+              case "top":
+                l["LinkInOffsetMode"] = MindMapNodeLinkOffsetMode.top;
+                break;
+              case "center":
+                l["LinkInOffsetMode"] = MindMapNodeLinkOffsetMode.center;
+                break;
+              case "bottom":
+                l["LinkInOffsetMode"] = MindMapNodeLinkOffsetMode.bottom;
+                break;
             }
           }
 
