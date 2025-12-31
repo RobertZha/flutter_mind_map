@@ -1,3 +1,7 @@
+## 1.0.11 - (2025-12-31)
+
+- Fix bug for watermark
+
 ## 1.0.10 - (2025-12-30)
 
 - Add `JsonTheme add LinkInOffset&LinkOOutOffset`

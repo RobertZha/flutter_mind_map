@@ -31,7 +31,7 @@ class JsonTheme implements IMindMapTheme {
             l["FontSize"] = double.tryParse(theme["FontSize"].toString()) ?? 12;
           }
           if (theme.containsKey("Bold")) {
-            l["Border"] = theme["Border"];
+            l["Bold"] = theme["Bold"];
           }
           if (theme.containsKey("LinkColor")) {
             l["LinkColor"] = fromHex(theme["LinkColor"].toString());

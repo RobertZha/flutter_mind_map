@@ -211,7 +211,7 @@ class CustomPage extends StatefulWidget {
     mindMap.setShowRecycle(false);
 
     //add Json Theme
-    /*
+
     Map<String, dynamic> json = {
       "0": {
         "BackgroundColor": "##FFFFFF",
@@ -280,7 +280,7 @@ class CustomPage extends StatefulWidget {
     print("------------------------------------------");
     print(s);
     print("------------------------------------------");
-    mindMap.setTheme(jsonTheme);*/
+    mindMap.setTheme(jsonTheme);
   }
 
   void onChanged() {

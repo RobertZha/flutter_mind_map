@@ -864,7 +864,20 @@ class MindMapState extends State<MindMap> {
               (ro.dy - size.height / 2 + rs.height / 2) * widget.getZoom();
         } else {
           if (widget.getRootNode().getLeftItems().isNotEmpty) {
-            x = s.width - size.width - 30;
+            x =
+                s.width / 2 -
+                ro.dx -
+                rs.width / 2 +
+                (ro.dx - size.width / 2 + rs.width / 2) -
+                (ro.dx - size.width / 2 + rs.width / 2) * widget.getZoom();
+
+            x = s.width < size.width * widget.getZoom()
+                ? x +
+                      s.width / 2 -
+                      rs.width * widget.getZoom() / 2 -
+                      widget.getMindMapPadding()
+                : x + size.width * widget.getZoom() / 2;
+
             y =
                 s.height / 2 -
                 ro.dy -
@@ -872,7 +885,19 @@ class MindMapState extends State<MindMap> {
                 (ro.dy - size.height / 2 + rs.height / 2) -
                 (ro.dy - size.height / 2 + rs.height / 2) * widget.getZoom();
           } else {
-            x = 30;
+            x =
+                s.width / 2 -
+                ro.dx -
+                rs.width / 2 +
+                (ro.dx - size.width / 2 + rs.width / 2) -
+                (ro.dx - size.width / 2 + rs.width / 2) * widget.getZoom();
+
+            x = s.width < size.width * widget.getZoom()
+                ? x -
+                      (s.width / 2 -
+                          rs.width * widget.getZoom() / 2 -
+                          widget.getMindMapPadding())
+                : x - size.width * widget.getZoom() / 2;
             y =
                 s.height / 2 -
                 ro.dy -
@@ -935,10 +960,8 @@ class MindMapState extends State<MindMap> {
                 children: [
                   widget.getWatermark().isEmpty
                       ? Container()
-                      : ListView.builder(
-                          scrollDirection: Axis.horizontal,
-                          itemCount: 100,
-                          itemBuilder: (context, index1) {
+                      : Row(
+                          children: List.generate(100, (index) {
                             return Column(
                               children: List.generate(100, (index) => "Item $index")
                                   .map(
@@ -983,7 +1006,7 @@ class MindMapState extends State<MindMap> {
                                   )
                                   .toList(),
                             );
-                          },
+                          }),
                         ),
 
                   Positioned(

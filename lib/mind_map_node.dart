@@ -1548,14 +1548,16 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
           getSize()!.height / 2 +
           ((getBorderRadius() as BorderRadius).topLeft.x > getSize()!.height / 2
               ? getSize()!.height / 2
-              : (getBorderRadius() as BorderRadius).topLeft.x);
+              : (getBorderRadius() as BorderRadius).topLeft.x) +
+          getBorder().top.width / 2;
     }
     if (getLinkInOffsetMode() == MindMapNodeLinkOffsetMode.bottom) {
       return getSize()!.height / 2 -
           ((getBorderRadius() as BorderRadius).bottomLeft.x >
                   getSize()!.height / 2
               ? getSize()!.height / 2
-              : (getBorderRadius() as BorderRadius).bottomLeft.x);
+              : (getBorderRadius() as BorderRadius).bottomLeft.x) -
+          getBorder().bottom.width / 2;
     }
     return 0;
   }
@@ -1603,14 +1605,16 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
           ((getBorderRadius() as BorderRadius).topRight.x >
                   getSize()!.height / 2
               ? getSize()!.height / 2
-              : (getBorderRadius() as BorderRadius).topRight.x);
+              : (getBorderRadius() as BorderRadius).topRight.x) +
+          getBorder().top.width / 2;
     }
     if (getLinkOutOffsetMode() == MindMapNodeLinkOffsetMode.bottom) {
       return getSize()!.height / 2 -
           ((getBorderRadius() as BorderRadius).bottomRight.x >
                   getSize()!.height / 2
               ? getSize()!.height / 2
-              : (getBorderRadius() as BorderRadius).bottomRight.x);
+              : (getBorderRadius() as BorderRadius).bottomRight.x) -
+          getBorder().bottom.width / 2;
     }
     return 0;
   }
