@@ -1,3 +1,7 @@
+## 1.0.12 - (2025-12-31)
+
+- Add `ArcLineLink`
+
 ## 1.0.11 - (2025-12-31)
 
 - Fix bug for watermark

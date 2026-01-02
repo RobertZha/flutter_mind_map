@@ -2,11 +2,12 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_mind_map/i_mind_map_node.dart';
+import 'package:flutter_mind_map/link/line_link.dart';
 import 'package:flutter_mind_map/link/oblique_broken_line.dart';
 import 'package:flutter_mind_map/link/poly_line_link.dart';
+import 'package:flutter_mind_map/link/arc_line_linek.dart';
 import 'package:flutter_mind_map/mind_map.dart';
 import 'package:flutter_mind_map/mind_map_node.dart';
-import 'package:flutter_mind_map/theme/json_theme.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 // ignore: must_be_immutable
@@ -44,6 +45,7 @@ class CustomPage extends StatefulWidget {
           node1.setTitle("By Domain");
           node1.setBackgroundColor(Colors.yellow);
           node1.setTextStyle(TextStyle(fontSize: 12.0, color: Colors.black));
+          node1.setLink(ArcLineLink());
           mindMap.getRootNode().addLeftItem(node1);
 
           MindMapNode node11 = MindMapNode();
@@ -85,6 +87,7 @@ class CustomPage extends StatefulWidget {
           node2.setTitle("By User");
           node2.setBackgroundColor(Colors.yellow);
           node2.setTextStyle(TextStyle(fontSize: 12.0, color: Colors.black));
+          node2.setLink(LineLink());
           mindMap.getRootNode().addLeftItem(node2);
 
           MindMapNode node21 = MindMapNode();
@@ -141,6 +144,7 @@ class CustomPage extends StatefulWidget {
           node3.addLeftItem(node32);
 
           MindMapNode node4 = MindMapNode();
+          node4.setBackgroundColor(Colors.white);
           node4.setLinkColor(Colors.red);
           //node4.setLinkInOffsetMode(MindMapNodeLinkOffsetMode.top);
           //node4.setLinkOutOffsetMode(MindMapNodeLinkOffsetMode.bottom);
@@ -199,6 +203,8 @@ class CustomPage extends StatefulWidget {
           MindMapNode node52 = MindMapNode();
           node52.setTitle("Real-Time");
           node5.addRightItem(node52);
+
+          mindMap.onChanged();
         }
 
         mindMap.addOnChangedListeners(onChanged);

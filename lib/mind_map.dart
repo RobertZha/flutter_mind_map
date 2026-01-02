@@ -8,6 +8,7 @@ import 'package:flutter_mind_map/adapter/i_link_adapter.dart';
 import 'package:flutter_mind_map/adapter/i_node_adapter.dart';
 import 'package:flutter_mind_map/adapter/i_theme_adapter.dart';
 import 'package:flutter_mind_map/i_mind_map_node.dart';
+import 'package:flutter_mind_map/link/arc_line_linek.dart';
 import 'package:flutter_mind_map/link/beerse_line_link.dart';
 import 'package:flutter_mind_map/link/i_link.dart';
 import 'package:flutter_mind_map/link/line_link.dart';
@@ -25,6 +26,41 @@ import 'package:path_drawing/path_drawing.dart';
 class MindMap extends StatefulWidget {
   MindMap({super.key});
   final GlobalKey _key = GlobalKey();
+
+  MapType _mapType = MapType.mind;
+
+  /// Map type
+  MapType getMapType() {
+    return _mapType;
+  }
+
+  //Change Map Type
+  void setMindMap(MapType value) {
+    if (_mapType != value) {
+      _mapType = value;
+      onMapTypeChanged();
+      onChanged();
+    }
+  }
+
+  final List<Function()> _onMapTypeChangedListeners = [];
+
+  /// Add listener for map type change
+  void addOnMapTypeChangedListener(Function() listener) {
+    _onMapTypeChangedListeners.add(listener);
+  }
+
+  /// Remove listener for map type change
+  void removeOnMapTypeChangedListener(Function() listener) {
+    _onMapTypeChangedListeners.remove(listener);
+  }
+
+  /// Called when the map type changes.
+  void onMapTypeChanged() {
+    for (Function() listener in _onMapTypeChangedListeners) {
+      listener();
+    }
+  }
 
   String _watermark = "";
 
@@ -317,6 +353,7 @@ class MindMap extends StatefulWidget {
     LineLinkAdapter(),
     PolyLineLinkAdapter(),
     ObliqueBrokenLineAdapter(),
+    ArcLineLinkAdapter(),
   ];
 
   ///Register Link Adapter
@@ -445,7 +482,7 @@ class MindMap extends StatefulWidget {
 
   ///Set Zoom
   void setZoom(double value) {
-    if (value > 0) {
+    if (value > 0 && _zoom != value) {
       _zoom = value;
       List<Function()> list = [];
       list.addAll(_onZoomChangedListeners);
@@ -482,6 +519,7 @@ class MindMap extends StatefulWidget {
   ///On Changed
   void onChanged() {
     if (!_isLoading) {
+      print("onChanged");
       List<Function()> list = [];
       list.addAll(_onChangedListeners);
       for (Function() call in list) {
@@ -685,7 +723,6 @@ class MindMap extends StatefulWidget {
     _rootNode = rootNode;
     _rootNode.setMindMap(this);
     onRootNodeChanged();
-    onChanged();
   }
 
   final List<Function()> _onRootNodeChangeListeners = [];
@@ -737,7 +774,6 @@ class MindMap extends StatefulWidget {
   void setOffset(Offset? value) {
     _offset = value;
     _state?.refresh();
-    onChanged();
   }
 
   ///Get Offset
@@ -791,12 +827,14 @@ class MindMapState extends State<MindMap> {
     super.initState();
     widget.addOnRootNodeChangeListener(onRootNodeChanged);
     widget.addOnSelectedNodeChangedListeners(onSelectedNodeChanged);
+    widget.addOnMapTypeChangedListener(onMapTypeChanged);
   }
 
   @override
   void dispose() {
     widget.removeOnRootNodeChangeListener(onRootNodeChanged);
     widget.removeOnSelectedNodeChangedListeners(onSelectedNodeChanged);
+    widget.removeOnMapTypeChangedListener(onMapTypeChanged);
     super.dispose();
   }
 
@@ -805,6 +843,10 @@ class MindMapState extends State<MindMap> {
   }
 
   void onSelectedNodeChanged() {
+    setState(() {});
+  }
+
+  void onMapTypeChanged() {
     setState(() {});
   }
 
@@ -1295,6 +1337,7 @@ class MindMapState extends State<MindMap> {
                       );
                     }
                     widget.getRootNode().refresh();
+                    widget.onChanged();
                   }
                   widget.refresh();
                   widget._dragInNode = null;
@@ -1351,9 +1394,6 @@ class MindMapState extends State<MindMap> {
                         (dataSize.width * widget.getZoom() / 2) +
                         dataSize.width / 2,
                     details.offset.dy - r.dy + dataSize.height / 2,
-                  );
-                  debugPrint(
-                    "${offset.dx} :${offset.dy}  dx:${details.offset.dx} rdx:${r.dx} rowidth:${ro.size.width}  :${size!.width}",
                   );
 
                   IMindMapNode? rightDragNode = inRightDrag(
@@ -1617,3 +1657,5 @@ class MindMapPainter extends CustomPainter {
     return true;
   }
 }
+
+enum MapType { mind }

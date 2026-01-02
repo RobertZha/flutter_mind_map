@@ -62,9 +62,12 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     return json;
   }
 
+  bool _isLoading = false;
+
   ///Import Data from JSON
   @override
   void loadData(Map<String, dynamic> json) {
+    _isLoading = true;
     if (json.containsKey("id") &&
         json.containsKey("content") &&
         json.containsKey("nodes")) {
@@ -103,6 +106,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
         }
       }
     }
+    _isLoading = false;
   }
 
   ///Export Data&Style to JSON
@@ -211,6 +215,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   ///Load Data&Style from JSON
   @override
   void fromJson(Map<String, dynamic> json) {
+    _isLoading = true;
     if (json.containsKey("MindMapNode")) {
       Map<String, dynamic> nodeJson = json["MindMapNode"];
       if (nodeJson.containsKey("Properties")) {
@@ -453,6 +458,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
         }
       }
     }
+    _isLoading = false;
   }
 
   /// add left child node
@@ -461,6 +467,10 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     node.setParentNode(this);
     node.setTitle("New Node");
     addLeftItem(node);
+    getMindMap()?.refresh();
+    if (!_isLoading) {
+      getMindMap()?.onChanged();
+    }
   }
 
   /// add right child node
@@ -469,6 +479,10 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     node.setParentNode(this);
     node.setTitle("New Node");
     addRightItem(node);
+    getMindMap()?.refresh();
+    if (!_isLoading) {
+      getMindMap()?.onChanged();
+    }
   }
 
   /// on tap
@@ -511,7 +525,9 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
       _state?.refresh();
       if (getMindMap() != null) {
         getMindMap()!.refresh();
-        getMindMap()?.onChanged();
+        if (!_isLoading) {
+          getMindMap()?.onChanged();
+        }
       }
     }
   }
@@ -558,7 +574,9 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   void setLink(ILink? value) {
     _link = value;
     _state?.refresh();
-    getMindMap()?.onChanged();
+    if (!_isLoading) {
+      getMindMap()?.onChanged();
+    }
   }
 
   Color? _linkColor;
@@ -599,7 +617,9 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   void setLinkColor(Color? value) {
     _linkColor = value;
     refresh();
-    getMindMap()?.onChanged();
+    if (!_isLoading) {
+      getMindMap()?.onChanged();
+    }
   }
 
   List<Color> _linkColors = [];
@@ -635,7 +655,9 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   void setLinkColors(List<Color> value) {
     _linkColors = value;
     refresh();
-    getMindMap()?.onChanged();
+    if (!_isLoading) {
+      getMindMap()?.onChanged();
+    }
   }
 
   double? _linkWidth;
@@ -669,7 +691,9 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   void setLinkWidth(double? value) {
     _linkWidth = value;
     refresh();
-    getMindMap()?.onChanged();
+    if (!_isLoading) {
+      getMindMap()?.onChanged();
+    }
   }
 
   List<Color> _borderColors = [];
@@ -705,7 +729,9 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   void setBorderColors(List<Color> value) {
     _borderColors = value;
     refresh();
-    getMindMap()?.onChanged();
+    if (!_isLoading) {
+      getMindMap()?.onChanged();
+    }
   }
 
   IMindMapNode? _parentNode;
@@ -752,7 +778,9 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   void setHSpace(int value) {
     _hSpace = value;
     refresh();
-    getMindMap()?.onChanged();
+    if (!_isLoading) {
+      getMindMap()?.onChanged();
+    }
   }
 
   /// VSpace
@@ -779,7 +807,9 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   void setVSpace(int value) {
     _vSpace = value;
     refresh();
-    getMindMap()?.onChanged();
+    if (!_isLoading) {
+      getMindMap()?.onChanged();
+    }
   }
 
   @override
@@ -808,7 +838,6 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   /// set id
   void setID(String id) {
     _id = id;
-    getMindMap()?.onChanged();
   }
 
   String _title = "";
@@ -825,7 +854,9 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     if (_title != value) {
       _title = value;
       refresh();
-      getMindMap()?.onChanged();
+      if (!_isLoading) {
+        getMindMap()?.onChanged();
+      }
     }
   }
 
@@ -897,7 +928,9 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   void setBackgroundColor(Color color) {
     _backgroundColor = color;
     refresh();
-    getMindMap()?.onChanged();
+    if (!_isLoading) {
+      getMindMap()?.onChanged();
+    }
   }
 
   List<Color> _backgroundColors = [];
@@ -935,7 +968,9 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   void setBackgroundColors(List<Color> value) {
     _backgroundColors = value;
     refresh();
-    getMindMap()?.onChanged();
+    if (!_isLoading) {
+      getMindMap()?.onChanged();
+    }
   }
 
   BoxBorder? _border;
@@ -1006,7 +1041,9 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   void setBorder(BoxBorder border) {
     _border = border;
     refresh();
-    getMindMap()?.onChanged();
+    if (!_isLoading) {
+      getMindMap()?.onChanged();
+    }
   }
 
   BorderRadiusGeometry? _borderRadius;
@@ -1036,7 +1073,9 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   void setBorderRadius(BorderRadiusGeometry borderRadius) {
     _borderRadius = borderRadius;
     refresh();
-    getMindMap()?.onChanged();
+    if (!_isLoading) {
+      getMindMap()?.onChanged();
+    }
   }
 
   List<BoxShadow>? _shadow;
@@ -1088,7 +1127,9 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   void setPadding(EdgeInsets? padding) {
     _padding = padding;
     refresh();
-    getMindMap()?.onChanged();
+    if (!_isLoading) {
+      getMindMap()?.onChanged();
+    }
   }
 
   TextStyle? _textStyle;
@@ -1140,7 +1181,9 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   void setTextStyle(TextStyle? textStyle) {
     _textStyle = textStyle;
     refresh();
-    getMindMap()?.onChanged();
+    if (!_isLoading) {
+      getMindMap()?.onChanged();
+    }
   }
 
   List<IMindMapNode> _leftItems = [];
@@ -1153,13 +1196,6 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     item.setParentNode(this);
     item.setNodeType(NodeType.left);
     refresh();
-
-    ///if (getNodeType() == NodeType.root && _leftItems.length == 1) {
-    getMindMap()?.refresh();
-
-    ///}
-    /// getMindMap()?.refresh();
-    getMindMap()?.onChanged();
   }
 
   ///Add Right Item
@@ -1169,13 +1205,6 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     item.setParentNode(this);
     item.setNodeType(NodeType.right);
     refresh();
-
-    ///if (getNodeType() == NodeType.root && _rightItems.length == 1) {
-    getMindMap()?.refresh();
-
-    ///}
-    ///getMindMap()?.refresh();
-    getMindMap()?.onChanged();
   }
 
   ///Get Left Items
@@ -1201,9 +1230,6 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     item.setParentNode(this);
     item.setNodeType(NodeType.left);
     refresh();
-
-    ///getMindMap()?.refresh();
-    getMindMap()?.onChanged();
   }
 
   ///Insert Right Item
@@ -1217,9 +1243,6 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     item.setParentNode(this);
     item.setNodeType(NodeType.right);
     refresh();
-
-    ///getMindMap()?.refresh();
-    getMindMap()?.onChanged();
   }
 
   ///Remove Left Item
@@ -1227,9 +1250,6 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   void removeLeftItem(IMindMapNode item) {
     _leftItems.remove(item);
     refresh();
-
-    ///getMindMap()?.refresh();
-    getMindMap()?.onChanged();
   }
 
   ///Remove Right Item
@@ -1237,9 +1257,6 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   void removeRightItem(IMindMapNode item) {
     _rightItems.remove(item);
     refresh();
-
-    ///getMindMap()?.refresh();
-    getMindMap()?.onChanged();
   }
 
   ///Set Left Items
@@ -1247,7 +1264,6 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   void setLeftItems(List<IMindMapNode> value) {
     _leftItems = value;
     refresh();
-    getMindMap()?.onChanged();
   }
 
   ///Set Right Items
@@ -1255,7 +1271,6 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   void setRightItems(List<IMindMapNode> value) {
     _rightItems = value;
     refresh();
-    getMindMap()?.onChanged();
   }
 
   NodeType _nodeType = NodeType.root;
@@ -1284,7 +1299,6 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
         n.setNodeType(value);
       }
     }
-    getMindMap()?.onChanged();
   }
 
   MindMap? _mindMap;
@@ -1536,7 +1550,9 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
       if (getParentNode() != null) {
         getParentNode()!.refresh();
       }
-      getMindMap()?.onChanged();
+      if (!_isLoading) {
+        getMindMap()?.onChanged();
+      }
     }
   }
 
@@ -1592,7 +1608,9 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
       if (getParentNode() != null) {
         getParentNode()!.refresh();
       }
-      getMindMap()?.onChanged();
+      if (!_isLoading) {
+        getMindMap()?.onChanged();
+      }
     }
   }
 
@@ -1959,6 +1977,9 @@ class MindMapNodeState extends State<MindMapNode> {
                                                                   ?.removeLeftItem(
                                                                     widget,
                                                                   );
+                                                              widget
+                                                                  .getMindMap()
+                                                                  ?.onChanged();
                                                               Navigator.of(
                                                                 context,
                                                               ).pop();
@@ -2433,6 +2454,9 @@ class MindMapNodeState extends State<MindMapNode> {
                                                                   ?.removeRightItem(
                                                                     widget,
                                                                   );
+                                                              widget
+                                                                  .getMindMap()
+                                                                  ?.onChanged();
                                                               Navigator.of(
                                                                 context,
                                                               ).pop();
