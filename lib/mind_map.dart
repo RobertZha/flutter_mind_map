@@ -27,6 +27,33 @@ class MindMap extends StatefulWidget {
   MindMap({super.key});
   final GlobalKey _key = GlobalKey();
 
+  String deleteNodeString = "Delete this node?";
+  String getDeleteNodeString() {
+    return deleteNodeString;
+  }
+
+  void setDeleteNodeString(String value) {
+    deleteNodeString = value;
+  }
+
+  String cancelString = "Cancel";
+  String getCancelString() {
+    return cancelString;
+  }
+
+  void setCancelString(String value) {
+    cancelString = cancelString;
+  }
+
+  String okString = "OK";
+  String getOkString() {
+    return okString;
+  }
+
+  void setOkString(String value) {
+    okString = value;
+  }
+
   MapType _mapType = MapType.mind;
 
   /// Map type
@@ -489,7 +516,6 @@ class MindMap extends StatefulWidget {
       for (Function() call in list) {
         call();
       }
-      onChanged();
     }
   }
 
@@ -519,7 +545,6 @@ class MindMap extends StatefulWidget {
   ///On Changed
   void onChanged() {
     if (!_isLoading) {
-      print("onChanged");
       List<Function()> list = [];
       list.addAll(_onChangedListeners);
       for (Function() call in list) {
@@ -856,6 +881,8 @@ class MindMapState extends State<MindMap> {
   Offset _lastFocalPoint = Offset.zero;
   double _lastScale = 1.0;
 
+  double _oldzoom = 1.0;
+
   final GlobalKey _pkey = GlobalKey();
 
   @override
@@ -966,6 +993,7 @@ class MindMapState extends State<MindMap> {
           if (widget.getCanMove()) {
             widget.setIsScaling(true);
             setState(() {
+              _oldzoom = widget.getZoom();
               widget._dragInNode = null;
               widget._dragNode = null;
               _focalPoint = widget.getMoveOffset();
@@ -990,6 +1018,9 @@ class MindMapState extends State<MindMap> {
         },
         onScaleEnd: (details) {
           widget.setIsScaling(false);
+          if (_oldzoom != widget.getZoom()) {
+            widget.onChanged();
+          }
         },
         child: DragTarget(
           key: _pkey,
@@ -1003,9 +1034,9 @@ class MindMapState extends State<MindMap> {
                   widget.getWatermark().isEmpty
                       ? Container()
                       : Row(
-                          children: List.generate(100, (index) {
+                          children: List.generate(20, (index) {
                             return Column(
-                              children: List.generate(100, (index) => "Item $index")
+                              children: List.generate(20, (index) => "Item $index")
                                   .map(
                                     (item) => Column(
                                       children: [
@@ -1221,13 +1252,17 @@ class MindMapState extends State<MindMap> {
                                             widget.setZoom(
                                               widget.getZoom() - 0.1,
                                             );
+                                            widget.onChanged();
                                           });
                                         }
                                         break;
                                       case 1:
                                         setState(() {
                                           widget.setMoveOffset(Offset.zero);
-                                          widget.setZoom(1);
+                                          if (widget.getZoom() != 1) {
+                                            widget.setZoom(1);
+                                            widget.onChanged();
+                                          }
                                         });
                                       case 2:
                                         if (widget.getZoom() < 2 && mounted) {
@@ -1235,6 +1270,7 @@ class MindMapState extends State<MindMap> {
                                             widget.setZoom(
                                               widget.getZoom() + 0.1,
                                             );
+                                            widget.onChanged();
                                           });
                                         }
                                         break;

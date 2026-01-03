@@ -1956,12 +1956,18 @@ class MindMapNodeState extends State<MindMapNode> {
                                                     builder: (context) {
                                                       return AlertDialog(
                                                         content: Text(
-                                                          "Delete this node?",
+                                                          widget
+                                                                  .getMindMap()
+                                                                  ?.getDeleteNodeString() ??
+                                                              "Delete this node?",
                                                         ),
                                                         actions: [
                                                           TextButton(
                                                             child: Text(
-                                                              "Cancel",
+                                                              widget
+                                                                      .getMindMap()
+                                                                      ?.getCancelString() ??
+                                                                  "Cancel",
                                                             ),
                                                             onPressed: () {
                                                               Navigator.of(
@@ -1970,7 +1976,12 @@ class MindMapNodeState extends State<MindMapNode> {
                                                             },
                                                           ),
                                                           TextButton(
-                                                            child: Text("OK"),
+                                                            child: Text(
+                                                              widget
+                                                                      .getMindMap()
+                                                                      ?.getOkString() ??
+                                                                  "OK",
+                                                            ),
                                                             onPressed: () {
                                                               widget
                                                                   .getParentNode()
@@ -2433,12 +2444,18 @@ class MindMapNodeState extends State<MindMapNode> {
                                                     builder: (context) {
                                                       return AlertDialog(
                                                         content: Text(
-                                                          "Delete this node?",
+                                                          widget
+                                                                  .getMindMap()
+                                                                  ?.getDeleteNodeString() ??
+                                                              "Delete this node?",
                                                         ),
                                                         actions: [
                                                           TextButton(
                                                             child: Text(
-                                                              "Cancel",
+                                                              widget
+                                                                      .getMindMap()
+                                                                      ?.getCancelString() ??
+                                                                  "Cancel",
                                                             ),
                                                             onPressed: () {
                                                               Navigator.of(
@@ -2447,7 +2464,12 @@ class MindMapNodeState extends State<MindMapNode> {
                                                             },
                                                           ),
                                                           TextButton(
-                                                            child: Text("OK"),
+                                                            child: Text(
+                                                              widget
+                                                                      .getMindMap()
+                                                                      ?.getOkString() ??
+                                                                  "OK",
+                                                            ),
                                                             onPressed: () {
                                                               widget
                                                                   .getParentNode()
