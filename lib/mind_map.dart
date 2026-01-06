@@ -28,28 +28,37 @@ class MindMap extends StatefulWidget {
   final GlobalKey _key = GlobalKey();
 
   String deleteNodeString = "Delete this node?";
+
+  ///Multilingual text of 'Delete this node?' string
   String getDeleteNodeString() {
     return deleteNodeString;
   }
 
+  ///Set multilingual text of 'Delete this node?' string
   void setDeleteNodeString(String value) {
     deleteNodeString = value;
   }
 
   String cancelString = "Cancel";
+
+  ///Multilingual text of  Cancel string
   String getCancelString() {
     return cancelString;
   }
 
+  ///Multilingual text of  Cancel string
   void setCancelString(String value) {
     cancelString = cancelString;
   }
 
   String okString = "OK";
+
+  /// Multilingual text of OK string
   String getOkString() {
     return okString;
   }
 
+  /// Multilingual text of OK string
   void setOkString(String value) {
     okString = value;
   }
@@ -62,10 +71,62 @@ class MindMap extends StatefulWidget {
   }
 
   //Change Map Type
-  void setMindMap(MapType value) {
+  void setMapType(MapType value) {
     if (_mapType != value) {
       _mapType = value;
       onMapTypeChanged();
+      onChanged();
+    }
+  }
+
+  MindMapType _mindMapType = MindMapType.leftAndRight;
+
+  /// Mind map type
+  MindMapType getMindMapType() {
+    return _mindMapType;
+  }
+
+  void setMindMapType(MindMapType value) {
+    if (getMapType() == MapType.mind && _mindMapType != value) {
+      _mindMapType = value;
+      switch (value) {
+        case MindMapType.leftAndRight:
+          if (getRootNode().getLeftItems().isNotEmpty &&
+              getRootNode().getRightItems().isEmpty) {
+            while (getRootNode().getRightItems().length <
+                getRootNode().getLeftItems().length - 1) {
+              IMindMapNode node = getRootNode().getLeftItems().last;
+              getRootNode().removeLeftItem(node);
+              getRootNode().insertRightItem(node, 0);
+            }
+          } else {
+            if (getRootNode().getLeftItems().isEmpty &&
+                getRootNode().getRightItems().isNotEmpty) {
+              while (getRootNode().getRightItems().length >
+                  getRootNode().getLeftItems().length) {
+                IMindMapNode node = getRootNode().getRightItems().first;
+                getRootNode().removeRightItem(node);
+                getRootNode().addLeftItem(node);
+              }
+            }
+          }
+          break;
+        case MindMapType.left:
+          while (getRootNode().getRightItems().isNotEmpty) {
+            IMindMapNode node = getRootNode().getRightItems().last;
+            getRootNode().removeRightItem(node);
+            getRootNode().addLeftItem(node);
+          }
+          break;
+        case MindMapType.right:
+          while (getRootNode().getLeftItems().isNotEmpty) {
+            IMindMapNode node = getRootNode().getLeftItems().last;
+            getRootNode().removeLeftItem(node);
+            getRootNode().insertLeftItem(node, 0);
+          }
+          break;
+      }
+      refresh();
       onChanged();
     }
   }
@@ -177,6 +238,7 @@ class MindMap extends StatefulWidget {
 
   ///Export to PNG
   Future<Uint8List?> toPng() async {
+    _state?.refresh();
     RenderRepaintBoundary boundary =
         _key.currentContext!.findRenderObject() as RenderRepaintBoundary;
 
@@ -208,6 +270,7 @@ class MindMap extends StatefulWidget {
   ///Export Data&Style to Json
   Map<String, dynamic> toJson() {
     Map<String, dynamic> json = {
+      "MapType": getMapType().name,
       "RootNode": getRootNode().toJson(),
       "Zoom": getZoom().toString(),
       "BackgroundColor": colorToString(getBackgroundColor()),
@@ -227,6 +290,16 @@ class MindMap extends StatefulWidget {
   ///Load Data&Style from Json
   void fromJson(Map<String, dynamic> json) {
     _isLoading = true;
+    if (json.containsKey("MapType")) {
+      MapType mapType = MapType.mind;
+      for (MapType type in MapType.values) {
+        if (type.name == json["MapType"].toString()) {
+          mapType = type;
+          break;
+        }
+      }
+      setMapType(mapType);
+    }
     if (json.containsKey("Zoom")) {
       setZoom(double.tryParse(json["Zoom"].toString()) ?? 1.0);
     }
@@ -1031,6 +1104,35 @@ class MindMapState extends State<MindMap> {
               height: double.infinity,
               child: Stack(
                 children: [
+                  Positioned(
+                    left:
+                        x +
+                        widget.getMoveOffset().dx -
+                        widget.getMindMapPadding() * widget.getZoom(),
+                    top:
+                        y +
+                        widget.getMoveOffset().dy -
+                        widget.getMindMapPadding() * widget.getZoom(),
+                    child: Transform.scale(
+                      scale: widget.getZoom(),
+                      child: RepaintBoundary(
+                        key: widget._key,
+                        child: Container(
+                          color: widget.getBackgroundColor(),
+                          child: CustomPaint(
+                            painter: MindMapPainter(mindMap: widget),
+                            child: Container(
+                              padding: EdgeInsets.all(
+                                widget.getMindMapPadding() * widget.getZoom(),
+                              ),
+                              child: widget.getRootNode() as Widget,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+
                   widget.getWatermark().isEmpty
                       ? Container()
                       : Row(
@@ -1060,6 +1162,13 @@ class MindMapState extends State<MindMap> {
                                                         .getWatermarkColor(),
                                                     fontSize: widget
                                                         .getWatermarkFontSize(),
+                                                    shadows: [
+                                                      Shadow(
+                                                        color: Colors.white,
+                                                        offset: Offset.zero,
+                                                        blurRadius: 3,
+                                                      ),
+                                                    ],
                                                   ),
                                                 ),
                                               ),
@@ -1081,32 +1190,6 @@ class MindMapState extends State<MindMap> {
                             );
                           }),
                         ),
-
-                  Positioned(
-                    left:
-                        x +
-                        widget.getMoveOffset().dx -
-                        widget.getMindMapPadding() * widget.getZoom(),
-                    top:
-                        y +
-                        widget.getMoveOffset().dy -
-                        widget.getMindMapPadding() * widget.getZoom(),
-                    child: Transform.scale(
-                      scale: widget.getZoom(),
-                      child: RepaintBoundary(
-                        key: widget._key,
-                        child: CustomPaint(
-                          painter: MindMapPainter(mindMap: widget),
-                          child: Container(
-                            padding: EdgeInsets.all(
-                              widget.getMindMapPadding() * widget.getZoom(),
-                            ),
-                            child: widget.getRootNode() as Widget,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
 
                   Container(
                     padding: EdgeInsets.fromLTRB(20, 20, 20, 0),
@@ -1472,6 +1555,14 @@ class MindMapState extends State<MindMap> {
     Rect? rect = parentNode.getLeftArea();
 
     if (rect != null) {
+      if (parentNode.getNodeType() == NodeType.root) {
+        rect = Rect.fromLTRB(
+          rect.left,
+          rect.top - 200,
+          rect.right,
+          rect.bottom + 200,
+        );
+      }
       if (rect.top * widget.getZoom() <= offset.dy &&
           rect.left * widget.getZoom() <= offset.dx &&
           rect.bottom * widget.getZoom() >= offset.dy &&
@@ -1531,6 +1622,14 @@ class MindMapState extends State<MindMap> {
     Rect? rect = parentNode.getRightArea();
 
     if (rect != null) {
+      if (parentNode.getNodeType() == NodeType.root) {
+        rect = Rect.fromLTRB(
+          rect.left,
+          rect.top - 200,
+          rect.right,
+          rect.bottom + 200,
+        );
+      }
       if (rect.top * widget.getZoom() <= offset.dy &&
           rect.left * widget.getZoom() <= offset.dx &&
           rect.bottom * widget.getZoom() >= offset.dy &&
@@ -1695,3 +1794,5 @@ class MindMapPainter extends CustomPainter {
 }
 
 enum MapType { mind }
+
+enum MindMapType { left, leftAndRight, right }

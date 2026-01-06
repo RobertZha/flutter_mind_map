@@ -22,7 +22,7 @@ Flutter's highly customizable and interactive mind map package features custom t
 -   [Export Image](#export-image)
 -   [Watermark](#watermark)
 -   [Json to Theme](#json-to-theme)
----
+-   [MindMapType](#mindmaptype)
 
 ## Load nodes from JSON
 
@@ -422,7 +422,7 @@ mindMap.setCanMove(false);
 ## Export Image
 
 ```dart
-Uint8List? image = mindMap.toPng();
+Uint8List? image = await mindMap.toPng();
 
 ```
 
@@ -520,5 +520,12 @@ JsonTheme jsonTheme = JsonTheme("Json Theme", {
     }
 );
 mindMap.registerThemeAdapter(JsonThemeAdapter(jsonTheme));
+
+```
+
+## MindMapType
+
+```dart
+mindMap.setMindMapType(MindMapType.leftAndRight);
 
 ```

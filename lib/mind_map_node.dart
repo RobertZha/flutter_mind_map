@@ -106,6 +106,41 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
         }
       }
     }
+    if (getNodeType() == NodeType.root) {
+      switch (getMindMap()?.getMindMapType() ?? MindMapType.leftAndRight) {
+        case MindMapType.leftAndRight:
+          if (getLeftItems().isNotEmpty && getRightItems().isEmpty) {
+            while (getRightItems().length < getLeftItems().length - 1) {
+              IMindMapNode node = getLeftItems().last;
+              removeLeftItem(node);
+              insertRightItem(node, 0);
+            }
+          } else {
+            if (getLeftItems().isEmpty && getRightItems().isNotEmpty) {
+              while (getRightItems().length > getLeftItems().length) {
+                IMindMapNode node = getRightItems().first;
+                removeRightItem(node);
+                addLeftItem(node);
+              }
+            }
+          }
+          break;
+        case MindMapType.left:
+          while (getRightItems().isNotEmpty) {
+            IMindMapNode node = getRightItems().last;
+            removeRightItem(node);
+            addLeftItem(node);
+          }
+          break;
+        case MindMapType.right:
+          while (getLeftItems().isNotEmpty) {
+            IMindMapNode node = getLeftItems().last;
+            removeLeftItem(node);
+            insertLeftItem(node, 0);
+          }
+          break;
+      }
+    }
     _isLoading = false;
   }
 
@@ -482,13 +517,6 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     getMindMap()?.refresh();
     if (!_isLoading) {
       getMindMap()?.onChanged();
-    }
-  }
-
-  /// on tap
-  void onTap() {
-    if (getMindMap() != null) {
-      getMindMap()!.setSelectedNode(this);
     }
   }
 
@@ -1196,6 +1224,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     item.setParentNode(this);
     item.setNodeType(NodeType.left);
     refresh();
+    getMindMap()?.refresh();
   }
 
   ///Add Right Item
@@ -1205,6 +1234,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     item.setParentNode(this);
     item.setNodeType(NodeType.right);
     refresh();
+    getMindMap()?.refresh();
   }
 
   ///Get Left Items
@@ -2794,14 +2824,21 @@ class MindMapNodeTitleState extends State<MindMapNodeTitle> {
         widget.node.setDragOfset(details.localPosition);
       },
       onTap: () {
-        widget.node.onTap();
+        widget.node.getMindMap()?.setSelectedNode(widget.node);
+      },
+      onLongPressDown: (details) {
+        widget.node.getMindMap()?.setSelectedNode(widget.node);
       },
       onDoubleTap: () {
-        widget.node.getMindMap()?.setSelectedNode(widget.node);
-        widget.node.getMindMap()?.onDoubleTap(widget.node);
+        if (!(widget.node.getMindMap()?.getReadOnly() ?? false)) {
+          widget.node.getMindMap()?.setSelectedNode(widget.node);
+          widget.node.getMindMap()?.onDoubleTap(widget.node);
+        }
       },
       child:
-          widget.node.getParentNode() == null ||
+          (widget.node.getSelected() == false &&
+                  !(widget.node.getMindMap()?.hasTextField() ?? false)) ||
+              widget.node.getParentNode() == null ||
               widget.node.getMindMap()?.getReadOnly() == true ||
               (widget.node.getMindMap()?.getIsScaling() ?? false)
           ? getBody(border)
