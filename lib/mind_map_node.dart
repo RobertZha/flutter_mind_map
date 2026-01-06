@@ -136,7 +136,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
           while (getLeftItems().isNotEmpty) {
             IMindMapNode node = getLeftItems().last;
             removeLeftItem(node);
-            insertLeftItem(node, 0);
+            insertRightItem(node, 0);
           }
           break;
       }

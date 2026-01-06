@@ -122,7 +122,7 @@ class MindMap extends StatefulWidget {
           while (getRootNode().getLeftItems().isNotEmpty) {
             IMindMapNode node = getRootNode().getLeftItems().last;
             getRootNode().removeLeftItem(node);
-            getRootNode().insertLeftItem(node, 0);
+            getRootNode().insertRightItem(node, 0);
           }
           break;
       }
