@@ -8,10 +8,9 @@ Flutter's highly customizable and interactive mind map package features custom t
 
 ---
 
-<iframe src="https://github.com/sponsors/RobertZha/button" title="Sponsor RobertZha" height="32" width="114" style="border: 0; border-radius: 6px;">
-</iframe>
+## Sponsor this project
 
-<iframe src="https://github.com/sponsors/RobertZha/card" title="Sponsor RobertZha" height="225" width="600" style="border: 0;"></iframe>
+<a href="https://github.com/sponsors/RobertZha"><img src="https://img.shields.io/badge/sponsor-30363D?style=for-the-badge&logo=GitHub-Sponsors&logoColor=#EA4AAA" alt="Sponsor RobertZha"></a>
 
 ---
 
