@@ -8,6 +8,13 @@ Flutter's highly customizable and interactive mind map package features custom t
 
 ---
 
+<iframe src="https://github.com/sponsors/RobertZha/button" title="Sponsor RobertZha" height="32" width="114" style="border: 0; border-radius: 6px;">
+</iframe>
+
+<iframe src="https://github.com/sponsors/RobertZha/card" title="Sponsor RobertZha" height="225" width="600" style="border: 0;"></iframe>
+
+---
+
 ### Contents
 
 -   [Load nodes from JSON](#load-nodes-from-json)
@@ -527,5 +534,10 @@ mindMap.registerThemeAdapter(JsonThemeAdapter(jsonTheme));
 
 ```dart
 mindMap.setMindMapType(MindMapType.leftAndRight);
+or
+mindMap.setMindMapType(MindMapType.left);
+or
+mindMap.setMindMapType(MindMapType.right);
+
 
 ```

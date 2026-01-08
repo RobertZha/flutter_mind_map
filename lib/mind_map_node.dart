@@ -110,33 +110,48 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
       switch (getMindMap()?.getMindMapType() ?? MindMapType.leftAndRight) {
         case MindMapType.leftAndRight:
           if (getLeftItems().isNotEmpty && getRightItems().isEmpty) {
-            while (getRightItems().length < getLeftItems().length - 1) {
-              IMindMapNode node = getLeftItems().last;
+            while (getLeftItems().isNotEmpty) {
+              IMindMapNode node = getLeftItems().first;
               removeLeftItem(node);
-              insertRightItem(node, 0);
-            }
-          } else {
-            if (getLeftItems().isEmpty && getRightItems().isNotEmpty) {
-              while (getRightItems().length > getLeftItems().length) {
-                IMindMapNode node = getRightItems().first;
-                removeRightItem(node);
-                addLeftItem(node);
-              }
+              addRightItem(node);
             }
           }
+          if (getLeftItems().isEmpty && getRightItems().isNotEmpty) {
+            while (getRightItems().length > getLeftItems().length + 1) {
+              IMindMapNode node = getRightItems().last;
+              removeRightItem(node);
+              addLeftItem(node);
+            }
+          }
+
           break;
         case MindMapType.left:
+          if (getLeftItems().isNotEmpty && getRightItems().isNotEmpty) {
+            while (getLeftItems().isNotEmpty) {
+              IMindMapNode node = getLeftItems().last;
+              removeLeftItem(node);
+              addRightItem(node);
+            }
+          }
           while (getRightItems().isNotEmpty) {
-            IMindMapNode node = getRightItems().last;
+            IMindMapNode node = getRightItems().first;
             removeRightItem(node);
             addLeftItem(node);
           }
           break;
         case MindMapType.right:
-          while (getLeftItems().isNotEmpty) {
-            IMindMapNode node = getLeftItems().last;
-            removeLeftItem(node);
-            insertRightItem(node, 0);
+          if (getLeftItems().isNotEmpty && getRightItems().isNotEmpty) {
+            while (getLeftItems().isNotEmpty) {
+              IMindMapNode node = getLeftItems().last;
+              removeLeftItem(node);
+              addRightItem(node);
+            }
+          } else {
+            while (getLeftItems().isNotEmpty) {
+              IMindMapNode node = getLeftItems().first;
+              removeLeftItem(node);
+              addRightItem(node);
+            }
           }
           break;
       }

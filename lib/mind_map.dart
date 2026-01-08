@@ -93,36 +93,52 @@ class MindMap extends StatefulWidget {
         case MindMapType.leftAndRight:
           if (getRootNode().getLeftItems().isNotEmpty &&
               getRootNode().getRightItems().isEmpty) {
-            while (getRootNode().getRightItems().length <
-                getRootNode().getLeftItems().length - 1) {
-              IMindMapNode node = getRootNode().getLeftItems().last;
+            while (getRootNode().getLeftItems().isNotEmpty) {
+              IMindMapNode node = getRootNode().getLeftItems().first;
               getRootNode().removeLeftItem(node);
-              getRootNode().insertRightItem(node, 0);
-            }
-          } else {
-            if (getRootNode().getLeftItems().isEmpty &&
-                getRootNode().getRightItems().isNotEmpty) {
-              while (getRootNode().getRightItems().length >
-                  getRootNode().getLeftItems().length) {
-                IMindMapNode node = getRootNode().getRightItems().first;
-                getRootNode().removeRightItem(node);
-                getRootNode().addLeftItem(node);
-              }
+              getRootNode().addRightItem(node);
             }
           }
+          if (getRootNode().getLeftItems().isEmpty &&
+              getRootNode().getRightItems().isNotEmpty) {
+            while (getRootNode().getRightItems().length >
+                getRootNode().getLeftItems().length + 1) {
+              IMindMapNode node = getRootNode().getRightItems().last;
+              getRootNode().removeRightItem(node);
+              getRootNode().addLeftItem(node);
+            }
+          }
+
           break;
         case MindMapType.left:
+          if (getRootNode().getLeftItems().isNotEmpty &&
+              getRootNode().getRightItems().isNotEmpty) {
+            while (getRootNode().getLeftItems().isNotEmpty) {
+              IMindMapNode node = getRootNode().getLeftItems().last;
+              getRootNode().removeLeftItem(node);
+              getRootNode().addRightItem(node);
+            }
+          }
           while (getRootNode().getRightItems().isNotEmpty) {
-            IMindMapNode node = getRootNode().getRightItems().last;
+            IMindMapNode node = getRootNode().getRightItems().first;
             getRootNode().removeRightItem(node);
             getRootNode().addLeftItem(node);
           }
           break;
         case MindMapType.right:
-          while (getRootNode().getLeftItems().isNotEmpty) {
-            IMindMapNode node = getRootNode().getLeftItems().last;
-            getRootNode().removeLeftItem(node);
-            getRootNode().insertRightItem(node, 0);
+          if (getRootNode().getLeftItems().isNotEmpty &&
+              getRootNode().getRightItems().isNotEmpty) {
+            while (getRootNode().getLeftItems().isNotEmpty) {
+              IMindMapNode node = getRootNode().getLeftItems().last;
+              getRootNode().removeLeftItem(node);
+              getRootNode().addRightItem(node);
+            }
+          } else {
+            while (getRootNode().getLeftItems().isNotEmpty) {
+              IMindMapNode node = getRootNode().getLeftItems().first;
+              getRootNode().removeLeftItem(node);
+              getRootNode().addRightItem(node);
+            }
           }
           break;
       }
@@ -271,6 +287,7 @@ class MindMap extends StatefulWidget {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> json = {
       "MapType": getMapType().name,
+      "MindMapType": getMindMapType().name,
       "RootNode": getRootNode().toJson(),
       "Zoom": getZoom().toString(),
       "BackgroundColor": colorToString(getBackgroundColor()),
@@ -299,6 +316,16 @@ class MindMap extends StatefulWidget {
         }
       }
       setMapType(mapType);
+    }
+    if (json.containsKey("MindMapType")) {
+      MindMapType mindMapType = MindMapType.leftAndRight;
+      for (MindMapType type in MindMapType.values) {
+        if (type.name == json["MindMapType"].toString()) {
+          mindMapType = type;
+          break;
+        }
+      }
+      setMindMapType(mindMapType);
     }
     if (json.containsKey("Zoom")) {
       setZoom(double.tryParse(json["Zoom"].toString()) ?? 1.0);
