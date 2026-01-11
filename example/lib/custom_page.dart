@@ -1,5 +1,8 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mind_map/i_mind_map_node.dart';
 import 'package:flutter_mind_map/link/line_link.dart';
@@ -199,9 +202,11 @@ class CustomPage extends StatefulWidget {
 
           MindMapNode node51 = MindMapNode();
           node51.setTitle("Time-Sharing");
+          node51.setExtended("value");
           node5.addRightItem(node51);
           MindMapNode node52 = MindMapNode();
           node52.setTitle("Real-Time");
+          node52.setExtended("value");
           node5.addRightItem(node52);
 
           mindMap.onChanged();
@@ -215,6 +220,7 @@ class CustomPage extends StatefulWidget {
     mindMap.setHasTextField(false);
     mindMap.setHasEditButton(true);
     mindMap.setShowRecycle(false);
+    mindMap.setExpandedLevel(3);
 
     //add Json Theme
     /*
@@ -310,18 +316,18 @@ class CustomPageState extends State<CustomPage> {
     super.initState();
     widget.init();
     widget.mindMap.addOnDoubleTapListeners(onDoubleTap);
-    widget.mindMap.addOnEditListeners(onDoubleTap);
+    widget.mindMap.addOnEditListeners(onEditTap);
   }
 
   @override
   void dispose() {
-    widget.mindMap.removeOnEditListeners(onDoubleTap);
+    widget.mindMap.removeOnEditListeners(onEditTap);
     widget.mindMap.removeOnDoubleTapListeners(onDoubleTap);
     super.dispose();
   }
 
   TextEditingController controller = TextEditingController();
-  void onDoubleTap(IMindMapNode node) {
+  void onEditTap(IMindMapNode node) {
     if (!widget.mindMap.getReadOnly()) {
       controller.text = node.getTitle();
       showDialog(
@@ -343,6 +349,22 @@ class CustomPageState extends State<CustomPage> {
           );
         },
       );
+    }
+  }
+
+  void onDoubleTap(IMindMapNode node) async {
+    if (!widget.mindMap.getReadOnly()) {
+      if (node is MindMapNode) {
+        FilePickerResult? filename = await FilePicker.platform.pickFiles(
+          type: FileType.image,
+        );
+        if (filename != null) {
+          File file = File(filename.files.single.path!);
+          Uint8List bytes = await file.readAsBytes();
+          String base64 = base64Encode(bytes);
+          node.setImage(base64);
+        }
+      }
     }
   }
 
