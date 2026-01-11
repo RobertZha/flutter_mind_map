@@ -221,7 +221,7 @@ class CustomPage extends StatefulWidget {
     mindMap.setHasEditButton(true);
     mindMap.setShowRecycle(false);
     mindMap.setExpandedLevel(3);
-
+    mindMap.setEnabledExtendedClick(true);
     //add Json Theme
     /*
     Map<String, dynamic> json = {
