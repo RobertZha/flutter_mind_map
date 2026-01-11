@@ -64,7 +64,7 @@ class MindMap extends StatefulWidget {
 
   ///Multilingual text of  Cancel string
   void setCancelString(String value) {
-    cancelString = cancelString;
+    cancelString = value;
   }
 
   String okString = "OK";
