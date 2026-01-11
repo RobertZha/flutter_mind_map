@@ -27,6 +27,22 @@ class MindMap extends StatefulWidget {
   MindMap({super.key});
   final GlobalKey _key = GlobalKey();
 
+  bool _enabledExtendedClick = false;
+
+  /// When Extended is not empty, display underline and Hand mouse in Read Only mode
+  bool getEnabledExtendedClick() => _enabledExtendedClick;
+  void setEnabledExtendedClick(bool enabled) {
+    _enabledExtendedClick = enabled;
+  }
+
+  int _expandedLevel = 99;
+
+  /// Defalut expanded layers
+  int getExpandedLevel() => _expandedLevel;
+  void setExpandedLevel(int level) {
+    _expandedLevel = level;
+  }
+
   String deleteNodeString = "Delete this node?";
 
   ///Multilingual text of 'Delete this node?' string
@@ -61,6 +77,20 @@ class MindMap extends StatefulWidget {
   /// Multilingual text of OK string
   void setOkString(String value) {
     okString = value;
+  }
+
+  double _toolbarPadding = 20.0;
+
+  /// Toolbar padding
+  double getToolbarPadding() {
+    return _toolbarPadding;
+  }
+
+  void setToolbarPadding(double value) {
+    if (_toolbarPadding != value) {
+      _toolbarPadding = value;
+      refresh();
+    }
   }
 
   MapType _mapType = MapType.mind;
@@ -1219,7 +1249,12 @@ class MindMapState extends State<MindMap> {
                         ),
 
                   Container(
-                    padding: EdgeInsets.fromLTRB(20, 20, 20, 0),
+                    padding: EdgeInsets.fromLTRB(
+                      20,
+                      widget.getToolbarPadding(),
+                      20,
+                      0,
+                    ),
                     height: 52,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,

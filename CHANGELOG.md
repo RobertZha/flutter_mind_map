@@ -1,3 +1,9 @@
+### 1.0.16 - (2026-01-02)
+
+- Add `Node Add Inage`
+- Add `setEnabledExtendedClick, When Extended is not empty, display underline and Hand mouse in Read Only mode`
+- Add `setExpandedLevel, Defalut expanded layers in Read Only mode`
+
 ## 1.0.15 - (2026-01-01)
 
 - Fix bug

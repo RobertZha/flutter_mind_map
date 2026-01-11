@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_mind_map/adapter/i_node_adapter.dart';
 import 'package:flutter_mind_map/i_mind_map_node.dart';
@@ -56,6 +58,8 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
         : {
             "id": getID(),
             "content": getTitle(),
+            "image": getImage(),
+            "extended": getExtended(),
             "leftNodes": leftlist,
             "nodes": list,
           };
@@ -73,6 +77,8 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
         json.containsKey("nodes")) {
       setID(json["id"].toString());
       setTitle(json["content"].toString());
+      setImage(json["image"] ?? "");
+      setExtended(json["extended"] ?? "");
       List<dynamic> list = json["nodes"];
       if (list.isNotEmpty) {
         for (Map<String, dynamic> j in list) {
@@ -166,7 +172,12 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     properties["ID"] = _id;
     properties["Title"] = _title;
     properties["Extended"] = _extended;
-    properties["Expanded"] = getExpanded().toString();
+    properties["Image"] = _image;
+    properties["ImageWidth"] = _imageWidth;
+    properties["ImageHeight"] = _imageHeight;
+    properties["ImageSpace"] = _imageSpace;
+    properties["ImagePosition"] = _imagePosition.name;
+    properties["Expanded"] = _expanded.toString();
     if (_link != null) {
       properties["Link"] = _link!.getName();
     }
@@ -276,6 +287,32 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
         }
         if (proJson.containsKey("Title")) {
           setTitle(proJson["Title"].toString());
+        }
+        if (proJson.containsKey("Image")) {
+          setImage(proJson["Image"].toString());
+        }
+        if (proJson.containsKey("ImageWidth")) {
+          setImageWidth(
+            double.tryParse(proJson["ImageWidth"].toString()) ?? 12,
+          );
+        }
+        if (proJson.containsKey("ImageHeight")) {
+          setImageHeight(
+            double.tryParse(proJson["ImageHeight"].toString()) ?? 12,
+          );
+        }
+        if (proJson.containsKey("ImageSpace")) {
+          setImageSpace(
+            double.tryParse(proJson["ImageSpace"].toString()) ?? 12,
+          );
+        }
+        if (proJson.containsKey("ImagePosition")) {
+          for (var item in MindMapNodeImagePosition.values) {
+            if (item.name == proJson["ImagePosition"].toString()) {
+              setImagePosition(item);
+              break;
+            }
+          }
         }
         if (proJson.containsKey("Extended")) {
           setExtended(proJson["Extended"].toString());
@@ -552,11 +589,14 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     }
   }
 
-  bool _expanded = true;
+  bool _expanded = false;
 
   ///Expanded
   @override
   bool getExpanded() {
+    if (getLevel() < (getMindMap()?.getExpandedLevel() ?? 0) - 1) {
+      return true;
+    }
     return _expanded;
   }
 
@@ -903,6 +943,82 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     }
   }
 
+  String _image = "";
+  String getImage() {
+    return _image;
+  }
+
+  void setImage(String value) {
+    if (_image != value) {
+      _image = value;
+      refresh();
+      if (!_isLoading) {
+        getMindMap()?.onChanged();
+      }
+    }
+  }
+
+  MindMapNodeImagePosition _imagePosition = MindMapNodeImagePosition.left;
+
+  MindMapNodeImagePosition getImagePosition() {
+    return _imagePosition;
+  }
+
+  void setImagePosition(MindMapNodeImagePosition value) {
+    if (_imagePosition != value) {
+      _imagePosition = value;
+      refresh();
+      if (!_isLoading) {
+        getMindMap()?.onChanged();
+      }
+    }
+  }
+
+  double _imageWidth = 16;
+  double getImageWidth() {
+    return _imageWidth;
+  }
+
+  void setImageWidth(double value) {
+    if (_imageWidth != value) {
+      _imageWidth = value;
+      refresh();
+      if (!_isLoading) {
+        getMindMap()?.onChanged();
+      }
+    }
+  }
+
+  double _imageHeight = 16;
+  double getImageHeight() {
+    return _imageHeight;
+  }
+
+  void setImageHeight(double value) {
+    if (_imageHeight != value) {
+      _imageHeight = value;
+      refresh();
+      if (!_isLoading) {
+        getMindMap()?.onChanged();
+      }
+    }
+  }
+
+  double _imageSpace = 8;
+  double getImageSpace() {
+    return _imageSpace;
+  }
+
+  void setImageSpace(double value) {
+    if (_imageSpace != value) {
+      _imageSpace = value;
+      refresh();
+      if (!_isLoading) {
+        getMindMap()?.onChanged();
+      }
+    }
+  }
+
   String _extended = "";
 
   /// Extended
@@ -1179,8 +1295,9 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
 
   /// Text Style
   TextStyle? getTextStyle() {
+    TextStyle? result;
     if (_textStyle != null) {
-      return _textStyle;
+      result = _textStyle;
     } else {
       double? fontSize =
           getMindMap()?.getTheme() != null &&
@@ -1208,7 +1325,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
           ? getMindMap()?.getTheme()?.getThemeByLevel(getLevel())!["Bold"]
                 as bool
           : null;
-      return textColor != null || fontSize != null || bold != null
+      result = textColor != null || fontSize != null || bold != null
           ? TextStyle(
               color: textColor ?? Colors.black,
               fontSize: fontSize ?? 16,
@@ -1218,6 +1335,17 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
                 ? (getParentNode() as MindMapNode).getTextStyle()
                 : TextStyle(fontSize: 16.0, color: Colors.black));
     }
+    if (result != null) {
+      if ((getMindMap()?.getReadOnly() ?? false) &&
+          (getMindMap()?.getEnabledExtendedClick() ?? false) &&
+          getExtended().isNotEmpty) {
+        result = result.copyWith(
+          decoration: TextDecoration.underline,
+          decorationStyle: TextDecorationStyle.solid,
+        );
+      }
+    }
+    return result;
   }
 
   /// set text style
@@ -1788,7 +1916,12 @@ class MindMapNodeState extends State<MindMapNode> {
                             ? (widget.getReadOnly()
                                   ? (widget.getNodeType() == NodeType.left &&
                                             widget.canExpand() &&
-                                            widget.getLeftItems().isNotEmpty
+                                            widget.getLeftItems().isNotEmpty &&
+                                            (widget
+                                                        .getMindMap()
+                                                        ?.getExpandedLevel() ??
+                                                    0) <=
+                                                widget.getLevel() + 1
                                         ? [
                                             ///Left Expand Button
                                             Container(
@@ -1849,6 +1982,11 @@ class MindMapNodeState extends State<MindMapNode> {
                                                 ),
                                                 child: IconButton(
                                                   onPressed: () {
+                                                    widget
+                                                        .getMindMap()
+                                                        ?.setSelectedNode(
+                                                          widget,
+                                                        );
                                                     widget.setExpanded(
                                                       !widget.getExpanded(),
                                                     );
@@ -2152,7 +2290,12 @@ class MindMapNodeState extends State<MindMapNode> {
                                   ? (widget.getNodeType() == NodeType.left &&
                                             widget.canExpand() &&
                                             !widget.getExpanded() &&
-                                            widget.getLeftItems().isNotEmpty
+                                            widget.getLeftItems().isNotEmpty &&
+                                            (widget
+                                                        .getMindMap()
+                                                        ?.getExpandedLevel() ??
+                                                    0) <=
+                                                widget.getLevel() + 1
                                         ? [
                                             ///Left Expand Button
                                             Container(
@@ -2213,6 +2356,11 @@ class MindMapNodeState extends State<MindMapNode> {
                                                 ),
                                                 child: IconButton(
                                                   onPressed: () {
+                                                    widget
+                                                        .getMindMap()
+                                                        ?.setSelectedNode(
+                                                          widget,
+                                                        );
                                                     widget.setExpanded(
                                                       !widget.getExpanded(),
                                                     );
@@ -2266,7 +2414,12 @@ class MindMapNodeState extends State<MindMapNode> {
                             ? (widget.getReadOnly()
                                   ? (widget.getNodeType() == NodeType.right &&
                                             widget.canExpand() &&
-                                            widget.getRightItems().isNotEmpty
+                                            widget.getRightItems().isNotEmpty &&
+                                            (widget
+                                                        .getMindMap()
+                                                        ?.getExpandedLevel() ??
+                                                    0) <=
+                                                widget.getLevel() + 1
                                         ? [
                                             ///Right Expand Button
                                             Container(
@@ -2327,6 +2480,11 @@ class MindMapNodeState extends State<MindMapNode> {
                                                 ),
                                                 child: IconButton(
                                                   onPressed: () {
+                                                    widget
+                                                        .getMindMap()
+                                                        ?.setSelectedNode(
+                                                          widget,
+                                                        );
                                                     widget.setExpanded(
                                                       !widget.getExpanded(),
                                                     );
@@ -2630,7 +2788,12 @@ class MindMapNodeState extends State<MindMapNode> {
                                   ? (widget.getNodeType() == NodeType.right &&
                                             widget.canExpand() &&
                                             !widget.getExpanded() &&
-                                            widget.getRightItems().isNotEmpty
+                                            widget.getRightItems().isNotEmpty &&
+                                            (widget
+                                                        .getMindMap()
+                                                        ?.getExpandedLevel() ??
+                                                    0) <=
+                                                widget.getLevel() + 1
                                         ? [
                                             ///Right Expand Button
                                             Container(
@@ -2691,6 +2854,11 @@ class MindMapNodeState extends State<MindMapNode> {
                                                 ),
                                                 child: IconButton(
                                                   onPressed: () {
+                                                    widget
+                                                        .getMindMap()
+                                                        ?.setSelectedNode(
+                                                          widget,
+                                                        );
                                                     widget.setExpanded(
                                                       !widget.getExpanded(),
                                                     );
@@ -2856,7 +3024,16 @@ class MindMapNodeTitleState extends State<MindMapNodeTitle> {
               widget.node.getParentNode() == null ||
               widget.node.getMindMap()?.getReadOnly() == true ||
               (widget.node.getMindMap()?.getIsScaling() ?? false)
-          ? getBody(border)
+          ? MouseRegion(
+              cursor:
+                  (widget.node.getMindMap()?.getReadOnly() ?? false) &&
+                      (widget.node.getMindMap()?.getEnabledExtendedClick() ??
+                          false) &&
+                      widget.node.getExtended().isNotEmpty
+                  ? SystemMouseCursors.click
+                  : MouseCursor.defer,
+              child: getBody(border),
+            )
           : Draggable(
               data: widget.node,
               feedback: Transform.scale(
@@ -2920,10 +3097,110 @@ class MindMapNodeTitleState extends State<MindMapNodeTitle> {
                     },
                   ),
                 )
-              : Text(
-                  widget.node.getTitle(),
-                  style: widget.node.getTextStyle(),
-                )),
+              : (widget.node.getImage().isNotEmpty
+                    ? (widget.node.getImagePosition() ==
+                              MindMapNodeImagePosition.left
+                          ? (Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Image.memory(
+                                  Base64Decoder().convert(
+                                    widget.node.getImage(),
+                                  ),
+                                  width: widget.node.getImageWidth(),
+                                  height: widget.node.getImageHeight(),
+                                  fit: BoxFit.fill,
+                                ),
+                                SizedBox(width: widget.node.getImageSpace()),
+                                Text(
+                                  widget.node.getTitle(),
+                                  style: widget.node.getTextStyle(),
+                                ),
+                              ],
+                            ))
+                          : (widget.node.getImagePosition() ==
+                                    MindMapNodeImagePosition.right
+                                ? (Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        widget.node.getTitle(),
+                                        style: widget.node.getTextStyle(),
+                                      ),
+                                      SizedBox(
+                                        width: widget.node.getImageSpace(),
+                                      ),
+                                      Image.memory(
+                                        Base64Decoder().convert(
+                                          widget.node.getImage(),
+                                        ),
+                                        width: widget.node.getImageWidth(),
+                                        height: widget.node.getImageHeight(),
+                                        fit: BoxFit.fill,
+                                      ),
+                                    ],
+                                  ))
+                                : (widget.node.getImagePosition() ==
+                                          MindMapNodeImagePosition.top
+                                      ? (Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Image.memory(
+                                              Base64Decoder().convert(
+                                                widget.node.getImage(),
+                                              ),
+                                              width: widget.node
+                                                  .getImageWidth(),
+                                              height: widget.node
+                                                  .getImageHeight(),
+                                              fit: BoxFit.fill,
+                                            ),
+                                            SizedBox(
+                                              height: widget.node
+                                                  .getImageSpace(),
+                                            ),
+                                            Text(
+                                              widget.node.getTitle(),
+                                              style: widget.node.getTextStyle(),
+                                            ),
+                                          ],
+                                        ))
+                                      : (Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              widget.node.getTitle(),
+                                              style: widget.node.getTextStyle(),
+                                            ),
+                                            SizedBox(
+                                              height: widget.node
+                                                  .getImageSpace(),
+                                            ),
+                                            Image.memory(
+                                              Base64Decoder().convert(
+                                                widget.node.getImage(),
+                                              ),
+                                              width: widget.node
+                                                  .getImageWidth(),
+                                              height: widget.node
+                                                  .getImageHeight(),
+                                              fit: BoxFit.fill,
+                                            ),
+                                          ],
+                                        )))))
+                    : Text(
+                        widget.node.getTitle(),
+                        style: widget.node.getTextStyle(),
+                      ))),
     );
   }
 }
@@ -2941,3 +3218,5 @@ class MindMapNodeAdapter implements INodeAdapter {
     return "MindMapNode";
   }
 }
+
+enum MindMapNodeImagePosition { left, right, top, bottom }

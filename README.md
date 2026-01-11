@@ -29,6 +29,9 @@ Flutter's highly customizable and interactive mind map package features custom t
 -   [Watermark](#watermark)
 -   [Json to Theme](#json-to-theme)
 -   [MindMapType](#mindmaptype)
+-   [Node Add Image](#node-add-image)
+-   [setEnabledExtendedClick](#setenabledextendedclick)
+-   [setExpandedLevel](#setexpandedlevel)
 
 ## Load nodes from JSON
 
@@ -540,6 +543,26 @@ mindMap.setMindMapType(MindMapType.right);
 
 
 ```
+
+## Node Add Image
+```dart
+node1.setImage(base64String);
+
+```
+
+## setEnabledExtendedClick
+When Extended is not empty, display underline and Hand mouse in Read Only mode
+```dart
+mindMap.setEnabledExtendedClick(true);
+
+```
+
+## setExpandedLevel
+```dart
+mindMap.setExpandedLevel(3);
+
+```
+
 
 
 [![Sponsor](https://img.shields.io/static/v1?label=Sponsor&message=%E2%9D%A4&logo=GitHub&color=ff69b4)](https://github.com/sponsors/RobertZha)
