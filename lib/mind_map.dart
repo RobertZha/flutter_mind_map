@@ -320,6 +320,7 @@ class MindMap extends StatefulWidget {
       "MindMapType": getMindMapType().name,
       "RootNode": getRootNode().toJson(),
       "Zoom": getZoom().toString(),
+      "ExpandedLevel": getExpandedLevel(),
       "BackgroundColor": colorToString(getBackgroundColor()),
       "Theme": getTheme() is JsonTheme
           ? jsonEncode((getTheme() as JsonTheme).json)
@@ -359,6 +360,9 @@ class MindMap extends StatefulWidget {
     }
     if (json.containsKey("Zoom")) {
       setZoom(double.tryParse(json["Zoom"].toString()) ?? 1.0);
+    }
+    if (json.containsKey("ExpandedLevel")) {
+      setExpandedLevel(int.tryParse(json["ExpandedLevel"].toString()) ?? 99);
     }
     if (json.containsKey("BackgroundColor")) {
       setBackgroundColor(stringToColor(json["BackgroundColor"].toString()));
@@ -1255,7 +1259,7 @@ class MindMapState extends State<MindMap> {
                       20,
                       0,
                     ),
-                    height: 52,
+                    height: 32 + widget.getToolbarPadding(),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
