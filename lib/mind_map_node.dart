@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_mind_map/adapter/i_node_adapter.dart';
@@ -3045,7 +3046,27 @@ class MindMapNodeTitleState extends State<MindMapNodeTitle> {
     );
   }
 
+  bool isValidBase64Image(String base64String) {
+    String cleanString = base64String.replaceAll(
+      RegExp(r'^data:image\/[a-zA-Z]+;base64,'),
+      '',
+    );
+    if (!RegExp(r'^[A-Za-z0-9+/]*={0,2}$').hasMatch(cleanString)) {
+      return false;
+    }
+
+    if (cleanString.length % 4 != 0) {
+      return false;
+    }
+
+    return true;
+  }
+
   Widget getBody(BoxBorder border) {
+    bool hasImage = false;
+    if (widget.node.getImage().isNotEmpty) {
+      hasImage = isValidBase64Image(widget.node.getImage());
+    }
     return Container(
       padding: widget.node.getPadding(),
       decoration: BoxDecoration(
@@ -3097,7 +3118,7 @@ class MindMapNodeTitleState extends State<MindMapNodeTitle> {
                     },
                   ),
                 )
-              : (widget.node.getImage().isNotEmpty
+              : (hasImage
                     ? (widget.node.getImagePosition() ==
                               MindMapNodeImagePosition.left
                           ? (Row(

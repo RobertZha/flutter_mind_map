@@ -1,3 +1,11 @@
+## 1.0.18 - (2026-01-04)
+
+- Validate Base64 Image String
+
+## 1.0.17 - (2026-01-03)
+
+- Fix bug
+
 ### 1.0.16 - (2026-01-02)
 
 - Add `Node Add Inage`
