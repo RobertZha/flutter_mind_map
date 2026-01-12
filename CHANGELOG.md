@@ -1,3 +1,7 @@
+## 1.0.20 - (2026-01-06)
+
+- Add `setEnabledDoubleTapShowTextField`
+
 ## 1.0.19 - (2026-01-05)
 
 - Future load image

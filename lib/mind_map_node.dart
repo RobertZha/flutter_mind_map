@@ -944,6 +944,9 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     }
   }
 
+  String _oldImageBase64 = "";
+  Uint8List? image;
+
   String _image = "";
   String getImage() {
     return _image;
@@ -1812,6 +1815,8 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   }
 
   final FocusNode _focusNode = FocusNode();
+
+  bool _doubleTapForTextField = false;
 }
 
 class MindMapNodeState extends State<MindMapNode> {
@@ -1823,6 +1828,11 @@ class MindMapNodeState extends State<MindMapNode> {
         onSelectedNodeChanged,
       );
     }
+    widget._focusNode.addListener(() {
+      if (!widget._focusNode.hasFocus) {
+        widget._doubleTapForTextField = false;
+      }
+    });
   }
 
   @override
@@ -3017,6 +3027,12 @@ class MindMapNodeTitleState extends State<MindMapNodeTitle> {
         if (!(widget.node.getMindMap()?.getReadOnly() ?? false)) {
           widget.node.getMindMap()?.setSelectedNode(widget.node);
           widget.node.getMindMap()?.onDoubleTap(widget.node);
+          if (widget.node.getMindMap()?.getEnabledDoubleTapShowTextField() ??
+              false) {
+            setState(() {
+              widget.node._doubleTapForTextField = true;
+            });
+          }
         }
       },
       child:
@@ -3046,23 +3062,21 @@ class MindMapNodeTitleState extends State<MindMapNodeTitle> {
     );
   }
 
-  String _oldImageBase64 = "";
-  Uint8List? image;
   Future<void> loadImage() async {
-    if (widget.node.getImage() != _oldImageBase64) {
+    if (widget.node.getImage() != widget.node._oldImageBase64) {
       if (widget.node.getImage().isNotEmpty) {
         if (await Base64ImageValidator.isValidImage(
           widget.node.getImage(),
           checkHeader: true,
           tryDecode: true,
         )) {
-          image = Base64Decoder().convert(widget.node.getImage());
-          _oldImageBase64 = widget.node.getImage();
+          widget.node.image = Base64Decoder().convert(widget.node.getImage());
+          widget.node._oldImageBase64 = widget.node.getImage();
         } else {
-          image = null;
+          widget.node.image = null;
         }
       } else {
-        image = null;
+        widget.node.image = null;
       }
     }
   }
@@ -3084,7 +3098,8 @@ class MindMapNodeTitleState extends State<MindMapNodeTitle> {
           child:
               widget.node.getChild() ??
               (!(widget.node.getMindMap()?.getReadOnly() ?? true) &&
-                      (widget.node.getMindMap()?.hasTextField() ?? false) &&
+                      ((widget.node.getMindMap()?.hasTextField() ?? false) ||
+                          widget.node._doubleTapForTextField) &&
                       widget.node.getSelected() &&
                       !(widget.node.getMindMap()?.getIsScaling() ?? false)
                   ? Container(
@@ -3126,7 +3141,7 @@ class MindMapNodeTitleState extends State<MindMapNodeTitle> {
                         },
                       ),
                     )
-                  : (image != null
+                  : (widget.node.image != null
                         ? (widget.node.getImagePosition() ==
                                   MindMapNodeImagePosition.left
                               ? (Row(
@@ -3134,7 +3149,7 @@ class MindMapNodeTitleState extends State<MindMapNodeTitle> {
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
                                     Image.memory(
-                                      image!,
+                                      widget.node.image!,
                                       width: widget.node.getImageWidth(),
                                       height: widget.node.getImageHeight(),
                                       fit: BoxFit.fill,

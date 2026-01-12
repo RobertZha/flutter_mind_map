@@ -27,6 +27,17 @@ class MindMap extends StatefulWidget {
   MindMap({super.key});
   final GlobalKey _key = GlobalKey();
 
+  bool _enabledDoubleTapShowTextField = false;
+
+  /// When double tap, show text field
+  bool getEnabledDoubleTapShowTextField() {
+    return _enabledDoubleTapShowTextField;
+  }
+
+  void setEnabledDoubleTapShowTextField(bool enabled) {
+    _enabledDoubleTapShowTextField = enabled;
+  }
+
   bool _enabledExtendedClick = false;
 
   /// When Extended is not empty, display underline and Hand mouse in Read Only mode

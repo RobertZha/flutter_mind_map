@@ -32,6 +32,7 @@ Flutter's highly customizable and interactive mind map package features custom t
 -   [Node Add Image](#node-add-image)
 -   [setEnabledExtendedClick](#setenabledextendedclick)
 -   [setExpandedLevel](#setexpandedlevel)
+-   [setEnabledDoubleTapShowTextField](#setenableddoubletapshowtextfield)
 
 ## Load nodes from JSON
 
@@ -560,6 +561,12 @@ mindMap.setEnabledExtendedClick(true);
 ## setExpandedLevel
 ```dart
 mindMap.setExpandedLevel(3);
+
+```
+
+## setEnabledDoubleTapShowTextField
+```dart
+mindMap.setEnabledDoubleTapShowTextField(true);
 
 ```
 

@@ -32,6 +32,7 @@ class Base64ImageValidator {
 
       return true;
     } catch (e) {
+      print(e.toString());
       return false;
     }
   }
@@ -43,6 +44,7 @@ class Base64ImageValidator {
     // Processing data URI
     if (str.startsWith('data:image/')) {
       final parts = str.split(',');
+
       if (parts.length != 2) return false;
       str = parts[1];
     }
