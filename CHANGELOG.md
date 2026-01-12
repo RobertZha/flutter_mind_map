@@ -1,3 +1,7 @@
+## 1.0.19 - (2026-01-05)
+
+- Future load image
+
 ## 1.0.18 - (2026-01-04)
 
 - Validate Base64 Image String

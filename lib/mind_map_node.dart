@@ -1,6 +1,8 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_mind_map/adapter/i_node_adapter.dart';
+import 'package:flutter_mind_map/base64_image_validator.dart';
 import 'package:flutter_mind_map/i_mind_map_node.dart';
 import 'package:flutter_mind_map/link/beerse_line_link.dart';
 import 'package:flutter_mind_map/link/i_link.dart';
@@ -3044,182 +3046,196 @@ class MindMapNodeTitleState extends State<MindMapNodeTitle> {
     );
   }
 
-  bool isValidBase64Image(String base64String) {
-    String cleanString = base64String.replaceAll(
-      RegExp(r'^data:image\/[a-zA-Z]+;base64,'),
-      '',
-    );
-    if (!RegExp(r'^[A-Za-z0-9+/]*={0,2}$').hasMatch(cleanString)) {
-      return false;
+  String _oldImageBase64 = "";
+  Uint8List? image;
+  Future<void> loadImage() async {
+    if (widget.node.getImage() != _oldImageBase64) {
+      if (widget.node.getImage().isNotEmpty) {
+        if (await Base64ImageValidator.isValidImage(
+          widget.node.getImage(),
+          checkHeader: true,
+          tryDecode: true,
+        )) {
+          image = Base64Decoder().convert(widget.node.getImage());
+          _oldImageBase64 = widget.node.getImage();
+        } else {
+          image = null;
+        }
+      } else {
+        image = null;
+      }
     }
-
-    if (cleanString.length % 4 != 0) {
-      return false;
-    }
-
-    return true;
   }
 
   Widget getBody(BoxBorder border) {
-    bool hasImage = false;
-    if (widget.node.getImage().isNotEmpty) {
-      hasImage = isValidBase64Image(widget.node.getImage());
-    }
-    return Container(
-      padding: widget.node.getPadding(),
-      decoration: BoxDecoration(
-        color: widget.node.getBackgroundColor(),
-        border: border,
-        borderRadius: widget.node.getBorderRadius(),
-        boxShadow: widget.node.getShadow(),
-        gradient: widget.node.getGradient(),
-      ),
-      constraints: BoxConstraints(minWidth: 30),
-      child:
-          widget.node.getChild() ??
-          (!(widget.node.getMindMap()?.getReadOnly() ?? true) &&
-                  (widget.node.getMindMap()?.hasTextField() ?? false) &&
-                  widget.node.getSelected() &&
-                  !(widget.node.getMindMap()?.getIsScaling() ?? false)
-              ? Container(
-                  constraints: BoxConstraints(
-                    maxWidth: widget.node.getSize() != null
-                        ? ((widget.node.getSize()!.width -
-                                      (widget.node.getPadding() == null
-                                          ? 0
-                                          : (widget.node.getPadding()!.left +
-                                                widget.node
-                                                    .getPadding()!
-                                                    .right))) <
-                                  30
-                              ? 30
-                              : widget.node.getSize()!.width -
-                                    (widget.node.getPadding() == null
-                                        ? 0
-                                        : (widget.node.getPadding()!.left +
-                                              widget.node.getPadding()!.right)))
-                        : 100,
-                  ),
-                  child: TextField(
-                    autofocus: true,
-                    focusNode: widget.node._focusNode,
-                    controller: _editingController,
-                    style: widget.node.getTextStyle(),
-                    scrollPadding: EdgeInsets.zero,
-                    decoration: InputDecoration(
-                      isCollapsed: true,
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                    onChanged: (value) {
-                      widget.node.setTitle(_editingController.text);
-                    },
-                  ),
-                )
-              : (hasImage
-                    ? (widget.node.getImagePosition() ==
-                              MindMapNodeImagePosition.left
-                          ? (Row(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Image.memory(
-                                  Base64Decoder().convert(
-                                    widget.node.getImage(),
-                                  ),
-                                  width: widget.node.getImageWidth(),
-                                  height: widget.node.getImageHeight(),
-                                  fit: BoxFit.fill,
-                                ),
-                                SizedBox(width: widget.node.getImageSpace()),
-                                Text(
-                                  widget.node.getTitle(),
-                                  style: widget.node.getTextStyle(),
-                                ),
-                              ],
-                            ))
-                          : (widget.node.getImagePosition() ==
-                                    MindMapNodeImagePosition.right
-                                ? (Row(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        widget.node.getTitle(),
-                                        style: widget.node.getTextStyle(),
-                                      ),
-                                      SizedBox(
-                                        width: widget.node.getImageSpace(),
-                                      ),
-                                      Image.memory(
-                                        Base64Decoder().convert(
-                                          widget.node.getImage(),
-                                        ),
-                                        width: widget.node.getImageWidth(),
-                                        height: widget.node.getImageHeight(),
-                                        fit: BoxFit.fill,
-                                      ),
-                                    ],
-                                  ))
-                                : (widget.node.getImagePosition() ==
-                                          MindMapNodeImagePosition.top
-                                      ? (Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Image.memory(
-                                              Base64Decoder().convert(
-                                                widget.node.getImage(),
-                                              ),
-                                              width: widget.node
-                                                  .getImageWidth(),
-                                              height: widget.node
-                                                  .getImageHeight(),
-                                              fit: BoxFit.fill,
-                                            ),
-                                            SizedBox(
-                                              height: widget.node
-                                                  .getImageSpace(),
-                                            ),
-                                            Text(
-                                              widget.node.getTitle(),
-                                              style: widget.node.getTextStyle(),
-                                            ),
-                                          ],
-                                        ))
-                                      : (Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.center,
-                                          children: [
-                                            Text(
-                                              widget.node.getTitle(),
-                                              style: widget.node.getTextStyle(),
-                                            ),
-                                            SizedBox(
-                                              height: widget.node
-                                                  .getImageSpace(),
-                                            ),
-                                            Image.memory(
-                                              Base64Decoder().convert(
-                                                widget.node.getImage(),
-                                              ),
-                                              width: widget.node
-                                                  .getImageWidth(),
-                                              height: widget.node
-                                                  .getImageHeight(),
-                                              fit: BoxFit.fill,
-                                            ),
-                                          ],
-                                        )))))
-                    : Text(
-                        widget.node.getTitle(),
+    return FutureBuilder(
+      future: loadImage(),
+      builder: (context, snapshot) {
+        return Container(
+          padding: widget.node.getPadding(),
+          decoration: BoxDecoration(
+            color: widget.node.getBackgroundColor(),
+            border: border,
+            borderRadius: widget.node.getBorderRadius(),
+            boxShadow: widget.node.getShadow(),
+            gradient: widget.node.getGradient(),
+          ),
+          constraints: BoxConstraints(minWidth: 30),
+          child:
+              widget.node.getChild() ??
+              (!(widget.node.getMindMap()?.getReadOnly() ?? true) &&
+                      (widget.node.getMindMap()?.hasTextField() ?? false) &&
+                      widget.node.getSelected() &&
+                      !(widget.node.getMindMap()?.getIsScaling() ?? false)
+                  ? Container(
+                      constraints: BoxConstraints(
+                        maxWidth: widget.node.getSize() != null
+                            ? ((widget.node.getSize()!.width -
+                                          (widget.node.getPadding() == null
+                                              ? 0
+                                              : (widget.node
+                                                        .getPadding()!
+                                                        .left +
+                                                    widget.node
+                                                        .getPadding()!
+                                                        .right))) <
+                                      30
+                                  ? 30
+                                  : widget.node.getSize()!.width -
+                                        (widget.node.getPadding() == null
+                                            ? 0
+                                            : (widget.node.getPadding()!.left +
+                                                  widget.node
+                                                      .getPadding()!
+                                                      .right)))
+                            : 100,
+                      ),
+                      child: TextField(
+                        autofocus: true,
+                        focusNode: widget.node._focusNode,
+                        controller: _editingController,
                         style: widget.node.getTextStyle(),
-                      ))),
+                        scrollPadding: EdgeInsets.zero,
+                        decoration: InputDecoration(
+                          isCollapsed: true,
+                          border: InputBorder.none,
+                          contentPadding: EdgeInsets.zero,
+                        ),
+                        onChanged: (value) {
+                          widget.node.setTitle(_editingController.text);
+                        },
+                      ),
+                    )
+                  : (image != null
+                        ? (widget.node.getImagePosition() ==
+                                  MindMapNodeImagePosition.left
+                              ? (Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Image.memory(
+                                      image!,
+                                      width: widget.node.getImageWidth(),
+                                      height: widget.node.getImageHeight(),
+                                      fit: BoxFit.fill,
+                                    ),
+                                    SizedBox(
+                                      width: widget.node.getImageSpace(),
+                                    ),
+                                    Text(
+                                      widget.node.getTitle(),
+                                      style: widget.node.getTextStyle(),
+                                    ),
+                                  ],
+                                ))
+                              : (widget.node.getImagePosition() ==
+                                        MindMapNodeImagePosition.right
+                                    ? (Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.center,
+                                        children: [
+                                          Text(
+                                            widget.node.getTitle(),
+                                            style: widget.node.getTextStyle(),
+                                          ),
+                                          SizedBox(
+                                            width: widget.node.getImageSpace(),
+                                          ),
+                                          Image.memory(
+                                            Base64Decoder().convert(
+                                              widget.node.getImage(),
+                                            ),
+                                            width: widget.node.getImageWidth(),
+                                            height: widget.node
+                                                .getImageHeight(),
+                                            fit: BoxFit.fill,
+                                          ),
+                                        ],
+                                      ))
+                                    : (widget.node.getImagePosition() ==
+                                              MindMapNodeImagePosition.top
+                                          ? (Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Image.memory(
+                                                  Base64Decoder().convert(
+                                                    widget.node.getImage(),
+                                                  ),
+                                                  width: widget.node
+                                                      .getImageWidth(),
+                                                  height: widget.node
+                                                      .getImageHeight(),
+                                                  fit: BoxFit.fill,
+                                                ),
+                                                SizedBox(
+                                                  height: widget.node
+                                                      .getImageSpace(),
+                                                ),
+                                                Text(
+                                                  widget.node.getTitle(),
+                                                  style: widget.node
+                                                      .getTextStyle(),
+                                                ),
+                                              ],
+                                            ))
+                                          : (Column(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.start,
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              children: [
+                                                Text(
+                                                  widget.node.getTitle(),
+                                                  style: widget.node
+                                                      .getTextStyle(),
+                                                ),
+                                                SizedBox(
+                                                  height: widget.node
+                                                      .getImageSpace(),
+                                                ),
+                                                Image.memory(
+                                                  Base64Decoder().convert(
+                                                    widget.node.getImage(),
+                                                  ),
+                                                  width: widget.node
+                                                      .getImageWidth(),
+                                                  height: widget.node
+                                                      .getImageHeight(),
+                                                  fit: BoxFit.fill,
+                                                ),
+                                              ],
+                                            )))))
+                        : Text(
+                            widget.node.getTitle(),
+                            style: widget.node.getTextStyle(),
+                          ))),
+        );
+      },
     );
   }
 }
