@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mind_map/adapter/i_link_adapter.dart';
 import 'package:flutter_mind_map/i_mind_map_node.dart';
 import 'package:flutter_mind_map/link/i_link.dart';
-import 'package:flutter_mind_map/mind_map_node.dart';
 
 /// Oblique Broken Line
 class ArcLineLink implements ILink {
@@ -40,10 +39,8 @@ class ArcLineLinkPainter extends CustomPainter {
             Offset? itemOffset = item.getOffsetByParent();
             Size? itemSize = item.getSize();
             if (itemOffset != null && itemSize != null) {
-              double p = 0;
-              if (node is MindMapNode) {
-                p = ((node as MindMapNode).getPadding()?.left ?? 0) / 2;
-              }
+              double p = 0 - node.getLinkOutPadding();
+
               double w = offset.dx - itemOffset.dx - itemSize.width + p;
               double h =
                   (itemOffset.dy +
@@ -185,10 +182,8 @@ class ArcLineLinkPainter extends CustomPainter {
             Offset? itemOffset = item.getOffsetByParent();
             Size? itemSize = item.getSize();
             if (itemOffset != null && itemSize != null) {
-              double p = 0;
-              if (node is MindMapNode) {
-                p = ((node as MindMapNode).getPadding()?.right ?? 0) / 2;
-              }
+              double p = 0 - node.getLinkOutPadding();
+
               double w = itemOffset.dx - offset.dx - s.width + p;
               double h =
                   (itemOffset.dy +

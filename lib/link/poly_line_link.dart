@@ -40,6 +40,7 @@ class PolyLineLinkPainter extends CustomPainter {
       Offset? offset = node.getOffset();
       Size? s = node.getSize();
       if (offset != null && s != null) {
+        double p = 0 - node.getLinkOutPadding();
         if (node.getNodeType() != NodeType.right) {
           for (IMindMapNode item in node.getLeftItems()) {
             Paint paint = Paint()
@@ -51,7 +52,7 @@ class PolyLineLinkPainter extends CustomPainter {
             Offset? itemOffset = item.getOffsetByParent();
             Size? itemSize = item.getSize();
             if (itemOffset != null && itemSize != null) {
-              double w = (offset.dx - itemOffset.dx - itemSize.width) / 2;
+              double w = (p + offset.dx - itemOffset.dx - itemSize.width) / 2;
               double h =
                   ((offset.dy + s.height / 2 + node.getLinkOutOffset()) -
                       (itemOffset.dy +
@@ -187,7 +188,7 @@ class PolyLineLinkPainter extends CustomPainter {
                     offset.dy + s.height / 2 + node.getLinkOutOffset(),
                   ),
                   Offset(
-                    offset.dx,
+                    offset.dx + p,
                     offset.dy + s.height / 2 + node.getLinkOutOffset(),
                   ),
                   paint,
@@ -207,7 +208,7 @@ class PolyLineLinkPainter extends CustomPainter {
             Offset? itemOffset = item.getOffsetByParent();
             Size? itemSize = item.getSize();
             if (itemOffset != null && itemSize != null) {
-              double w = (itemOffset.dx - offset.dx - s.width) / 2;
+              double w = (p + itemOffset.dx - offset.dx - s.width) / 2;
               double h =
                   ((offset.dy + s.height / 2 + node.getLinkOutOffset()) -
                       (itemOffset.dy +
@@ -343,7 +344,7 @@ class PolyLineLinkPainter extends CustomPainter {
                     offset.dy + s.height / 2 + node.getLinkOutOffset(),
                   ),
                   Offset(
-                    offset.dx + s.width,
+                    offset.dx + s.width - p,
                     offset.dy + s.height / 2 + node.getLinkOutOffset(),
                   ),
                   paint,

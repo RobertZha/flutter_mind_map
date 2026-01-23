@@ -28,6 +28,7 @@ class LineLinkPainter extends CustomPainter {
       Offset? offset = node.getOffset();
       Size? s = node.getSize();
       if (offset != null && s != null) {
+        double p = 0 - node.getLinkOutPadding();
         if (node.getNodeType() != NodeType.right) {
           for (IMindMapNode item in node.getLeftItems()) {
             Paint paint = Paint()
@@ -42,7 +43,7 @@ class LineLinkPainter extends CustomPainter {
                   itemOffset.dy + itemSize.height / 2 + item.getLinkInOffset(),
                 ),
                 Offset(
-                  offset.dx,
+                  offset.dx + p,
                   offset.dy + s.height / 2 + node.getLinkOutOffset(),
                 ),
                 paint,
@@ -64,7 +65,7 @@ class LineLinkPainter extends CustomPainter {
                   itemOffset.dy + itemSize.height / 2 + item.getLinkInOffset(),
                 ),
                 Offset(
-                  offset.dx + s.width,
+                  offset.dx + s.width - p,
                   offset.dy + s.height / 2 + node.getLinkOutOffset(),
                 ),
                 paint,

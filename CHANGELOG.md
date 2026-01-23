@@ -1,3 +1,7 @@
+## 1.0.21 - (2026-01-07)
+
+- Add `setLinkOutPadding`
+
 ## 1.0.20 - (2026-01-06)
 
 - Add `setEnabledDoubleTapShowTextField`

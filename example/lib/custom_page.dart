@@ -34,7 +34,11 @@ class CustomPage extends StatefulWidget {
           mindMap.getRootNode().getLeftItems().clear();
           mindMap.getRootNode().getRightItems().clear();
           mindMap.getRootNode().setTitle("OS Types");
+          (mindMap.getRootNode() as MindMapNode).setBackgroundColor(
+            Colors.white,
+          );
           mindMap.getRootNode().setLinkColor(Colors.blue);
+          (mindMap.getRootNode() as MindMapNode).setLinkOutPadding(-50);
           // (mindMap.getRootNode() as MindMapNode).
 
           (mindMap.getRootNode() as MindMapNode).setBorderRadius(
@@ -49,6 +53,7 @@ class CustomPage extends StatefulWidget {
           node1.setBackgroundColor(Colors.yellow);
           node1.setTextStyle(TextStyle(fontSize: 12.0, color: Colors.black));
           node1.setLink(ArcLineLink());
+          node1.setLinkOutPadding(-15);
           mindMap.getRootNode().addLeftItem(node1);
 
           MindMapNode node11 = MindMapNode();
@@ -171,8 +176,10 @@ class CustomPage extends StatefulWidget {
 
           MindMapNode node5 = MindMapNode();
           node5.setTitle("By Time");
+          node5.setBackgroundColor(Colors.white);
           node5.setLinkColor(Colors.cyan);
           node5.setLink(ObliqueBrokenLine());
+          node5.setLinkOutOffsetMode(MindMapNodeLinkOffsetMode.center);
 
           node5.setBorder(
             BoxBorder.all(
@@ -203,10 +210,12 @@ class CustomPage extends StatefulWidget {
           MindMapNode node51 = MindMapNode();
           node51.setTitle("Time-Sharing");
           node51.setExtended("value");
+          node51.setLinkInOffsetMode(MindMapNodeLinkOffsetMode.center);
           node5.addRightItem(node51);
           MindMapNode node52 = MindMapNode();
           node52.setTitle("Real-Time");
           node52.setExtended("value");
+          node52.setLinkInOffsetMode(MindMapNodeLinkOffsetMode.center);
           node5.addRightItem(node52);
 
           mindMap.onChanged();

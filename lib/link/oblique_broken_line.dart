@@ -27,6 +27,7 @@ class ObliqueBrokenLinePainter extends CustomPainter {
       Offset? offset = node.getOffset();
       Size? s = node.getSize();
       if (offset != null && s != null) {
+        double p = 0 - node.getLinkOutPadding();
         if (node.getNodeType() != NodeType.right) {
           for (IMindMapNode item in node.getLeftItems()) {
             Paint paint = Paint()
@@ -38,7 +39,7 @@ class ObliqueBrokenLinePainter extends CustomPainter {
             Offset? itemOffset = item.getOffsetByParent();
             Size? itemSize = item.getSize();
             if (itemOffset != null && itemSize != null) {
-              double w = (offset.dx - itemOffset.dx - itemSize.width) / 2;
+              double w = (p + offset.dx - itemOffset.dx - itemSize.width) / 2;
 
               //Left HLine
               canvas.drawLine(
@@ -60,7 +61,7 @@ class ObliqueBrokenLinePainter extends CustomPainter {
                   itemOffset.dy + itemSize.height / 2 + item.getLinkInOffset(),
                 ),
                 Offset(
-                  offset.dx,
+                  offset.dx + p,
                   offset.dy + s.height / 2 + node.getLinkOutOffset(),
                 ),
                 paint,
@@ -79,7 +80,7 @@ class ObliqueBrokenLinePainter extends CustomPainter {
             Offset? itemOffset = item.getOffsetByParent();
             Size? itemSize = item.getSize();
             if (itemOffset != null && itemSize != null) {
-              double w = (itemOffset.dx - offset.dx - s.width) / 2;
+              double w = (p + itemOffset.dx - offset.dx - s.width) / 2;
 
               //Right HLine
               canvas.drawLine(
@@ -101,7 +102,7 @@ class ObliqueBrokenLinePainter extends CustomPainter {
                   itemOffset.dy + itemSize.height / 2 + item.getLinkInOffset(),
                 ),
                 Offset(
-                  offset.dx + s.width,
+                  offset.dx + s.width - p,
                   offset.dy + s.height / 2 + node.getLinkOutOffset(),
                 ),
                 paint,

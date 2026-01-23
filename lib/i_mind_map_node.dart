@@ -54,6 +54,7 @@ abstract class IMindMapNode {
 
   double getLinkInOffset();
   double getLinkOutOffset();
+  double getLinkOutPadding();
 
   Size? getSize();
   void setSize(Size? value);

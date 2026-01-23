@@ -28,6 +28,8 @@ class BeerseLineLinkPainter extends CustomPainter {
       Offset? offset = node.getOffset();
       Size? s = node.getSize();
       if (offset != null && s != null) {
+        double p = 0 - node.getLinkOutPadding();
+
         if (node.getNodeType() != NodeType.right) {
           for (IMindMapNode item in node.getLeftItems()) {
             Paint paint = Paint()
@@ -43,11 +45,11 @@ class BeerseLineLinkPainter extends CustomPainter {
                 itemOffset.dy + itemSize.height / 2 + item.getLinkInOffset(),
               );
               path.cubicTo(
-                itemOffset.dx + itemSize.width + node.getHSpace() / 2,
+                itemOffset.dx + itemSize.width + (node.getHSpace() + p) / 2,
                 itemOffset.dy + itemSize.height / 2 + item.getLinkInOffset(),
-                offset.dx - node.getHSpace() / 2,
+                offset.dx + p - (node.getHSpace() + p) / 2,
                 offset.dy + s.height / 2 + node.getLinkOutOffset(),
-                offset.dx,
+                offset.dx + p,
                 offset.dy + s.height / 2 + node.getLinkOutOffset(),
               );
               canvas.drawPath(path, paint);
@@ -70,11 +72,11 @@ class BeerseLineLinkPainter extends CustomPainter {
                 itemOffset.dy + itemSize.height / 2 + item.getLinkInOffset(),
               );
               path.cubicTo(
-                itemOffset.dx - (node.getHSpace() / 2),
+                itemOffset.dx - ((node.getHSpace() + p) / 2),
                 itemOffset.dy + itemSize.height / 2 + item.getLinkInOffset(),
-                offset.dx + s.width + (node.getHSpace() / 2),
+                offset.dx + s.width + ((node.getHSpace() + p) / 2) - p,
                 offset.dy + s.height / 2 + node.getLinkOutOffset(),
-                offset.dx + s.width,
+                offset.dx + s.width - p,
                 offset.dy + s.height / 2 + node.getLinkOutOffset(),
               );
               canvas.drawPath(path, paint);

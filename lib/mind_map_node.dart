@@ -257,6 +257,9 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     if (_linkOutOffsetMode != null) {
       properties["LinkOutOffsetMode"] = _linkOutOffsetMode!.name;
     }
+    if (_linkOutPadding != null && _linkOutPadding != 0) {
+      properties["LinkOutPadding"] = _linkOutPadding;
+    }
     List<Map<String, dynamic>> leftNodes = [];
     for (IMindMapNode node in _leftItems) {
       leftNodes.add(node.toJson());
@@ -519,6 +522,11 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
             }
           }
         }
+        if (proJson.containsKey("LinkOutPadding")) {
+          setLinkOutPadding(
+            double.tryParse(proJson["LinkOutPadding"].toString()) ?? 0,
+          );
+        }
       }
       if (nodeJson.containsKey("Nodes")) {
         Map<String, dynamic> nodes = nodeJson["Nodes"];
@@ -659,6 +667,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     _link = value;
     _state?.refresh();
     if (!_isLoading) {
+      getMindMap()?.refresh();
       getMindMap()?.onChanged();
     }
   }
@@ -862,6 +871,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   void setHSpace(int value) {
     _hSpace = value;
     refresh();
+    getMindMap()?.refresh();
     if (!_isLoading) {
       getMindMap()?.onChanged();
     }
@@ -891,6 +901,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   void setVSpace(int value) {
     _vSpace = value;
     refresh();
+    getMindMap()?.refresh();
     if (!_isLoading) {
       getMindMap()?.onChanged();
     }
@@ -938,6 +949,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     if (_title != value) {
       _title = value;
       refresh();
+      getMindMap()?.refresh();
       if (!_isLoading) {
         getMindMap()?.onChanged();
       }
@@ -956,6 +968,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     if (_image != value) {
       _image = value;
       refresh();
+      getMindMap()?.refresh();
       if (!_isLoading) {
         getMindMap()?.onChanged();
       }
@@ -972,6 +985,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     if (_imagePosition != value) {
       _imagePosition = value;
       refresh();
+      getMindMap()?.refresh();
       if (!_isLoading) {
         getMindMap()?.onChanged();
       }
@@ -987,6 +1001,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     if (_imageWidth != value) {
       _imageWidth = value;
       refresh();
+      getMindMap()?.refresh();
       if (!_isLoading) {
         getMindMap()?.onChanged();
       }
@@ -1002,6 +1017,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     if (_imageHeight != value) {
       _imageHeight = value;
       refresh();
+      getMindMap()?.refresh();
       if (!_isLoading) {
         getMindMap()?.onChanged();
       }
@@ -1017,6 +1033,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     if (_imageSpace != value) {
       _imageSpace = value;
       refresh();
+      getMindMap()?.refresh();
       if (!_isLoading) {
         getMindMap()?.onChanged();
       }
@@ -1812,6 +1829,43 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
           getBorder().bottom.width / 2;
     }
     return 0;
+  }
+
+  double? _linkOutPadding;
+  @override
+  double getLinkOutPadding() {
+    if (_linkOutPadding != null) {
+      return _linkOutPadding!;
+    } else {
+      return getMindMap()?.getTheme() != null &&
+              getMindMap()?.getTheme()?.getThemeByLevel(getLevel()) != null &&
+              getMindMap()?.getTheme()?.getThemeByLevel(
+                    getLevel(),
+                  )!["LinkOutPadding"] !=
+                  null
+          ? (double.tryParse(
+                  getMindMap()
+                          ?.getTheme()
+                          ?.getThemeByLevel(getLevel())!["LinkOutPadding"]
+                          .toString() ??
+                      "0",
+                ) ??
+                0)
+          : (getParentNode() != null && getParentNode() is MindMapNode
+                ? (getParentNode() as MindMapNode).getLinkOutPadding()
+                : 0);
+    }
+  }
+
+  void setLinkOutPadding(double value) {
+    if (_linkOutPadding != value) {
+      _linkOutPadding = value;
+      refresh();
+      getMindMap()?.refresh();
+      if (!_isLoading) {
+        getMindMap()?.onChanged();
+      }
+    }
   }
 
   final FocusNode _focusNode = FocusNode();
