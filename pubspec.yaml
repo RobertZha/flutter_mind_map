@@ -1,6 +1,6 @@
 name: flutter_mind_map
 description: "Flutter's customizable mind map widget. It can customize styles, node content, and connection lines."
-version: 1.0.21
+version: 1.0.22
 homepage: https://www.polariscode.com
 repository: https://github.com/RobertZha/flutter_mind_map
 topics: [mind-map, mindmap, mind]

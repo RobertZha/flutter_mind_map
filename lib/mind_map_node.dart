@@ -3069,12 +3069,15 @@ class MindMapNodeTitleState extends State<MindMapNodeTitle> {
     }
     return GestureDetector(
       onTapDown: (details) {
+        widget.node._doubleTapForTextField = false;
         widget.node.setDragOfset(details.localPosition);
       },
       onTap: () {
+        widget.node._doubleTapForTextField = false;
         widget.node.getMindMap()?.setSelectedNode(widget.node);
       },
       onLongPressDown: (details) {
+        widget.node._doubleTapForTextField = false;
         widget.node.getMindMap()?.setSelectedNode(widget.node);
       },
       onDoubleTap: () {
