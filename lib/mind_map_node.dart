@@ -966,6 +966,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
 
   void setImage(String value) {
     if (_image != value) {
+      _oldImageBase64 = "";
       _image = value;
       refresh();
       getMindMap()?.refresh();
