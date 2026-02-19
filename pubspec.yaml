@@ -10,6 +10,8 @@ screenshots:
     path: screenshots/mindmapcustom.png
   - description: 'MindMap in default theme'
     path: screenshots/mindmaptheme.png
+  - description: 'Fishbone Diagram'
+    path: screenshots/fishbone.png
 
 environment:
   sdk: ^3.8.1
