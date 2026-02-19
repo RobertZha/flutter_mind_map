@@ -219,6 +219,8 @@ class CustomPage extends StatefulWidget {
           node5.addRightItem(node52);
 
           mindMap.onChanged();
+          mindMap.setZoom(0.7);
+          mindMap.setMoveOffset(Offset.zero);
         }
 
         mindMap.addOnChangedListeners(onChanged);

@@ -59,6 +59,14 @@ abstract class IMindMapNode {
   Size? getSize();
   void setSize(Size? value);
 
+  double getFishboneHeight();
+  double getFishboneWidth();
+  void setFishboneWidth(double value);
+  FishboneNodeMode getFishboneNodeMode();
+  void setFishboneNodeMode(FishboneNodeMode value);
+  Offset getFishbonePosition();
+  void setFishbonePosition(Offset value);
+
   Rect? getLeftArea();
   Rect? getRightArea();
   Rect? getNodeArea();
@@ -78,6 +86,8 @@ abstract class IMindMapNode {
 }
 
 enum NodeType { root, left, right }
+
+enum FishboneNodeMode { up, down }
 
 Color stringToColor(String value) {
   if (value.startsWith("#") && value.length >= 9) {

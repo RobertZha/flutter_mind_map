@@ -188,6 +188,33 @@ class MindMap extends StatefulWidget {
     }
   }
 
+  FishboneMapType _fishboneMapType = FishboneMapType.leftToRight;
+
+  /// Mind map type
+  FishboneMapType getFishboneMapType() {
+    return _fishboneMapType;
+  }
+
+  void setFishboneMapType(FishboneMapType value) {
+    if (getMapType() == MapType.fishbone && _fishboneMapType != value) {
+      _fishboneMapType = value;
+      refresh();
+      onChanged();
+    }
+  }
+
+  Size _fishboneSize = Size.zero;
+  Size getFishboneSize() {
+    return _fishboneSize;
+  }
+
+  void setFishboneSize(Size value) {
+    if (_fishboneSize.width != value.width ||
+        _fishboneSize.height != value.height) {
+      _fishboneSize = value;
+    }
+  }
+
   final List<Function()> _onMapTypeChangedListeners = [];
 
   /// Add listener for map type change
@@ -337,9 +364,9 @@ class MindMap extends StatefulWidget {
           ? jsonEncode((getTheme() as JsonTheme).json)
           : "",
     };
-    if (getOffset() != null) {
-      json["x"] = getOffset()!.dx.toString();
-      json["y"] = getOffset()!.dy.toString();
+    if (getMoveOffset() != Offset.zero) {
+      json["x"] = getMoveOffset().dx.toString();
+      json["y"] = getMoveOffset().dy.toString();
     }
     return json;
   }
@@ -381,7 +408,7 @@ class MindMap extends StatefulWidget {
     if (json.containsKey("x") && json.containsKey("y")) {
       double x = double.tryParse(json["x"].toString()) ?? 0;
       double y = double.tryParse(json["y"].toString()) ?? 0;
-      setOffset(Offset(x, y));
+      setMoveOffset(Offset(x, y));
     }
     if (json.containsKey("Theme")) {
       String themeName = json["Theme"];
@@ -891,6 +918,7 @@ class MindMap extends StatefulWidget {
   ///Set Root Node
   void setRootNode(IMindMapNode rootNode) {
     _rootNode = rootNode;
+    _rootNode.setNodeType(NodeType.root);
     _rootNode.setMindMap(this);
     onRootNodeChanged();
   }
@@ -957,6 +985,7 @@ class MindMap extends StatefulWidget {
     if (moveOffset.dx != value.dx || moveOffset.dy != value.dy) {
       moveOffset = value;
       onMove();
+      onChanged();
     }
   }
 
@@ -1055,70 +1084,134 @@ class MindMapState extends State<MindMap> {
         size != null &&
         size.width > 0 &&
         size.height > 0) {
-      x = (s.width - size.width * widget.getZoom()) / 2;
-      y = (s.height - size.height * widget.getZoom()) / 2;
+      switch (widget.getMapType()) {
+        case MapType.mind:
+          x = (s.width - size.width * widget.getZoom()) / 2;
+          y = (s.height - size.height * widget.getZoom()) / 2;
+          break;
+        case MapType.fishbone:
+          x = widget.getMindMapPadding();
+          y =
+              widget.getMindMapPadding() +
+              (s.height - widget.getFishboneSize().height * widget.getZoom()) /
+                  2;
+      }
 
       ///set RooetNode Center
       Size? rs = widget.getRootNode().getSize();
       Offset? ro = widget.getRootNode().getOffset();
       if (rs != null && ro != null) {
-        if (widget.getRootNode().getLeftItems().isNotEmpty &&
-            widget.getRootNode().getRightItems().isNotEmpty) {
-          x =
-              s.width / 2 -
-              ro.dx -
-              rs.width / 2 +
-              (ro.dx - size.width / 2 + rs.width / 2) -
-              (ro.dx - size.width / 2 + rs.width / 2) * widget.getZoom();
-          y =
-              s.height / 2 -
-              ro.dy -
-              rs.height / 2 +
-              (ro.dy - size.height / 2 + rs.height / 2) -
-              (ro.dy - size.height / 2 + rs.height / 2) * widget.getZoom();
-        } else {
-          if (widget.getRootNode().getLeftItems().isNotEmpty) {
-            x =
-                s.width / 2 -
-                ro.dx -
-                rs.width / 2 +
-                (ro.dx - size.width / 2 + rs.width / 2) -
-                (ro.dx - size.width / 2 + rs.width / 2) * widget.getZoom();
+        switch (widget.getMapType()) {
+          case MapType.mind:
+            if (widget.getRootNode().getLeftItems().isNotEmpty &&
+                widget.getRootNode().getRightItems().isNotEmpty) {
+              x =
+                  s.width / 2 -
+                  ro.dx -
+                  rs.width / 2 +
+                  (ro.dx - size.width / 2 + rs.width / 2) -
+                  (ro.dx - size.width / 2 + rs.width / 2) * widget.getZoom();
+              y =
+                  s.height / 2 -
+                  ro.dy -
+                  rs.height / 2 +
+                  (ro.dy - size.height / 2 + rs.height / 2) -
+                  (ro.dy - size.height / 2 + rs.height / 2) * widget.getZoom();
+            } else {
+              if (widget.getRootNode().getLeftItems().isNotEmpty) {
+                x =
+                    s.width / 2 -
+                    ro.dx -
+                    rs.width / 2 +
+                    (ro.dx - size.width / 2 + rs.width / 2) -
+                    (ro.dx - size.width / 2 + rs.width / 2) * widget.getZoom();
 
-            x = s.width < size.width * widget.getZoom()
-                ? x +
-                      s.width / 2 -
-                      rs.width * widget.getZoom() / 2 -
-                      widget.getMindMapPadding()
-                : x + size.width * widget.getZoom() / 2;
-
-            y =
-                s.height / 2 -
-                ro.dy -
-                rs.height / 2 +
-                (ro.dy - size.height / 2 + rs.height / 2) -
-                (ro.dy - size.height / 2 + rs.height / 2) * widget.getZoom();
-          } else {
-            x =
-                s.width / 2 -
-                ro.dx -
-                rs.width / 2 +
-                (ro.dx - size.width / 2 + rs.width / 2) -
-                (ro.dx - size.width / 2 + rs.width / 2) * widget.getZoom();
-
-            x = s.width < size.width * widget.getZoom()
-                ? x -
-                      (s.width / 2 -
+                x = s.width < size.width * widget.getZoom()
+                    ? x +
+                          s.width / 2 -
                           rs.width * widget.getZoom() / 2 -
-                          widget.getMindMapPadding())
-                : x - size.width * widget.getZoom() / 2;
+                          widget.getMindMapPadding() * widget.getZoom()
+                    : x +
+                          size.width * widget.getZoom() / 2 -
+                          widget.getMindMapPadding() * widget.getZoom();
+
+                y =
+                    s.height / 2 -
+                    ro.dy -
+                    rs.height / 2 +
+                    (ro.dy - size.height / 2 + rs.height / 2) -
+                    (ro.dy - size.height / 2 + rs.height / 2) *
+                        widget.getZoom();
+              } else {
+                x =
+                    s.width / 2 -
+                    ro.dx -
+                    rs.width / 2 +
+                    (ro.dx - size.width / 2 + rs.width / 2) -
+                    (ro.dx - size.width / 2 + rs.width / 2) * widget.getZoom();
+
+                x = s.width < size.width * widget.getZoom()
+                    ? x -
+                          (s.width / 2 -
+                              rs.width * widget.getZoom() / 2 -
+                              widget.getMindMapPadding() * widget.getZoom())
+                    : x -
+                          size.width * widget.getZoom() / 2 +
+                          widget.getMindMapPadding() * widget.getZoom();
+                y =
+                    s.height / 2 -
+                    ro.dy -
+                    rs.height / 2 +
+                    (ro.dy - size.height / 2 + rs.height / 2) -
+                    (ro.dy - size.height / 2 + rs.height / 2) *
+                        widget.getZoom();
+              }
+            }
+            break;
+          case MapType.fishbone:
+            if (widget.getFishboneMapType() == FishboneMapType.rightToLeft) {
+              x =
+                  s.width / 2 -
+                  ro.dx -
+                  rs.width / 2 +
+                  (ro.dx - size.width / 2 + rs.width / 2) -
+                  (ro.dx - size.width / 2 + rs.width / 2) * widget.getZoom();
+
+              x = s.width < size.width * widget.getZoom()
+                  ? x +
+                        (s.width / 2 -
+                            rs.width * widget.getZoom() / 2 -
+                            widget.getMindMapPadding() * widget.getZoom() / 2) +
+                        widget.getMindMapPadding() * widget.getZoom()
+                  : x + size.width * widget.getZoom() / 2;
+            } else {
+              x =
+                  s.width / 2 -
+                  ro.dx -
+                  rs.width / 2 +
+                  (ro.dx - size.width / 2 + rs.width / 2) -
+                  (ro.dx - size.width / 2 + rs.width / 2) * widget.getZoom();
+
+              x = s.width < size.width * widget.getZoom()
+                  ? x -
+                        (s.width / 2 -
+                            rs.width * widget.getZoom() / 2 -
+                            widget.getMindMapPadding() * widget.getZoom() / 2) +
+                        widget.getMindMapPadding() * widget.getZoom()
+                  : x -
+                        size.width * widget.getZoom() / 2 +
+                        widget.getMindMapPadding() * widget.getZoom() * 2;
+            }
+
             y =
+                widget.getMindMapPadding() * widget.getZoom() +
                 s.height / 2 -
                 ro.dy -
                 rs.height / 2 +
                 (ro.dy - size.height / 2 + rs.height / 2) -
                 (ro.dy - size.height / 2 + rs.height / 2) * widget.getZoom();
-          }
+
+            break;
         }
       }
     }
@@ -1192,10 +1285,15 @@ class MindMapState extends State<MindMap> {
                         child: Container(
                           color: widget.getBackgroundColor(),
                           child: CustomPaint(
-                            painter: MindMapPainter(mindMap: widget),
+                            painter: widget.getMapType() == MapType.mind
+                                ? MindMapPainter(mindMap: widget)
+                                : FishbonePainter(mindMap: widget),
                             child: Container(
                               padding: EdgeInsets.all(
-                                widget.getMindMapPadding() * widget.getZoom(),
+                                widget.getMapType() == MapType.mind
+                                    ? widget.getMindMapPadding() *
+                                          widget.getZoom()
+                                    : 0,
                               ),
                               child: widget.getRootNode() as Widget,
                             ),
@@ -1494,12 +1592,19 @@ class MindMapState extends State<MindMap> {
           },
           onWillAcceptWithDetails: (details) {
             if (!widget.getIsScaling()) {
-              if (details.data is IMindMapNode) {
-                setState(() {
-                  widget._dragNode = details.data as IMindMapNode;
-                });
-                return true;
+              switch (widget.getMapType()) {
+                case MapType.mind:
+                  if (details.data is IMindMapNode) {
+                    setState(() {
+                      widget._dragNode = details.data as IMindMapNode;
+                    });
+                    return true;
+                  }
+                  break;
+                case MapType.fishbone:
+                  break;
               }
+
               setState(() {
                 widget._dragNode = null;
               });
@@ -1508,36 +1613,42 @@ class MindMapState extends State<MindMap> {
           },
           onAcceptWithDetails: (details) {
             if (!widget.getIsScaling()) {
-              if (details.data is IMindMapNode) {
-                setState(() {
-                  if (widget._dragInNode != null) {
-                    if ((details.data as IMindMapNode).getNodeType() ==
-                        NodeType.left) {
-                      (details.data as IMindMapNode)
-                          .getParentNode()
-                          ?.removeLeftItem((details.data as IMindMapNode));
-                    } else {
-                      (details.data as IMindMapNode)
-                          .getParentNode()
-                          ?.removeRightItem((details.data as IMindMapNode));
-                    }
-                    if (widget._leftDrag) {
-                      widget._dragInNode!.insertLeftItem(
-                        (details.data as IMindMapNode),
-                        _dragIndex,
-                      );
-                    } else {
-                      widget._dragInNode!.insertRightItem(
-                        (details.data as IMindMapNode),
-                        _dragIndex,
-                      );
-                    }
-                    widget.getRootNode().refresh();
-                    widget.onChanged();
+              switch (widget.getMapType()) {
+                case MapType.mind:
+                  if (details.data is IMindMapNode) {
+                    setState(() {
+                      if (widget._dragInNode != null) {
+                        if ((details.data as IMindMapNode).getNodeType() ==
+                            NodeType.left) {
+                          (details.data as IMindMapNode)
+                              .getParentNode()
+                              ?.removeLeftItem((details.data as IMindMapNode));
+                        } else {
+                          (details.data as IMindMapNode)
+                              .getParentNode()
+                              ?.removeRightItem((details.data as IMindMapNode));
+                        }
+                        if (widget._leftDrag) {
+                          widget._dragInNode!.insertLeftItem(
+                            (details.data as IMindMapNode),
+                            _dragIndex,
+                          );
+                        } else {
+                          widget._dragInNode!.insertRightItem(
+                            (details.data as IMindMapNode),
+                            _dragIndex,
+                          );
+                        }
+                        widget.getRootNode().refresh();
+                        widget.onChanged();
+                      }
+                      widget.refresh();
+                      widget._dragInNode = null;
+                    });
                   }
-                  widget.refresh();
-                  widget._dragInNode = null;
-                });
+                  break;
+                case MapType.fishbone:
+                  break;
               }
               setState(() {
                 widget._dragNode = null;
@@ -1870,6 +1981,360 @@ class MindMapPainter extends CustomPainter {
   }
 }
 
-enum MapType { mind }
+class FishbonePainter extends CustomPainter {
+  FishbonePainter({required this.mindMap});
+
+  MindMap mindMap;
+
+  @override
+  void paint(ui.Canvas canvas, ui.Size size) {
+    if (mindMap.getFishboneMapType() == FishboneMapType.leftToRight) {
+      Paint paint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
+        ..strokeWidth = mindMap.getRootNode().getLinkWidth() <= 0
+            ? 2
+            : mindMap.getRootNode().getLinkWidth()
+        ..color = mindMap.getRootNode().getLinkColor() == Colors.transparent
+            ? Colors.black
+            : mindMap.getRootNode().getLinkColor();
+
+      Offset offset = mindMap.getRootNode().getOffset() ?? Offset.zero;
+      double dx = mindMap.getRootNode().getFishbonePosition().dx - offset.dx;
+      double dy = mindMap.getRootNode().getFishbonePosition().dy - offset.dy;
+
+      double left = offset.dx + (mindMap.getRootNode().getSize()?.width ?? 0);
+      double top =
+          offset.dy + (mindMap.getRootNode().getSize()?.height ?? 0) / 2;
+      canvas.drawLine(
+        Offset(left + dx, top + dy),
+        Offset(mindMap.getFishboneSize().width + dx, top + dy),
+        paint,
+      );
+      List<IMindMapNode> items = [];
+      items.addAll(mindMap.getRootNode().getRightItems());
+      for (int i = 0; i < mindMap.getRootNode().getLeftItems().length; i++) {
+        IMindMapNode node =
+            mindMap.getRootNode().getLeftItems()[mindMap
+                    .getRootNode()
+                    .getLeftItems()
+                    .length -
+                i -
+                1];
+        items.add(node);
+      }
+      for (IMindMapNode node in items) {
+        if (node.getFishboneNodeMode() == FishboneNodeMode.up) {
+          Paint paint1 = Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeCap = StrokeCap.round
+            ..strokeWidth = mindMap.getRootNode().getLinkWidth() <= 0
+                ? 2
+                : mindMap.getRootNode().getLinkWidth()
+            ..color = node.getLinkColor() == Colors.transparent
+                ? Colors.black
+                : node.getLinkColor();
+          double l =
+              node.getFishbonePosition().dx + (node.getSize()?.width ?? 0) / 2;
+          double t =
+              node.getFishbonePosition().dy + (node.getSize()?.height ?? 0);
+          double h = top - t - dy;
+          Offset p1 = Offset(l + dx, t + dy);
+          Offset p2 = Offset(l + dx - h, top);
+          canvas.drawLine(p1, p2, paint1);
+          //Child Line
+          List<IMindMapNode> childs = [];
+          childs.addAll(node.getRightItems());
+          childs.addAll(node.getLeftItems());
+          for (IMindMapNode child in childs) {
+            Paint paint2 = Paint()
+              ..style = PaintingStyle.stroke
+              ..strokeCap = StrokeCap.round
+              ..strokeWidth = node.getLinkWidth() <= 0 ? 2 : node.getLinkWidth()
+              ..color = child.getLinkColor() == Colors.transparent
+                  ? Colors.black
+                  : child.getLinkColor();
+            double t2 =
+                child.getLinkInOffset() +
+                child.getFishbonePosition().dy +
+                (child.getSize()?.height ?? 0) / 2;
+            double h1 =
+                node.getHSpace() +
+                (child.getSize()?.height ?? 0) / 2 +
+                child.getLinkInOffset();
+            canvas.drawLine(
+              Offset(child.getFishbonePosition().dx - h1 + dx, t2 + dy),
+              Offset(child.getFishbonePosition().dx + dx, t2 + dy),
+              paint2,
+            );
+            drawChildLine(child, canvas);
+          }
+        } else {
+          Paint paint1 = Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeCap = StrokeCap.round
+            ..strokeWidth = mindMap.getRootNode().getLinkWidth() <= 0
+                ? 2
+                : mindMap.getRootNode().getLinkWidth()
+            ..color = node.getLinkColor() == Colors.transparent
+                ? Colors.black
+                : node.getLinkColor();
+          double l =
+              node.getFishbonePosition().dx + (node.getSize()?.width ?? 0) / 2;
+          double t = node.getFishbonePosition().dy;
+          double h = t + dy - top;
+          Offset p1 = Offset(l + dx, t + dy);
+          Offset p2 = Offset(l + dx - h, top);
+          canvas.drawLine(p1, p2, paint1);
+          //Child Line
+          List<IMindMapNode> childs = [];
+          childs.addAll(node.getRightItems());
+          childs.addAll(node.getLeftItems());
+          for (IMindMapNode child in childs) {
+            Paint paint2 = Paint()
+              ..style = PaintingStyle.stroke
+              ..strokeCap = StrokeCap.round
+              ..strokeWidth = node.getLinkWidth() <= 0 ? 2 : node.getLinkWidth()
+              ..color = child.getLinkColor() == Colors.transparent
+                  ? Colors.black
+                  : child.getLinkColor();
+            double t2 =
+                child.getLinkInOffset() +
+                child.getFishbonePosition().dy +
+                (child.getSize()?.height ?? 0) / 2;
+            double h1 =
+                node.getHSpace() +
+                (child.getSize()?.height ?? 0) / 2 -
+                child.getLinkInOffset() +
+                child.getFishboneHeight();
+            canvas.drawLine(
+              Offset(child.getFishbonePosition().dx - h1 + dx, t2 + dy),
+              Offset(child.getFishbonePosition().dx + dx, t2 + dy),
+              paint2,
+            );
+            drawChildLine(child, canvas);
+          }
+        }
+      }
+    } else {
+      Paint paint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
+        ..strokeWidth = mindMap.getRootNode().getLinkWidth() <= 0
+            ? 2
+            : mindMap.getRootNode().getLinkWidth()
+        ..color = mindMap.getRootNode().getLinkColor() == Colors.transparent
+            ? Colors.black
+            : mindMap.getRootNode().getLinkColor();
+
+      Offset offset = mindMap.getRootNode().getOffset() ?? Offset.zero;
+      double dx = mindMap.getRootNode().getFishbonePosition().dx - offset.dx;
+      double dy = mindMap.getRootNode().getFishbonePosition().dy - offset.dy;
+
+      double right = offset.dx;
+      double top =
+          offset.dy + (mindMap.getRootNode().getSize()?.height ?? 0) / 2;
+      canvas.drawLine(Offset(right, top), Offset(0, top), paint);
+      List<IMindMapNode> items = [];
+      items.addAll(mindMap.getRootNode().getLeftItems());
+      for (int i = 0; i < mindMap.getRootNode().getRightItems().length; i++) {
+        IMindMapNode node =
+            mindMap.getRootNode().getRightItems()[mindMap
+                    .getRootNode()
+                    .getRightItems()
+                    .length -
+                i -
+                1];
+        items.add(node);
+      }
+      for (IMindMapNode node in items) {
+        if (node.getFishboneNodeMode() == FishboneNodeMode.up) {
+          Paint paint1 = Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeCap = StrokeCap.round
+            ..strokeWidth = mindMap.getRootNode().getLinkWidth() <= 0
+                ? 2
+                : mindMap.getRootNode().getLinkWidth()
+            ..color = node.getLinkColor() == Colors.transparent
+                ? Colors.black
+                : node.getLinkColor();
+
+          double l =
+              node.getFishbonePosition().dx + (node.getSize()?.width ?? 0) / 2;
+          double t =
+              node.getFishbonePosition().dy + (node.getSize()?.height ?? 0);
+          double h = top - t - dy;
+          Offset p1 = Offset(l + dx, t + dy);
+          Offset p2 = Offset(l + dx + h, top);
+          canvas.drawLine(p1, p2, paint1);
+          //Child Line
+          List<IMindMapNode> childs = [];
+          childs.addAll(node.getRightItems());
+          childs.addAll(node.getLeftItems());
+          for (IMindMapNode child in childs) {
+            Paint paint2 = Paint()
+              ..style = PaintingStyle.stroke
+              ..strokeCap = StrokeCap.round
+              ..strokeWidth = node.getLinkWidth() <= 0 ? 2 : node.getLinkWidth()
+              ..color = child.getLinkColor() == Colors.transparent
+                  ? Colors.black
+                  : child.getLinkColor();
+            double t2 =
+                child.getLinkInOffset() +
+                child.getFishbonePosition().dy +
+                (child.getSize()?.height ?? 0) / 2;
+            double h1 =
+                node.getHSpace() +
+                (child.getSize()?.height ?? 0) / 2 +
+                child.getLinkInOffset();
+            canvas.drawLine(
+              Offset(
+                child.getFishbonePosition().dx +
+                    (child.getSize()?.width ?? 0) +
+                    h1,
+                t2,
+              ),
+              Offset(
+                child.getFishbonePosition().dx + (child.getSize()?.width ?? 0),
+                t2,
+              ),
+              paint2,
+            );
+            drawChildLine(child, canvas);
+          }
+        } else {
+          Paint paint1 = Paint()
+            ..style = PaintingStyle.stroke
+            ..strokeCap = StrokeCap.round
+            ..strokeWidth = mindMap.getRootNode().getLinkWidth() <= 0
+                ? 2
+                : mindMap.getRootNode().getLinkWidth()
+            ..color = node.getLinkColor() == Colors.transparent
+                ? Colors.black
+                : node.getLinkColor();
+          double l =
+              node.getFishbonePosition().dx + (node.getSize()?.width ?? 0) / 2;
+          double t = node.getFishbonePosition().dy;
+          double h = t + dy - top;
+          Offset p1 = Offset(l + dx, t + dy);
+          Offset p2 = Offset(l + dx + h, top);
+          canvas.drawLine(p1, p2, paint1);
+          //Child Line
+          List<IMindMapNode> childs = [];
+          childs.addAll(node.getRightItems());
+          childs.addAll(node.getLeftItems());
+          for (IMindMapNode child in childs) {
+            Paint paint2 = Paint()
+              ..style = PaintingStyle.stroke
+              ..strokeCap = StrokeCap.round
+              ..strokeWidth = node.getLinkWidth() <= 0 ? 2 : node.getLinkWidth()
+              ..color = child.getLinkColor() == Colors.transparent
+                  ? Colors.black
+                  : child.getLinkColor();
+            double t2 =
+                child.getLinkInOffset() +
+                child.getFishbonePosition().dy +
+                (child.getSize()?.height ?? 0) / 2;
+            double h1 =
+                (child.getSize()?.height ?? 0) / 2 -
+                child.getLinkInOffset() +
+                child.getFishboneHeight();
+            canvas.drawLine(
+              Offset(
+                child.getFishbonePosition().dx +
+                    (child.getSize()?.width ?? 0) +
+                    h1 +
+                    node.getHSpace(),
+                t2,
+              ),
+              Offset(
+                child.getFishbonePosition().dx + (child.getSize()?.width ?? 0),
+                t2,
+              ),
+              paint2,
+            );
+            drawChildLine(child, canvas);
+          }
+        }
+      }
+    }
+  }
+
+  void drawChildLine(IMindMapNode node, ui.Canvas canvas) {
+    List<IMindMapNode> childs = [];
+    childs.addAll(node.getRightItems());
+    childs.addAll(node.getLeftItems());
+    double t = node.getFishbonePosition().dy + (node.getSize()?.height ?? 0);
+    for (IMindMapNode child in childs) {
+      Paint paint = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
+        ..strokeWidth = node.getLinkWidth() <= 0 ? 2 : node.getLinkWidth()
+        ..color = child.getLinkColor() == Colors.transparent
+            ? Colors.black
+            : child.getLinkColor();
+      if (mindMap.getFishboneMapType() == FishboneMapType.leftToRight) {
+        double t2 =
+            child.getLinkInOffset() +
+            child.getFishbonePosition().dy +
+            (child.getSize()?.height ?? 0) / 2;
+        canvas.drawLine(
+          Offset(child.getFishbonePosition().dx - node.getHSpace() / 2, t),
+          Offset(child.getFishbonePosition().dx - node.getHSpace() / 2, t2),
+          paint,
+        );
+        canvas.drawLine(
+          Offset(child.getFishbonePosition().dx - node.getHSpace() / 2, t2),
+          Offset(child.getFishbonePosition().dx, t2),
+          paint,
+        );
+        drawChildLine(child, canvas);
+      } else {
+        double t2 =
+            child.getLinkInOffset() +
+            child.getFishbonePosition().dy +
+            (child.getSize()?.height ?? 0) / 2;
+        canvas.drawLine(
+          Offset(
+            child.getFishbonePosition().dx +
+                (child.getSize()?.width ?? 0) +
+                node.getHSpace() / 2,
+            t,
+          ),
+          Offset(
+            child.getFishbonePosition().dx +
+                (child.getSize()?.width ?? 0) +
+                node.getHSpace() / 2,
+            t2,
+          ),
+          paint,
+        );
+        canvas.drawLine(
+          Offset(
+            child.getFishbonePosition().dx +
+                (child.getSize()?.width ?? 0) +
+                node.getHSpace() / 2,
+            t2,
+          ),
+          Offset(
+            child.getFishbonePosition().dx + (child.getSize()?.width ?? 0),
+            t2,
+          ),
+          paint,
+        );
+        drawChildLine(child, canvas);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
+  }
+}
+
+enum MapType { mind, fishbone }
 
 enum MindMapType { left, leftAndRight, right }
+
+enum FishboneMapType { leftToRight, rightToLeft }

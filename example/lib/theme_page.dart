@@ -492,7 +492,12 @@ class ThemePage extends StatefulWidget {
             ],
           };
 
+          mindMap.setZoom(0.6);
+          mindMap.setMoveOffset(Offset.zero);
+          mindMap.setTheme(MindMapThemeCompact());
+
           mindMap.loadData(json);
+
           /*mindMap.getRootNode().setTitle("Root Node");
 
           MindMapNode node1 = MindMapNode();

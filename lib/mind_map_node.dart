@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_mind_map/adapter/i_node_adapter.dart';
@@ -562,7 +564,11 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     MindMapNode node = MindMapNode();
     node.setParentNode(this);
     node.setTitle("New Node");
-    addLeftItem(node);
+    if (getNodeType() == NodeType.root && getRightItems().isNotEmpty) {
+      insertLeftItem(node, 0);
+    } else {
+      addLeftItem(node);
+    }
     getMindMap()?.refresh();
     if (!_isLoading) {
       getMindMap()?.onChanged();
@@ -684,13 +690,19 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     if (list.isNotEmpty) {
       int index = 0;
       if (getParentNode() != null) {
-        if (getNodeType() == NodeType.right) {
-          index = getParentNode()!.getRightItems().indexOf(this);
+        List<IMindMapNode> list1 = [];
+        if (getParentNode()!.getNodeType() == NodeType.root) {
+          list1.addAll(getParentNode()!.getRightItems());
+          for (int i = 0; i < getParentNode()!.getLeftItems().length; i++) {
+            IMindMapNode node = getParentNode()!
+                .getLeftItems()[getParentNode()!.getLeftItems().length - i - 1];
+            list1.add(node);
+          }
         } else {
-          index =
-              getParentNode()!.getRightItems().length +
-              getParentNode()!.getLeftItems().indexOf(this);
+          list1.addAll(getParentNode()!.getRightItems());
+          list1.addAll(getParentNode()!.getLeftItems());
         }
+        index = list1.indexOf(this);
       }
       return list[index % list.length];
     }
@@ -1078,14 +1090,20 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     List<Color> list = getBackgroundColors();
     if (list.isNotEmpty) {
       int index = 0;
+      List<IMindMapNode> list1 = [];
       if (getParentNode() != null) {
-        if (getNodeType() == NodeType.right) {
-          index = getParentNode()!.getRightItems().indexOf(this);
+        if (getParentNode()!.getNodeType() == NodeType.root) {
+          list1.addAll(getParentNode()!.getRightItems());
+          for (int i = 0; i < getParentNode()!.getLeftItems().length; i++) {
+            IMindMapNode node = getParentNode()!
+                .getLeftItems()[getParentNode()!.getLeftItems().length - i - 1];
+            list1.add(node);
+          }
         } else {
-          index =
-              getParentNode()!.getRightItems().length +
-              getParentNode()!.getLeftItems().indexOf(this);
+          list1.addAll(getParentNode()!.getRightItems());
+          list1.addAll(getParentNode()!.getLeftItems());
         }
+        index = list1.indexOf(this);
       }
       return list[index % list.length];
     }
@@ -1182,13 +1200,23 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
       if (list.isNotEmpty) {
         int index = 0;
         if (getParentNode() != null) {
-          if (getNodeType() == NodeType.right) {
-            index = getParentNode()!.getRightItems().indexOf(this);
+          List<IMindMapNode> list1 = [];
+          if (getParentNode()!.getNodeType() == NodeType.root) {
+            list1.addAll(getParentNode()!.getRightItems());
+            for (int i = 0; i < getParentNode()!.getLeftItems().length; i++) {
+              IMindMapNode node =
+                  getParentNode()!.getLeftItems()[getParentNode()!
+                          .getLeftItems()
+                          .length -
+                      i -
+                      1];
+              list1.add(node);
+            }
           } else {
-            index =
-                getParentNode()!.getRightItems().length +
-                getParentNode()!.getLeftItems().indexOf(this);
+            list1.addAll(getRightItems());
+            list1.addAll(getParentNode()!.getLeftItems());
           }
+          index = list1.indexOf(this);
         }
         Color color = list[index % list.length];
         BorderSide top = BorderSide.none;
@@ -1215,6 +1243,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
           bottom: bottom,
         );
       }
+
       return border;
     }
   }
@@ -1611,6 +1640,162 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     }
   }
 
+  @override
+  double getFishboneHeight() {
+    double h = 0;
+    for (IMindMapNode node in getRightItems()) {
+      h += (node.getSize()?.height ?? 0);
+      h += node.getFishboneHeight();
+    }
+    for (int i = 0; i < getLeftItems().length; i++) {
+      IMindMapNode node = getLeftItems()[getLeftItems().length - 1 - i];
+      h += (node.getSize()?.height ?? 0);
+      h += node.getFishboneHeight();
+    }
+    if (getNodeType() == NodeType.root) {
+      h += getVSpace();
+    } else {
+      h += (getParentNode()?.getVSpace() ?? getVSpace());
+    }
+
+    return h;
+  }
+
+  double _fishboneWidth = 0;
+
+  @override
+  double getFishboneWidth() {
+    if (getRightItems().isEmpty && getLeftItems().isEmpty) {
+      return _fishboneWidth == 0
+          ? (getSize()?.width ?? 200) +
+                (getParentNode()?.getHSpace() ?? 0) +
+                (getSize()?.height ?? 200)
+          : _fishboneWidth;
+    } else {
+      double w = _fishboneWidth;
+      for (IMindMapNode node in getRightItems()) {
+        double w1 = node.getFishboneWidth();
+        if (w1 > w) {
+          w = w1;
+        }
+      }
+      for (IMindMapNode node in getLeftItems()) {
+        double w1 = node.getFishboneWidth();
+        if (w1 > w) {
+          w = w1;
+        }
+      }
+      if (getParentNode()?.getNodeType() == NodeType.root) {
+        if (w < (getSize()?.width ?? 0) / 2) {
+          w = (getSize()?.width ?? 0) / 2;
+        }
+      }
+      return w;
+    }
+  }
+
+  @override
+  void setFishboneWidth(double value) {
+    if (_fishboneWidth != value) {
+      _fishboneWidth = value;
+      if (getParentNode() != null) {
+        getParentNode()!.refresh();
+      }
+    }
+  }
+
+  FishboneNodeMode _fishboneNodeMode = FishboneNodeMode.up;
+  @override
+  FishboneNodeMode getFishboneNodeMode() {
+    return _fishboneNodeMode;
+  }
+
+  @override
+  void setFishboneNodeMode(FishboneNodeMode value) {
+    _fishboneNodeMode = value;
+  }
+
+  Offset _fishbonePosition = Offset.zero;
+  @override
+  Offset getFishbonePosition() {
+    return _fishbonePosition;
+  }
+
+  @override
+  void setFishbonePosition(Offset value) {
+    if (getNodeType() != NodeType.root) {
+      if (getRightItems().isEmpty && getLeftItems().isEmpty) {
+        if (getParentNode()?.getNodeType() == NodeType.root) {
+          setFishboneWidth((getSize()?.width ?? 0) / 2);
+        } else {
+          IMindMapNode? topNode = getFishboneTopNode();
+          if (topNode != null) {
+            if (getMindMap()?.getFishboneMapType() ==
+                FishboneMapType.leftToRight) {
+              if (topNode.getFishboneNodeMode() == FishboneNodeMode.up) {
+                double h =
+                    (getSize()?.height ?? 0) +
+                    value.dy -
+                    topNode.getFishbonePosition().dy -
+                    (topNode.getSize()?.height ?? 0) / 2;
+                double r = value.dx + (getSize()?.width ?? 0) + h;
+                double w =
+                    r -
+                    topNode.getFishbonePosition().dx -
+                    (topNode.getSize()?.width ?? 0) / 2;
+                setFishboneWidth(w);
+              } else {
+                double h = topNode.getFishbonePosition().dy - value.dy;
+                double r = value.dx + (getSize()?.width ?? 0) + h;
+                double w =
+                    r -
+                    topNode.getFishbonePosition().dx -
+                    (topNode.getSize()?.width ?? 0) / 2;
+                setFishboneWidth(w);
+              }
+            } else {
+              if (topNode.getFishboneNodeMode() == FishboneNodeMode.up) {
+                double h =
+                    (getSize()?.height ?? 0) +
+                    value.dy -
+                    topNode.getFishbonePosition().dy -
+                    (topNode.getSize()?.height ?? 0) / 2;
+                double r = value.dx - h;
+                double w =
+                    topNode.getFishbonePosition().dx +
+                    (topNode.getSize()?.width ?? 0) / 2 -
+                    r;
+                setFishboneWidth(w);
+              } else {
+                double h = topNode.getFishbonePosition().dy - value.dy;
+                double r = value.dx - h;
+                double w =
+                    topNode.getFishbonePosition().dx +
+                    (topNode.getSize()?.width ?? 0) / 2 -
+                    r;
+                setFishboneWidth(w);
+              }
+            }
+          }
+        }
+      }
+    }
+    _fishbonePosition = value;
+  }
+
+  IMindMapNode? getFishboneTopNode() {
+    IMindMapNode? result;
+    IMindMapNode? parentNode = getParentNode();
+    while (parentNode != null) {
+      if (parentNode.getParentNode()?.getNodeType() == NodeType.root) {
+        result = parentNode;
+        break;
+      }
+      parentNode = parentNode.getParentNode();
+    }
+    return result;
+  }
+
   /// Get Left Area
   @override
   Rect? getLeftArea() {
@@ -1924,1056 +2109,2542 @@ class MindMapNodeState extends State<MindMapNode> {
         }
       });
     }
-    List<Widget> leftItems = [];
-    if (widget.getNodeType() == NodeType.root ||
-        widget.getNodeType() == NodeType.left) {
-      for (IMindMapNode item in widget.getLeftItems()) {
-        leftItems.add(item as Widget);
-      }
-    }
-    List<Widget> rightItems = [];
-    if (widget.getNodeType() == NodeType.root ||
-        widget.getNodeType() == NodeType.right) {
-      for (IMindMapNode item in widget.getRightItems()) {
-        rightItems.add(item as Widget);
-      }
-    }
-    return CustomPaint(
-      painter: widget.getOffset() == null
-          ? null
-          : widget.getLink().getPainter(widget),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisSize: MainAxisSize.min,
+    switch (widget.getMindMap()?.getMapType() ?? MapType.mind) {
+      case MapType.mind:
+        List<Widget> leftItems = [];
+        if (widget.getNodeType() == NodeType.root ||
+            widget.getNodeType() == NodeType.left) {
+          for (IMindMapNode item in widget.getLeftItems()) {
+            leftItems.add(item as Widget);
+          }
+        }
+        List<Widget> rightItems = [];
+        if (widget.getNodeType() == NodeType.root ||
+            widget.getNodeType() == NodeType.right) {
+          for (IMindMapNode item in widget.getRightItems()) {
+            rightItems.add(item as Widget);
+          }
+        }
+        return CustomPaint(
+          painter: widget.getOffset() == null
+              ? null
+              : widget.getLink().getPainter(widget),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
 
-        ///spacing: widget.getHSpace().toDouble(),
-        children: [
-          ///Left Items
-          ...(leftItems.isEmpty ||
-                  (!widget.getExpanded() &&
-                      (widget.getMindMap()?.getReadOnly() ?? false))
-              ? []
-              : [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    mainAxisSize: MainAxisSize.min,
-                    spacing: widget.getVSpace().toDouble(),
-                    children: leftItems,
-                  ),
-                ]),
+            ///spacing: widget.getHSpace().toDouble(),
+            children: [
+              ///Left Items
+              ...(leftItems.isEmpty ||
+                      (!widget.getExpanded() &&
+                          (widget.getMindMap()?.getReadOnly() ?? false))
+                  ? []
+                  : [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        mainAxisSize: MainAxisSize.min,
+                        spacing: widget.getVSpace().toDouble(),
+                        children: leftItems,
+                      ),
+                    ]),
 
-          ///LeftSpace
-          ...(widget.getNodeType() != NodeType.right
-              ? [
-                  Container(
-                    constraints: BoxConstraints(
-                      minWidth: widget.getHSpace().toDouble(),
-                      maxWidth: widget.getHSpace().toDouble(),
-                      minHeight: (widget.getMindMap()?.getButtonWidth() ?? 24)
-                          .toDouble(),
-                    ),
-                    padding: EdgeInsets.fromLTRB(3, 0, 3, 0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        ...(widget.getSelected()
-                            ? (widget.getReadOnly()
-                                  ? (widget.getNodeType() == NodeType.left &&
-                                            widget.canExpand() &&
-                                            widget.getLeftItems().isNotEmpty &&
-                                            (widget
-                                                        .getMindMap()
-                                                        ?.getExpandedLevel() ??
-                                                    0) <=
-                                                widget.getLevel() + 1
-                                        ? [
-                                            ///Left Expand Button
-                                            Container(
-                                              constraints: BoxConstraints(
-                                                maxHeight:
-                                                    (widget
+              ///LeftSpace
+              ...(widget.getNodeType() != NodeType.right
+                  ? [
+                      Container(
+                        constraints: BoxConstraints(
+                          minWidth: widget.getHSpace().toDouble(),
+                          maxWidth: widget.getHSpace().toDouble(),
+                          minHeight:
+                              (widget.getMindMap()?.getButtonWidth() ?? 24)
+                                  .toDouble(),
+                        ),
+                        padding: EdgeInsets.fromLTRB(3, 0, 3, 0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            ...(widget.getSelected()
+                                ? (widget.getReadOnly()
+                                      ? (widget.getNodeType() ==
+                                                    NodeType.left &&
+                                                widget.canExpand() &&
+                                                widget
+                                                    .getLeftItems()
+                                                    .isNotEmpty &&
+                                                (widget
                                                             .getMindMap()
-                                                            ?.getButtonWidth() ??
-                                                        24) +
-                                                    widget
-                                                            .getLinkOutOffset()
-                                                            .abs() *
-                                                        2,
-                                              ),
-                                              padding: EdgeInsets.fromLTRB(
-                                                0,
-                                                widget.getLinkOutOffset() > 0
-                                                    ? widget.getLinkOutOffset() *
-                                                          2
-                                                    : 0,
-                                                0,
-                                                widget.getLinkOutOffset() < 0
-                                                    ? widget
-                                                              .getLinkOutOffset()
-                                                              .abs() *
-                                                          2
-                                                    : 0,
-                                              ),
-                                              child: Container(
-                                                constraints: BoxConstraints(
-                                                  maxWidth:
-                                                      (widget
-                                                                  .getMindMap()
-                                                                  ?.getButtonWidth() ??
-                                                              24)
-                                                          .toDouble(),
-                                                  maxHeight:
-                                                      (widget
-                                                                  .getMindMap()
-                                                                  ?.getButtonWidth() ??
-                                                              24)
-                                                          .toDouble(),
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  color:
-                                                      widget
-                                                          .getMindMap()
-                                                          ?.getButtonBackground() ??
-                                                      Colors.white,
-                                                  borderRadius:
-                                                      BorderRadius.circular(
+                                                            ?.getExpandedLevel() ??
+                                                        0) <=
+                                                    widget.getLevel() + 1
+                                            ? [
+                                                ///Left Expand Button
+                                                Container(
+                                                  constraints: BoxConstraints(
+                                                    maxHeight:
                                                         (widget
-                                                                    .getMindMap()
-                                                                    ?.getButtonWidth() ??
-                                                                24)
-                                                            .toDouble(),
-                                                      ),
-                                                ),
-                                                child: IconButton(
-                                                  onPressed: () {
-                                                    widget
-                                                        .getMindMap()
-                                                        ?.setSelectedNode(
-                                                          widget,
-                                                        );
-                                                    widget.setExpanded(
-                                                      !widget.getExpanded(),
-                                                    );
-                                                  },
-                                                  padding: EdgeInsets.zero,
-                                                  icon: Icon(
-                                                    widget.getExpanded()
-                                                        ? Icons
-                                                              .remove_circle_outline
-                                                        : Icons
-                                                              .add_circle_outline,
-                                                    size:
-                                                        (widget
-                                                                    .getMindMap()
-                                                                    ?.getButtonWidth() ??
-                                                                24)
-                                                            .toDouble(),
-                                                    color:
+                                                                .getMindMap()
+                                                                ?.getButtonWidth() ??
+                                                            24) +
+                                                        widget
+                                                                .getLinkOutOffset()
+                                                                .abs() *
+                                                            2,
+                                                  ),
+                                                  padding: EdgeInsets.fromLTRB(
+                                                    0,
+                                                    widget.getLinkOutOffset() >
+                                                            0
+                                                        ? widget.getLinkOutOffset() *
+                                                              2
+                                                        : 0,
+                                                    0,
+                                                    widget.getLinkOutOffset() <
+                                                            0
+                                                        ? widget
+                                                                  .getLinkOutOffset()
+                                                                  .abs() *
+                                                              2
+                                                        : 0,
+                                                  ),
+                                                  child: Container(
+                                                    constraints: BoxConstraints(
+                                                      maxWidth:
+                                                          (widget
+                                                                      .getMindMap()
+                                                                      ?.getButtonWidth() ??
+                                                                  24)
+                                                              .toDouble(),
+                                                      maxHeight:
+                                                          (widget
+                                                                      .getMindMap()
+                                                                      ?.getButtonWidth() ??
+                                                                  24)
+                                                              .toDouble(),
+                                                    ),
+                                                    decoration: BoxDecoration(
+                                                      color:
+                                                          widget
+                                                              .getMindMap()
+                                                              ?.getButtonBackground() ??
+                                                          Colors.white,
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            (widget
+                                                                        .getMindMap()
+                                                                        ?.getButtonWidth() ??
+                                                                    24)
+                                                                .toDouble(),
+                                                          ),
+                                                    ),
+                                                    child: IconButton(
+                                                      onPressed: () {
                                                         widget
                                                             .getMindMap()
-                                                            ?.getButtonColor() ??
-                                                        Colors.white,
+                                                            ?.setSelectedNode(
+                                                              widget,
+                                                            );
+                                                        widget.setExpanded(
+                                                          !widget.getExpanded(),
+                                                        );
+                                                      },
+                                                      padding: EdgeInsets.zero,
+                                                      icon: Icon(
+                                                        widget.getExpanded()
+                                                            ? Icons
+                                                                  .remove_circle_outline
+                                                            : Icons
+                                                                  .add_circle_outline,
+                                                        size:
+                                                            (widget
+                                                                        .getMindMap()
+                                                                        ?.getButtonWidth() ??
+                                                                    24)
+                                                                .toDouble(),
+                                                        color:
+                                                            widget
+                                                                .getMindMap()
+                                                                ?.getButtonColor() ??
+                                                            Colors.white,
+                                                      ),
+                                                    ),
                                                   ),
                                                 ),
-                                              ),
-                                            ),
-                                          ]
-                                        : [])
-                                  : [
-                                      ///left Add Button
-                                      Container(
-                                        constraints: BoxConstraints(
-                                          maxWidth:
-                                              (widget
-                                                          .getMindMap()
-                                                          ?.getButtonWidth() ??
-                                                      24)
-                                                  .toDouble(),
-                                          maxHeight:
-                                              (widget
-                                                          .getMindMap()
-                                                          ?.getButtonWidth() ??
-                                                      24)
-                                                  .toDouble(),
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color:
-                                              (widget
-                                                  .getMindMap()
-                                                  ?.getButtonBackground() ??
-                                              Colors.white),
-                                          border: Border.all(
-                                            color:
-                                                (widget
-                                                    .getMindMap()
-                                                    ?.getButtonColor() ??
-                                                Colors.black),
-                                            width: 1,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            (widget
-                                                        .getMindMap()
-                                                        ?.getButtonWidth() ??
-                                                    24)
-                                                .toDouble(),
-                                          ),
-                                        ),
-                                        child: IconButton(
-                                          onPressed: () {
-                                            widget._focusNode.unfocus();
-                                            widget.addLeftChildNode();
-                                          },
-                                          padding: EdgeInsets.zero,
-                                          hoverColor: Colors.green.shade200,
-                                          highlightColor: Colors.green,
-                                          icon: Icon(
-                                            Icons.add_rounded,
-                                            size:
-                                                (widget
-                                                        .getMindMap()
-                                                        ?.getButtonWidth() ??
-                                                    24) -
-                                                6,
-                                            color:
-                                                (widget
-                                                    .getMindMap()
-                                                    ?.getButtonColor() ??
-                                                Colors.black),
-                                          ),
-                                        ),
-                                      ),
-
-                                      ///Sapce
-                                      widget.getNodeType() == NodeType.root ||
-                                              (widget
-                                                      .getMindMap()
-                                                      ?.getShowRecycle() ??
-                                                  false)
-                                          ? SizedBox(width: 0, height: 0)
-                                          : SizedBox(width: 6),
-
-                                      ///left Delete Button
-                                      widget.getNodeType() == NodeType.root ||
-                                              (widget
-                                                      .getMindMap()
-                                                      ?.getShowRecycle() ??
-                                                  false)
-                                          ? SizedBox(width: 0, height: 0)
-                                          : Container(
-                                              constraints: BoxConstraints(
-                                                maxWidth:
-                                                    (widget
-                                                                .getMindMap()
-                                                                ?.getButtonWidth() ??
-                                                            24)
-                                                        .toDouble(),
-                                                maxHeight:
-                                                    (widget
-                                                                .getMindMap()
-                                                                ?.getButtonWidth() ??
-                                                            24)
-                                                        .toDouble(),
-                                              ),
-                                              decoration: BoxDecoration(
-                                                color:
-                                                    (widget
-                                                        .getMindMap()
-                                                        ?.getButtonBackground() ??
-                                                    Colors.white),
-                                                border: Border.all(
-                                                  color:
-                                                      (widget
-                                                          .getMindMap()
-                                                          ?.getButtonColor() ??
-                                                      Colors.black),
-                                                  width: 1,
-                                                ),
-                                                borderRadius: BorderRadius.circular(
+                                              ]
+                                            : [])
+                                      : [
+                                          ///left Add Button
+                                          Container(
+                                            constraints: BoxConstraints(
+                                              maxWidth:
                                                   (widget
                                                               .getMindMap()
                                                               ?.getButtonWidth() ??
                                                           24)
                                                       .toDouble(),
-                                                ),
-                                              ),
-                                              child: IconButton(
-                                                onPressed: () {
-                                                  showDialog(
-                                                    context: context,
-                                                    builder: (context) {
-                                                      return AlertDialog(
-                                                        content: Text(
-                                                          widget
-                                                                  .getMindMap()
-                                                                  ?.getDeleteNodeString() ??
-                                                              "Delete this node?",
-                                                        ),
-                                                        actions: [
-                                                          TextButton(
-                                                            child: Text(
-                                                              widget
-                                                                      .getMindMap()
-                                                                      ?.getCancelString() ??
-                                                                  "Cancel",
-                                                            ),
-                                                            onPressed: () {
-                                                              Navigator.of(
-                                                                context,
-                                                              ).pop();
-                                                            },
-                                                          ),
-                                                          TextButton(
-                                                            child: Text(
-                                                              widget
-                                                                      .getMindMap()
-                                                                      ?.getOkString() ??
-                                                                  "OK",
-                                                            ),
-                                                            onPressed: () {
-                                                              widget
-                                                                  .getParentNode()
-                                                                  ?.removeLeftItem(
-                                                                    widget,
-                                                                  );
-                                                              widget
-                                                                  .getMindMap()
-                                                                  ?.onChanged();
-                                                              Navigator.of(
-                                                                context,
-                                                              ).pop();
-                                                            },
-                                                          ),
-                                                        ],
-                                                      );
-                                                    },
-                                                  );
-                                                },
-                                                hoverColor: Colors.red.shade200,
-                                                highlightColor: Colors.red,
-                                                padding: EdgeInsets.zero,
-                                                icon: Icon(
-                                                  Icons.close_rounded,
-                                                  size:
-                                                      (widget
-                                                              .getMindMap()
-                                                              ?.getButtonWidth() ??
-                                                          24) -
-                                                      6,
-                                                  color:
-                                                      (widget
-                                                          .getMindMap()
-                                                          ?.getButtonColor() ??
-                                                      Colors.black),
-                                                ),
-                                              ),
-                                            ),
-
-                                      ///Space
-                                      !(widget.getMindMap()?.hasTextField() ??
-                                                  true) &&
-                                              (widget
-                                                      .getMindMap()
-                                                      ?.hasEditButton() ??
-                                                  false)
-                                          ? SizedBox(width: 6)
-                                          : SizedBox(width: 0),
-
-                                      ///Edit Button
-                                      !(widget.getMindMap()?.hasTextField() ??
-                                                  true) &&
-                                              (widget
-                                                      .getMindMap()
-                                                      ?.hasEditButton() ??
-                                                  false)
-                                          ? Container(
-                                              constraints: BoxConstraints(
-                                                maxWidth:
-                                                    (widget
-                                                                .getMindMap()
-                                                                ?.getButtonWidth() ??
-                                                            24)
-                                                        .toDouble(),
-                                                maxHeight:
-                                                    (widget
-                                                                .getMindMap()
-                                                                ?.getButtonWidth() ??
-                                                            24)
-                                                        .toDouble(),
-                                              ),
-                                              decoration: BoxDecoration(
-                                                color:
-                                                    (widget
-                                                        .getMindMap()
-                                                        ?.getButtonBackground() ??
-                                                    Colors.white),
-                                                border: Border.all(
-                                                  color:
-                                                      (widget
-                                                          .getMindMap()
-                                                          ?.getButtonColor() ??
-                                                      Colors.black),
-                                                  width: 1,
-                                                ),
-                                                borderRadius: BorderRadius.circular(
+                                              maxHeight:
                                                   (widget
                                                               .getMindMap()
                                                               ?.getButtonWidth() ??
                                                           24)
                                                       .toDouble(),
-                                                ),
-                                              ),
-                                              child: IconButton(
-                                                onPressed: () {
-                                                  widget.getMindMap()?.onEdit(
-                                                    widget,
-                                                  );
-                                                },
-                                                hoverColor:
-                                                    Colors.blue.shade200,
-                                                highlightColor: Colors.blue,
-                                                padding: EdgeInsets.zero,
-                                                icon: Icon(
-                                                  Icons.edit_outlined,
-                                                  size:
-                                                      (widget
-                                                              .getMindMap()
-                                                              ?.getButtonWidth() ??
-                                                          24) -
-                                                      8,
-                                                  color:
-                                                      (widget
-                                                          .getMindMap()
-                                                          ?.getButtonColor() ??
-                                                      Colors.black),
-                                                ),
-                                              ),
-                                            )
-                                          : SizedBox(width: 0, height: 0),
-                                    ])
-                            : (widget.getReadOnly()
-                                  ? (widget.getNodeType() == NodeType.left &&
-                                            widget.canExpand() &&
-                                            !widget.getExpanded() &&
-                                            widget.getLeftItems().isNotEmpty &&
-                                            (widget
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  (widget
+                                                      .getMindMap()
+                                                      ?.getButtonBackground() ??
+                                                  Colors.white),
+                                              border: Border.all(
+                                                color:
+                                                    (widget
                                                         .getMindMap()
-                                                        ?.getExpandedLevel() ??
-                                                    0) <=
-                                                widget.getLevel() + 1
-                                        ? [
-                                            ///Left Expand Button
-                                            Container(
-                                              constraints: BoxConstraints(
-                                                maxHeight:
+                                                        ?.getButtonColor() ??
+                                                    Colors.black),
+                                                width: 1,
+                                              ),
+                                              borderRadius: BorderRadius.circular(
+                                                (widget
+                                                            .getMindMap()
+                                                            ?.getButtonWidth() ??
+                                                        24)
+                                                    .toDouble(),
+                                              ),
+                                            ),
+                                            child: IconButton(
+                                              onPressed: () {
+                                                widget._focusNode.unfocus();
+                                                widget.addLeftChildNode();
+                                              },
+                                              padding: EdgeInsets.zero,
+                                              hoverColor: Colors.green.shade200,
+                                              highlightColor: Colors.green,
+                                              icon: Icon(
+                                                Icons.add_rounded,
+                                                size:
                                                     (widget
                                                             .getMindMap()
                                                             ?.getButtonWidth() ??
-                                                        24) +
-                                                    widget
-                                                            .getLinkOutOffset()
-                                                            .abs() *
-                                                        2,
-                                              ),
-                                              padding: EdgeInsets.fromLTRB(
-                                                0,
-                                                widget.getLinkOutOffset() > 0
-                                                    ? widget.getLinkOutOffset() *
-                                                          2
-                                                    : 0,
-                                                0,
-                                                widget.getLinkOutOffset() < 0
-                                                    ? widget
-                                                              .getLinkOutOffset()
-                                                              .abs() *
-                                                          2
-                                                    : 0,
-                                              ),
-                                              child: Container(
-                                                constraints: BoxConstraints(
-                                                  maxWidth:
-                                                      (widget
-                                                                  .getMindMap()
-                                                                  ?.getButtonWidth() ??
-                                                              24)
-                                                          .toDouble(),
-                                                  maxHeight:
-                                                      (widget
-                                                                  .getMindMap()
-                                                                  ?.getButtonWidth() ??
-                                                              24)
-                                                          .toDouble(),
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  color:
-                                                      (widget
-                                                          .getMindMap()
-                                                          ?.getButtonBackground() ??
-                                                      Colors.white),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                        (widget
-                                                                    .getMindMap()
-                                                                    ?.getButtonWidth() ??
-                                                                24)
-                                                            .toDouble(),
-                                                      ),
-                                                ),
-                                                child: IconButton(
-                                                  onPressed: () {
-                                                    widget
+                                                        24) -
+                                                    6,
+                                                color:
+                                                    (widget
                                                         .getMindMap()
-                                                        ?.setSelectedNode(
-                                                          widget,
-                                                        );
-                                                    widget.setExpanded(
-                                                      !widget.getExpanded(),
-                                                    );
-                                                  },
-                                                  padding: EdgeInsets.zero,
-                                                  icon: Icon(
-                                                    Icons.add_circle_outline,
-                                                    size:
+                                                        ?.getButtonColor() ??
+                                                    Colors.black),
+                                              ),
+                                            ),
+                                          ),
+
+                                          ///Sapce
+                                          widget.getNodeType() ==
+                                                      NodeType.root ||
+                                                  (widget
+                                                          .getMindMap()
+                                                          ?.getShowRecycle() ??
+                                                      false)
+                                              ? SizedBox(width: 0, height: 0)
+                                              : SizedBox(width: 6),
+
+                                          ///left Delete Button
+                                          widget.getNodeType() ==
+                                                      NodeType.root ||
+                                                  (widget
+                                                          .getMindMap()
+                                                          ?.getShowRecycle() ??
+                                                      false)
+                                              ? SizedBox(width: 0, height: 0)
+                                              : Container(
+                                                  constraints: BoxConstraints(
+                                                    maxWidth:
                                                         (widget
                                                                     .getMindMap()
                                                                     ?.getButtonWidth() ??
                                                                 24)
                                                             .toDouble(),
+                                                    maxHeight:
+                                                        (widget
+                                                                    .getMindMap()
+                                                                    ?.getButtonWidth() ??
+                                                                24)
+                                                            .toDouble(),
+                                                  ),
+                                                  decoration: BoxDecoration(
                                                     color:
                                                         (widget
                                                             .getMindMap()
-                                                            ?.getButtonColor() ??
-                                                        Colors.black),
+                                                            ?.getButtonBackground() ??
+                                                        Colors.white),
+                                                    border: Border.all(
+                                                      color:
+                                                          (widget
+                                                              .getMindMap()
+                                                              ?.getButtonColor() ??
+                                                          Colors.black),
+                                                      width: 1,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          (widget
+                                                                      .getMindMap()
+                                                                      ?.getButtonWidth() ??
+                                                                  24)
+                                                              .toDouble(),
+                                                        ),
+                                                  ),
+                                                  child: IconButton(
+                                                    onPressed: () {
+                                                      showDialog(
+                                                        context: context,
+                                                        builder: (context) {
+                                                          return AlertDialog(
+                                                            content: Text(
+                                                              widget
+                                                                      .getMindMap()
+                                                                      ?.getDeleteNodeString() ??
+                                                                  "Delete this node?",
+                                                            ),
+                                                            actions: [
+                                                              TextButton(
+                                                                child: Text(
+                                                                  widget
+                                                                          .getMindMap()
+                                                                          ?.getCancelString() ??
+                                                                      "Cancel",
+                                                                ),
+                                                                onPressed: () {
+                                                                  Navigator.of(
+                                                                    context,
+                                                                  ).pop();
+                                                                },
+                                                              ),
+                                                              TextButton(
+                                                                child: Text(
+                                                                  widget
+                                                                          .getMindMap()
+                                                                          ?.getOkString() ??
+                                                                      "OK",
+                                                                ),
+                                                                onPressed: () {
+                                                                  widget
+                                                                      .getParentNode()
+                                                                      ?.removeLeftItem(
+                                                                        widget,
+                                                                      );
+                                                                  widget
+                                                                      .getMindMap()
+                                                                      ?.onChanged();
+                                                                  Navigator.of(
+                                                                    context,
+                                                                  ).pop();
+                                                                },
+                                                              ),
+                                                            ],
+                                                          );
+                                                        },
+                                                      );
+                                                    },
+                                                    hoverColor:
+                                                        Colors.red.shade200,
+                                                    highlightColor: Colors.red,
+                                                    padding: EdgeInsets.zero,
+                                                    icon: Icon(
+                                                      Icons.close_rounded,
+                                                      size:
+                                                          (widget
+                                                                  .getMindMap()
+                                                                  ?.getButtonWidth() ??
+                                                              24) -
+                                                          6,
+                                                      color:
+                                                          (widget
+                                                              .getMindMap()
+                                                              ?.getButtonColor() ??
+                                                          Colors.black),
+                                                    ),
                                                   ),
                                                 ),
+
+                                          ///Space
+                                          !(widget
+                                                          .getMindMap()
+                                                          ?.hasTextField() ??
+                                                      true) &&
+                                                  (widget
+                                                          .getMindMap()
+                                                          ?.hasEditButton() ??
+                                                      false)
+                                              ? SizedBox(width: 6)
+                                              : SizedBox(width: 0),
+
+                                          ///Edit Button
+                                          !(widget
+                                                          .getMindMap()
+                                                          ?.hasTextField() ??
+                                                      true) &&
+                                                  (widget
+                                                          .getMindMap()
+                                                          ?.hasEditButton() ??
+                                                      false)
+                                              ? Container(
+                                                  constraints: BoxConstraints(
+                                                    maxWidth:
+                                                        (widget
+                                                                    .getMindMap()
+                                                                    ?.getButtonWidth() ??
+                                                                24)
+                                                            .toDouble(),
+                                                    maxHeight:
+                                                        (widget
+                                                                    .getMindMap()
+                                                                    ?.getButtonWidth() ??
+                                                                24)
+                                                            .toDouble(),
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    color:
+                                                        (widget
+                                                            .getMindMap()
+                                                            ?.getButtonBackground() ??
+                                                        Colors.white),
+                                                    border: Border.all(
+                                                      color:
+                                                          (widget
+                                                              .getMindMap()
+                                                              ?.getButtonColor() ??
+                                                          Colors.black),
+                                                      width: 1,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          (widget
+                                                                      .getMindMap()
+                                                                      ?.getButtonWidth() ??
+                                                                  24)
+                                                              .toDouble(),
+                                                        ),
+                                                  ),
+                                                  child: IconButton(
+                                                    onPressed: () {
+                                                      widget
+                                                          .getMindMap()
+                                                          ?.onEdit(widget);
+                                                    },
+                                                    hoverColor:
+                                                        Colors.blue.shade200,
+                                                    highlightColor: Colors.blue,
+                                                    padding: EdgeInsets.zero,
+                                                    icon: Icon(
+                                                      Icons.edit_outlined,
+                                                      size:
+                                                          (widget
+                                                                  .getMindMap()
+                                                                  ?.getButtonWidth() ??
+                                                              24) -
+                                                          8,
+                                                      color:
+                                                          (widget
+                                                              .getMindMap()
+                                                              ?.getButtonColor() ??
+                                                          Colors.black),
+                                                    ),
+                                                  ),
+                                                )
+                                              : SizedBox(width: 0, height: 0),
+                                        ])
+                                : (widget.getReadOnly()
+                                      ? (widget.getNodeType() ==
+                                                    NodeType.left &&
+                                                widget.canExpand() &&
+                                                !widget.getExpanded() &&
+                                                widget
+                                                    .getLeftItems()
+                                                    .isNotEmpty &&
+                                                (widget
+                                                            .getMindMap()
+                                                            ?.getExpandedLevel() ??
+                                                        0) <=
+                                                    widget.getLevel() + 1
+                                            ? [
+                                                ///Left Expand Button
+                                                Container(
+                                                  constraints: BoxConstraints(
+                                                    maxHeight:
+                                                        (widget
+                                                                .getMindMap()
+                                                                ?.getButtonWidth() ??
+                                                            24) +
+                                                        widget
+                                                                .getLinkOutOffset()
+                                                                .abs() *
+                                                            2,
+                                                  ),
+                                                  padding: EdgeInsets.fromLTRB(
+                                                    0,
+                                                    widget.getLinkOutOffset() >
+                                                            0
+                                                        ? widget.getLinkOutOffset() *
+                                                              2
+                                                        : 0,
+                                                    0,
+                                                    widget.getLinkOutOffset() <
+                                                            0
+                                                        ? widget
+                                                                  .getLinkOutOffset()
+                                                                  .abs() *
+                                                              2
+                                                        : 0,
+                                                  ),
+                                                  child: Container(
+                                                    constraints: BoxConstraints(
+                                                      maxWidth:
+                                                          (widget
+                                                                      .getMindMap()
+                                                                      ?.getButtonWidth() ??
+                                                                  24)
+                                                              .toDouble(),
+                                                      maxHeight:
+                                                          (widget
+                                                                      .getMindMap()
+                                                                      ?.getButtonWidth() ??
+                                                                  24)
+                                                              .toDouble(),
+                                                    ),
+                                                    decoration: BoxDecoration(
+                                                      color:
+                                                          (widget
+                                                              .getMindMap()
+                                                              ?.getButtonBackground() ??
+                                                          Colors.white),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            (widget
+                                                                        .getMindMap()
+                                                                        ?.getButtonWidth() ??
+                                                                    24)
+                                                                .toDouble(),
+                                                          ),
+                                                    ),
+                                                    child: IconButton(
+                                                      onPressed: () {
+                                                        widget
+                                                            .getMindMap()
+                                                            ?.setSelectedNode(
+                                                              widget,
+                                                            );
+                                                        widget.setExpanded(
+                                                          !widget.getExpanded(),
+                                                        );
+                                                      },
+                                                      padding: EdgeInsets.zero,
+                                                      icon: Icon(
+                                                        Icons
+                                                            .add_circle_outline,
+                                                        size:
+                                                            (widget
+                                                                        .getMindMap()
+                                                                        ?.getButtonWidth() ??
+                                                                    24)
+                                                                .toDouble(),
+                                                        color:
+                                                            (widget
+                                                                .getMindMap()
+                                                                ?.getButtonColor() ??
+                                                            Colors.black),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ]
+                                            : [])
+                                      : [])),
+                          ],
+                        ),
+                      ),
+                    ]
+                  : []),
+
+              ///Node
+              MindMapNodeTitle(node: widget),
+
+              ///RightSpace
+              ...(widget.getNodeType() != NodeType.left
+                  ? [
+                      Container(
+                        constraints: BoxConstraints(
+                          minWidth: widget.getHSpace().toDouble(),
+                          maxWidth: widget.getHSpace().toDouble(),
+                          minHeight:
+                              (widget.getMindMap()?.getButtonWidth() ?? 24)
+                                  .toDouble(),
+                        ),
+                        padding: EdgeInsets.fromLTRB(3, 0, 3, 0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            ...(widget.getSelected()
+                                ? (widget.getReadOnly()
+                                      ? (widget.getNodeType() ==
+                                                    NodeType.right &&
+                                                widget.canExpand() &&
+                                                widget
+                                                    .getRightItems()
+                                                    .isNotEmpty &&
+                                                (widget
+                                                            .getMindMap()
+                                                            ?.getExpandedLevel() ??
+                                                        0) <=
+                                                    widget.getLevel() + 1
+                                            ? [
+                                                ///Right Expand Button
+                                                Container(
+                                                  constraints: BoxConstraints(
+                                                    maxHeight:
+                                                        (widget
+                                                                .getMindMap()
+                                                                ?.getButtonWidth() ??
+                                                            24) +
+                                                        widget
+                                                                .getLinkOutOffset()
+                                                                .abs() *
+                                                            2,
+                                                  ),
+                                                  padding: EdgeInsets.fromLTRB(
+                                                    0,
+                                                    widget.getLinkOutOffset() >
+                                                            0
+                                                        ? widget.getLinkOutOffset() *
+                                                              2
+                                                        : 0,
+                                                    0,
+                                                    widget.getLinkOutOffset() <
+                                                            0
+                                                        ? widget
+                                                                  .getLinkOutOffset()
+                                                                  .abs() *
+                                                              2
+                                                        : 0,
+                                                  ),
+                                                  child: Container(
+                                                    constraints: BoxConstraints(
+                                                      maxWidth:
+                                                          (widget
+                                                                      .getMindMap()
+                                                                      ?.getButtonWidth() ??
+                                                                  24)
+                                                              .toDouble(),
+                                                      maxHeight:
+                                                          (widget
+                                                                      .getMindMap()
+                                                                      ?.getButtonWidth() ??
+                                                                  24)
+                                                              .toDouble(),
+                                                    ),
+                                                    decoration: BoxDecoration(
+                                                      color:
+                                                          (widget
+                                                              .getMindMap()
+                                                              ?.getButtonBackground() ??
+                                                          Colors.white),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            (widget
+                                                                        .getMindMap()
+                                                                        ?.getButtonWidth() ??
+                                                                    24)
+                                                                .toDouble(),
+                                                          ),
+                                                    ),
+                                                    child: IconButton(
+                                                      onPressed: () {
+                                                        widget
+                                                            .getMindMap()
+                                                            ?.setSelectedNode(
+                                                              widget,
+                                                            );
+                                                        widget.setExpanded(
+                                                          !widget.getExpanded(),
+                                                        );
+                                                      },
+                                                      padding: EdgeInsets.zero,
+                                                      icon: Icon(
+                                                        widget.getExpanded()
+                                                            ? Icons
+                                                                  .remove_circle_outline
+                                                            : Icons
+                                                                  .add_circle_outline,
+                                                        size:
+                                                            (widget
+                                                                        .getMindMap()
+                                                                        ?.getButtonWidth() ??
+                                                                    24)
+                                                                .toDouble(),
+                                                        color:
+                                                            (widget
+                                                                .getMindMap()
+                                                                ?.getButtonColor() ??
+                                                            Colors.black),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ]
+                                            : [])
+                                      : [
+                                          ///Edit Button
+                                          !(widget
+                                                          .getMindMap()
+                                                          ?.hasTextField() ??
+                                                      true) &&
+                                                  (widget
+                                                          .getMindMap()
+                                                          ?.hasEditButton() ??
+                                                      false)
+                                              ? Container(
+                                                  constraints: BoxConstraints(
+                                                    maxWidth:
+                                                        (widget
+                                                                    .getMindMap()
+                                                                    ?.getButtonWidth() ??
+                                                                24)
+                                                            .toDouble(),
+                                                    maxHeight:
+                                                        (widget
+                                                                    .getMindMap()
+                                                                    ?.getButtonWidth() ??
+                                                                24)
+                                                            .toDouble(),
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    color:
+                                                        (widget
+                                                            .getMindMap()
+                                                            ?.getButtonBackground() ??
+                                                        Colors.white),
+                                                    border: Border.all(
+                                                      color:
+                                                          (widget
+                                                              .getMindMap()
+                                                              ?.getButtonColor() ??
+                                                          Colors.black),
+                                                      width: 1,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          (widget
+                                                                      .getMindMap()
+                                                                      ?.getButtonWidth() ??
+                                                                  24)
+                                                              .toDouble(),
+                                                        ),
+                                                  ),
+                                                  child: IconButton(
+                                                    onPressed: () {
+                                                      widget
+                                                          .getMindMap()
+                                                          ?.onEdit(widget);
+                                                    },
+                                                    hoverColor:
+                                                        Colors.blue.shade200,
+                                                    highlightColor: Colors.blue,
+                                                    padding: EdgeInsets.zero,
+                                                    icon: Icon(
+                                                      Icons.edit_outlined,
+                                                      size:
+                                                          (widget
+                                                                  .getMindMap()
+                                                                  ?.getButtonWidth() ??
+                                                              24) -
+                                                          8,
+                                                      color:
+                                                          (widget
+                                                              .getMindMap()
+                                                              ?.getButtonColor() ??
+                                                          Colors.black),
+                                                    ),
+                                                  ),
+                                                )
+                                              : SizedBox(width: 0, height: 0),
+
+                                          ///Space
+                                          !(widget
+                                                          .getMindMap()
+                                                          ?.hasTextField() ??
+                                                      true) &&
+                                                  (widget
+                                                          .getMindMap()
+                                                          ?.hasEditButton() ??
+                                                      false)
+                                              ? SizedBox(width: 6)
+                                              : SizedBox(width: 0),
+
+                                          ///Right Delete Button
+                                          widget.getNodeType() ==
+                                                      NodeType.root ||
+                                                  (widget
+                                                          .getMindMap()
+                                                          ?.getShowRecycle() ??
+                                                      false)
+                                              ? SizedBox(width: 0, height: 0)
+                                              : Container(
+                                                  constraints: BoxConstraints(
+                                                    maxWidth:
+                                                        (widget
+                                                                    .getMindMap()
+                                                                    ?.getButtonWidth() ??
+                                                                24)
+                                                            .toDouble(),
+                                                    maxHeight:
+                                                        (widget
+                                                                    .getMindMap()
+                                                                    ?.getButtonWidth() ??
+                                                                24)
+                                                            .toDouble(),
+                                                  ),
+                                                  decoration: BoxDecoration(
+                                                    color:
+                                                        (widget
+                                                            .getMindMap()
+                                                            ?.getButtonBackground() ??
+                                                        Colors.white),
+                                                    border: Border.all(
+                                                      color:
+                                                          (widget
+                                                              .getMindMap()
+                                                              ?.getButtonColor() ??
+                                                          Colors.black),
+                                                      width: 1,
+                                                    ),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                          (widget
+                                                                      .getMindMap()
+                                                                      ?.getButtonWidth() ??
+                                                                  24)
+                                                              .toDouble(),
+                                                        ),
+                                                  ),
+                                                  child: IconButton(
+                                                    onPressed: () {
+                                                      showDialog(
+                                                        context: context,
+                                                        builder: (context) {
+                                                          return AlertDialog(
+                                                            content: Text(
+                                                              widget
+                                                                      .getMindMap()
+                                                                      ?.getDeleteNodeString() ??
+                                                                  "Delete this node?",
+                                                            ),
+                                                            actions: [
+                                                              TextButton(
+                                                                child: Text(
+                                                                  widget
+                                                                          .getMindMap()
+                                                                          ?.getCancelString() ??
+                                                                      "Cancel",
+                                                                ),
+                                                                onPressed: () {
+                                                                  Navigator.of(
+                                                                    context,
+                                                                  ).pop();
+                                                                },
+                                                              ),
+                                                              TextButton(
+                                                                child: Text(
+                                                                  widget
+                                                                          .getMindMap()
+                                                                          ?.getOkString() ??
+                                                                      "OK",
+                                                                ),
+                                                                onPressed: () {
+                                                                  widget
+                                                                      .getParentNode()
+                                                                      ?.removeRightItem(
+                                                                        widget,
+                                                                      );
+                                                                  widget
+                                                                      .getMindMap()
+                                                                      ?.onChanged();
+                                                                  Navigator.of(
+                                                                    context,
+                                                                  ).pop();
+                                                                },
+                                                              ),
+                                                            ],
+                                                          );
+                                                        },
+                                                      );
+                                                    },
+                                                    hoverColor:
+                                                        Colors.red.shade200,
+                                                    highlightColor: Colors.red,
+                                                    padding: EdgeInsets.zero,
+                                                    icon: Icon(
+                                                      Icons.close_rounded,
+                                                      size:
+                                                          (widget
+                                                                  .getMindMap()
+                                                                  ?.getButtonWidth() ??
+                                                              24) -
+                                                          6,
+                                                      color:
+                                                          (widget
+                                                              .getMindMap()
+                                                              ?.getButtonColor() ??
+                                                          Colors.black),
+                                                    ),
+                                                  ),
+                                                ),
+
+                                          ///Sapce
+                                          widget.getNodeType() ==
+                                                      NodeType.root ||
+                                                  (widget
+                                                          .getMindMap()
+                                                          ?.getShowRecycle() ??
+                                                      false)
+                                              ? SizedBox(width: 0, height: 0)
+                                              : SizedBox(width: 6),
+
+                                          ///Right add Button
+                                          Container(
+                                            constraints: BoxConstraints(
+                                              maxWidth:
+                                                  (widget
+                                                              .getMindMap()
+                                                              ?.getButtonWidth() ??
+                                                          24)
+                                                      .toDouble(),
+                                              maxHeight:
+                                                  (widget
+                                                              .getMindMap()
+                                                              ?.getButtonWidth() ??
+                                                          24)
+                                                      .toDouble(),
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color:
+                                                  (widget
+                                                      .getMindMap()
+                                                      ?.getButtonBackground() ??
+                                                  Colors.white),
+                                              border: Border.all(
+                                                color:
+                                                    (widget
+                                                        .getMindMap()
+                                                        ?.getButtonColor() ??
+                                                    Colors.black),
+                                                width: 1,
+                                              ),
+                                              borderRadius: BorderRadius.circular(
+                                                (widget
+                                                            .getMindMap()
+                                                            ?.getButtonWidth() ??
+                                                        24)
+                                                    .toDouble(),
                                               ),
                                             ),
-                                          ]
-                                        : [])
-                                  : [])),
-                      ],
+                                            child: IconButton(
+                                              onPressed: () {
+                                                widget._focusNode.unfocus();
+                                                widget.addRightChildNode();
+                                              },
+                                              padding: EdgeInsets.zero,
+                                              hoverColor: Colors.green.shade200,
+                                              highlightColor: Colors.green,
+                                              icon: Icon(
+                                                Icons.add_rounded,
+                                                size:
+                                                    (widget
+                                                            .getMindMap()
+                                                            ?.getButtonWidth() ??
+                                                        24) -
+                                                    6,
+                                                color:
+                                                    (widget
+                                                        .getMindMap()
+                                                        ?.getButtonColor() ??
+                                                    Colors.black),
+                                              ),
+                                            ),
+                                          ),
+                                        ])
+                                : (widget.getReadOnly()
+                                      ? (widget.getNodeType() ==
+                                                    NodeType.right &&
+                                                widget.canExpand() &&
+                                                !widget.getExpanded() &&
+                                                widget
+                                                    .getRightItems()
+                                                    .isNotEmpty &&
+                                                (widget
+                                                            .getMindMap()
+                                                            ?.getExpandedLevel() ??
+                                                        0) <=
+                                                    widget.getLevel() + 1
+                                            ? [
+                                                ///Right Expand Button
+                                                Container(
+                                                  constraints: BoxConstraints(
+                                                    maxHeight:
+                                                        (widget
+                                                                .getMindMap()
+                                                                ?.getButtonWidth() ??
+                                                            24) +
+                                                        widget
+                                                                .getLinkOutOffset()
+                                                                .abs() *
+                                                            2,
+                                                  ),
+                                                  padding: EdgeInsets.fromLTRB(
+                                                    0,
+                                                    widget.getLinkOutOffset() >
+                                                            0
+                                                        ? widget.getLinkOutOffset() *
+                                                              2
+                                                        : 0,
+                                                    0,
+                                                    widget.getLinkOutOffset() <
+                                                            0
+                                                        ? widget
+                                                                  .getLinkOutOffset()
+                                                                  .abs() *
+                                                              2
+                                                        : 0,
+                                                  ),
+                                                  child: Container(
+                                                    constraints: BoxConstraints(
+                                                      maxWidth:
+                                                          (widget
+                                                                      .getMindMap()
+                                                                      ?.getButtonWidth() ??
+                                                                  24)
+                                                              .toDouble(),
+                                                      maxHeight:
+                                                          (widget
+                                                                      .getMindMap()
+                                                                      ?.getButtonWidth() ??
+                                                                  24)
+                                                              .toDouble(),
+                                                    ),
+                                                    decoration: BoxDecoration(
+                                                      color:
+                                                          (widget
+                                                              .getMindMap()
+                                                              ?.getButtonBackground() ??
+                                                          Colors.white),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                            (widget
+                                                                        .getMindMap()
+                                                                        ?.getButtonWidth() ??
+                                                                    24)
+                                                                .toDouble(),
+                                                          ),
+                                                    ),
+                                                    child: IconButton(
+                                                      onPressed: () {
+                                                        widget
+                                                            .getMindMap()
+                                                            ?.setSelectedNode(
+                                                              widget,
+                                                            );
+                                                        widget.setExpanded(
+                                                          !widget.getExpanded(),
+                                                        );
+                                                      },
+                                                      padding: EdgeInsets.zero,
+                                                      icon: Icon(
+                                                        Icons
+                                                            .add_circle_outline,
+                                                        size:
+                                                            (widget
+                                                                        .getMindMap()
+                                                                        ?.getButtonWidth() ??
+                                                                    24)
+                                                                .toDouble(),
+                                                        color:
+                                                            (widget
+                                                                .getMindMap()
+                                                                ?.getButtonColor() ??
+                                                            Colors.black),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                              ]
+                                            : [])
+                                      : [])),
+                          ],
+                        ),
+                      ),
+                    ]
+                  : []),
+
+              ///Right Items
+              ...(rightItems.isEmpty ||
+                      (!widget.getExpanded() &&
+                          (widget.getMindMap()?.getReadOnly() ?? false))
+                  ? []
+                  : [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        spacing: widget.getVSpace().toDouble(),
+                        children: rightItems,
+                      ),
+                    ]),
+            ],
+          ),
+        );
+      case MapType.fishbone:
+        if (widget.getNodeType() == NodeType.root) {
+          double maxHeight = 0;
+
+          double maxWidth = 0;
+          if (widget.getLeftItems().isEmpty && widget.getRightItems().isEmpty) {
+            maxWidth =
+                maxWidth +
+                (widget.getSize()?.width ?? 0) +
+                widget.getHSpace() +
+                (widget.getMindMap()?.getButtonWidth() ?? 0) +
+                12;
+            maxHeight =
+                (widget.getSize()?.height ?? 0) + widget.getVSpace() * 2;
+          } else {
+            if (widget.getMindMap()?.getFishboneMapType() ==
+                FishboneMapType.leftToRight) {
+              List<List<IMindMapNode>> items = [];
+              List<IMindMapNode> c = [];
+              for (var item in widget.getRightItems()) {
+                if (maxHeight <
+                    (item.getSize()?.height ?? 0) +
+                        item.getFishboneHeight() +
+                        widget.getVSpace().toDouble()) {
+                  maxHeight =
+                      (item.getSize()?.height ?? 0) +
+                      item.getFishboneHeight() +
+                      widget.getVSpace().toDouble();
+                }
+                c.add(item);
+                if (c.length >= 2) {
+                  items.add(c);
+                  c = [];
+                }
+              }
+              for (
+                int index = 0;
+                index < widget.getLeftItems().length;
+                index++
+              ) {
+                var item = widget
+                    .getLeftItems()[widget.getLeftItems().length - index - 1];
+                if (maxHeight <
+                    (item.getSize()?.height ?? 0) +
+                        item.getFishboneHeight() +
+                        widget.getVSpace().toDouble()) {
+                  maxHeight =
+                      (item.getSize()?.height ?? 0) +
+                      item.getFishboneHeight() +
+                      widget.getVSpace().toDouble();
+                }
+                c.add(item);
+                if (c.length >= 2) {
+                  items.add(c);
+                  c = [];
+                }
+              }
+              if (c.isNotEmpty) {
+                items.add(c);
+              }
+              maxWidth += (widget.getSize()?.width ?? 0) + widget.getHSpace();
+              for (List<IMindMapNode> item in items) {
+                double d1 =
+                    item[0].getFishboneWidth() +
+                    (item[0].getSize()?.width ?? 0) / 2;
+                double d2 = item.length <= 1
+                    ? 0
+                    : item[1].getFishboneWidth() +
+                          (item[1].getSize()?.width ?? 0) / 2 +
+                          widget.getHSpace();
+
+                maxWidth += d1 < d2 ? d2 : d1;
+                maxWidth += widget.getHSpace();
+                if (item == items.last) {
+                  double w1 =
+                      item[0].getFishboneWidth() +
+                      item[0].getFishbonePosition().dx +
+                      (item[0].getSize()?.width ?? 0) / 2;
+                  maxWidth = maxWidth < w1 ? w1 : maxWidth;
+                }
+                if (item.length > 1) {
+                  double w1 =
+                      item[1].getFishboneWidth() +
+                      item[1].getFishbonePosition().dx +
+                      (item[1].getSize()?.width ?? 0) / 2;
+                  maxWidth = maxWidth < w1 ? w1 : maxWidth;
+                }
+              }
+            } else {
+              List<List<IMindMapNode>> items = [];
+              List<IMindMapNode> c = [];
+              for (var item in widget.getLeftItems()) {
+                if (maxHeight <
+                    (item.getSize()?.height ?? 0) +
+                        item.getFishboneHeight() +
+                        widget.getVSpace().toDouble()) {
+                  maxHeight =
+                      (item.getSize()?.height ?? 0) +
+                      item.getFishboneHeight() +
+                      widget.getVSpace().toDouble();
+                }
+                c.add(item);
+                if (c.length >= 2) {
+                  items.add(c);
+                  c = [];
+                }
+              }
+              for (
+                int index = 0;
+                index < widget.getRightItems().length;
+                index++
+              ) {
+                var item = widget
+                    .getRightItems()[widget.getRightItems().length - index - 1];
+                if (maxHeight <
+                    (item.getSize()?.height ?? 0) +
+                        item.getFishboneHeight() +
+                        widget.getVSpace().toDouble()) {
+                  maxHeight =
+                      (item.getSize()?.height ?? 0) +
+                      item.getFishboneHeight() +
+                      widget.getVSpace().toDouble();
+                }
+                c.add(item);
+                if (c.length >= 2) {
+                  items.add(c);
+                  c = [];
+                }
+              }
+              if (c.isNotEmpty) {
+                items.add(c);
+              }
+              maxWidth += (widget.getSize()?.width ?? 0) + widget.getHSpace();
+              for (List<IMindMapNode> item in items) {
+                double d1 =
+                    item[0].getFishboneWidth() +
+                    (item[0].getSize()?.width ?? 0) / 2;
+                double d2 = item.length <= 1
+                    ? 0
+                    : item[1].getFishboneWidth() +
+                          (item[1].getSize()?.width ?? 0) / 2 +
+                          widget.getHSpace();
+
+                maxWidth += d1 < d2 ? d2 : d1;
+                maxWidth += widget.getHSpace();
+                if (item == items.last) {
+                  double w1 =
+                      (widget
+                              .getMindMap()
+                              ?.getRootNode()
+                              .getFishbonePosition()
+                              .dx ??
+                          0) -
+                      (item[0].getFishbonePosition().dx +
+                          (item[0].getSize()?.width ?? 0) / 2 -
+                          item[0].getFishboneWidth()) +
+                      (widget.getMindMap()?.getRootNode().getSize()?.width ??
+                          0);
+                  maxWidth = maxWidth < w1 ? w1 : maxWidth;
+                }
+                if (item.length > 1) {
+                  double w1 =
+                      (widget
+                              .getMindMap()
+                              ?.getRootNode()
+                              .getFishbonePosition()
+                              .dx ??
+                          0) -
+                      (item[1].getFishbonePosition().dx +
+                          (item[1].getSize()?.width ?? 0) / 2 -
+                          item[1].getFishboneWidth()) +
+                      (widget.getMindMap()?.getRootNode().getSize()?.width ??
+                          0);
+                  maxWidth = maxWidth < w1 ? w1 : maxWidth;
+                }
+              }
+            }
+          }
+          List<Widget> list = [];
+
+          widget.setFishbonePosition(
+            Offset(
+              widget.getMindMap()?.getFishboneMapType() ==
+                      FishboneMapType.rightToLeft
+                  ? maxWidth -
+                        (widget.getSize()?.width ?? 0) -
+                        (widget.getBorder() as Border).right.width
+                  : (widget.getBorder() as Border).left.width,
+              maxHeight -
+                  (widget.getSize()?.height ?? 0) / 2 +
+                  widget.getLinkWidth() / 2,
+            ),
+          );
+
+          list.add(
+            Positioned(
+              left:
+                  widget.getMindMap()?.getFishboneMapType() ==
+                      FishboneMapType.rightToLeft
+                  ? maxWidth -
+                        (widget.getSize()?.width ?? 0) -
+                        (widget.getBorder() as Border).right.width
+                  : (widget.getBorder() as Border).left.width,
+              top:
+                  maxHeight -
+                  (widget.getSize()?.height ?? 0) / 2 +
+                  widget.getLinkWidth() / 2,
+              child: MindMapNodeTitle(node: widget),
+            ),
+          );
+
+          list.addAll(getFinshboneNodes(widget, maxWidth, maxHeight));
+
+          widget.getMindMap()?.setFishboneSize(Size(maxWidth, maxHeight * 2));
+          if (widget.getMindMap()?.getSelectedNode() != null) {
+            list.addAll(
+              getSelectedNodesButtons(widget.getMindMap()!.getSelectedNode()!),
+            );
+          }
+          return SizedBox(
+            width: maxWidth,
+            height: maxHeight * 2 + widget.getLinkWidth(),
+            child: Stack(children: list),
+          );
+        } else {
+          return MindMapNodeTitle(node: widget);
+        }
+    }
+  }
+
+  List<Widget> getFinshboneNodes(
+    IMindMapNode node,
+    double width,
+    double height,
+  ) {
+    List<Widget> list = [];
+    if (widget.getMindMap()?.getFishboneMapType() ==
+        FishboneMapType.rightToLeft) {
+      if (node.getNodeType() == NodeType.root) {
+        List<IMindMapNode> items = [];
+        for (var item in node.getLeftItems()) {
+          items.add(item);
+        }
+        for (int i = 0; i < node.getRightItems().length; i++) {
+          IMindMapNode item = node
+              .getRightItems()[node.getRightItems().length - i - 1];
+          items.add(item);
+        }
+        double w = 0;
+        int ii = 0;
+        for (IMindMapNode item in items) {
+          if (ii == 0) {
+            w = (item.getSize()?.width ?? 0) / 2;
+          } else {
+            w = w < (item.getSize()?.width ?? 0) / 2
+                ? (item.getSize()?.width ?? 0) / 2
+                : w;
+          }
+          ii++;
+          if (ii > 1) {
+            break;
+          }
+        }
+
+        double right = width - (node.getSize()?.width ?? 0) - w;
+        double dragX = right - node.getHSpace();
+        double tw = 0;
+        int index = 0;
+
+        for (IMindMapNode item in items) {
+          double w1 = (item.getSize()?.width ?? 0) / 2;
+          double h = item.getFishboneHeight();
+          if (index % 2 == 0) {
+            item.setFishboneNodeMode(FishboneNodeMode.down);
+            item.setFishbonePosition(
+              Offset(
+                right - h - w1,
+                height +
+                    h +
+                    (widget.getMindMap()?.getRootNode().getLinkWidth() ?? 0),
+              ),
+            );
+            list.add(
+              Positioned(
+                left: right - h - w1,
+                top:
+                    height +
+                    h +
+                    (widget.getMindMap()?.getRootNode().getLinkWidth() ?? 0),
+                child: item as Widget,
+              ),
+            );
+            //add drag
+            if (item == items.first) {
+              list.add(
+                Positioned(
+                  left: right,
+                  top: height - node.getVSpace() / 2,
+                  child: FishboneNodeDrag(
+                    node: item,
+                    isLast: true,
+                    width: node.getFishbonePosition().dx - right,
+                    height: node.getVSpace().toDouble() + node.getLinkWidth(),
+                  ),
+                ),
+              );
+            }
+            list.add(
+              Positioned(
+                left: right - node.getHSpace(),
+                top: height - node.getVSpace() / 2,
+                child: FishboneNodeDrag(
+                  node: item,
+                  isLast: false,
+                  width: node.getHSpace().toDouble(),
+                  height: node.getVSpace().toDouble() + node.getLinkWidth(),
+                ),
+              ),
+            );
+
+            //add child
+            List<IMindMapNode> children = [];
+            children.addAll(item.getRightItems());
+            children.addAll(item.getLeftItems());
+            double ctop =
+                height +
+                item.getVSpace() +
+                (widget.getMindMap()?.getRootNode().getLinkWidth() ?? 0);
+            for (IMindMapNode child in children) {
+              double cright =
+                  right -
+                  (ctop -
+                      height -
+                      (widget.getMindMap()?.getRootNode().getLinkWidth() ??
+                          0)) -
+                  (child.getSize()?.height ?? 0) -
+                  child.getFishboneHeight() -
+                  item.getHSpace();
+              child.setFishbonePosition(
+                Offset(cright - (child.getSize()?.width ?? 0), ctop),
+              );
+              list.add(
+                Positioned(
+                  left: cright - (child.getSize()?.width ?? 0),
+                  top: ctop,
+                  child: child as Widget,
+                ),
+              );
+              //add drag
+              list.add(
+                Positioned(
+                  left: cright - (child.getSize()?.width ?? 0),
+                  top: ctop - item.getVSpace(),
+                  child: FishboneNodeDrag(
+                    node: child,
+                    isLast: false,
+                    width: child.getSize()?.width ?? 0,
+                    height: item.getVSpace().toDouble(),
+                  ),
+                ),
+              );
+              if (child == children.last) {
+                list.add(
+                  Positioned(
+                    left: cright - (child.getSize()?.width ?? 0),
+                    top: ctop + (child.getSize()?.height ?? 0),
+                    child: FishboneNodeDrag(
+                      node: child,
+                      isLast: true,
+                      width: child.getSize()?.width ?? 0,
+                      height: item.getVSpace().toDouble(),
                     ),
                   ),
-                ]
-              : []),
+                );
+              }
+              list.addAll(getFinshboneNodes(child, width, height));
+              ctop =
+                  ctop +
+                  (child.getSize()?.height ?? 0) +
+                  child.getFishboneHeight();
+            }
 
-          ///Node
-          MindMapNodeTitle(node: widget),
+            tw = item.getFishboneWidth() + (item.getSize()?.width ?? 0) / 2;
+            right = right - node.getHSpace();
 
-          ///RightSpace
-          ...(widget.getNodeType() != NodeType.left
-              ? [
-                  Container(
+            //w = left + h + w1;
+          } else {
+            item.setFishboneNodeMode(FishboneNodeMode.up);
+            item.setFishbonePosition(
+              Offset(
+                right - h - w1,
+                height - h - (item.getSize()?.height ?? 0),
+              ),
+            );
+            list.add(
+              Positioned(
+                left: right - h - w1,
+                top: height - h - (item.getSize()?.height ?? 0),
+                child: item as Widget,
+              ),
+            );
+
+            //add child
+            List<IMindMapNode> children = [];
+            children.addAll(item.getRightItems());
+            children.addAll(item.getLeftItems());
+            double ctop = height - h + item.getVSpace();
+            for (IMindMapNode child in children) {
+              double cright = right - (height - ctop) - item.getHSpace();
+              child.setFishbonePosition(
+                Offset(cright - (child.getSize()?.width ?? 0), ctop),
+              );
+              list.add(
+                Positioned(
+                  left: cright - (child.getSize()?.width ?? 0),
+                  top: ctop,
+                  child: child as Widget,
+                ),
+              );
+              //add drag
+              list.add(
+                Positioned(
+                  left: cright - (child.getSize()?.width ?? 0),
+                  top: ctop - item.getVSpace(),
+                  child: FishboneNodeDrag(
+                    node: child,
+                    isLast: false,
+                    width: child.getSize()?.width ?? 0,
+                    height: item.getVSpace().toDouble(),
+                  ),
+                ),
+              );
+              if (child == children.last) {
+                list.add(
+                  Positioned(
+                    left: cright - (child.getSize()?.width ?? 0),
+                    top: ctop + (child.getSize()?.height ?? 0),
+                    child: FishboneNodeDrag(
+                      node: child,
+                      isLast: true,
+                      width: child.getSize()?.width ?? 0,
+                      height: item.getVSpace().toDouble(),
+                    ),
+                  ),
+                );
+              }
+              list.addAll(getFinshboneNodes(child, width, height));
+              ctop =
+                  ctop +
+                  (child.getSize()?.height ?? 0) +
+                  child.getFishboneHeight();
+            }
+            tw =
+                tw <
+                    item.getFishboneWidth() +
+                        node.getHSpace() +
+                        (item.getSize()?.width ?? 0) / 2
+                ? item.getFishboneWidth() +
+                      node.getHSpace() +
+                      (item.getSize()?.width ?? 0) / 2
+                : tw;
+            right = right - tw;
+
+            //add drag
+            list.add(
+              Positioned(
+                left: right,
+                top: height - node.getVSpace() / 2,
+                child: FishboneNodeDrag(
+                  node: item,
+                  isLast: false,
+                  width: dragX - right,
+                  height: node.getVSpace().toDouble() + node.getLinkWidth(),
+                ),
+              ),
+            );
+
+            dragX = right - node.getHSpace();
+          }
+          index++;
+          //list.addAll(getFinshboneNodes(item));
+        }
+      } else {
+        double top =
+            node.getFishbonePosition().dy +
+            (node.getSize()?.height ?? 0) +
+            node.getVSpace();
+        double right =
+            node.getFishbonePosition().dx +
+            (node.getSize()?.width ?? 0) -
+            node.getHSpace();
+        List<IMindMapNode> items = [];
+        items.addAll(node.getRightItems());
+        items.addAll(node.getLeftItems());
+        for (var item in items) {
+          item.setFishbonePosition(
+            Offset(right - (item.getSize()?.width ?? 0), top),
+          );
+          list.add(
+            Positioned(
+              left: right - (item.getSize()?.width ?? 0),
+              top: top,
+              child: item as Widget,
+            ),
+          );
+          //add drag
+          list.add(
+            Positioned(
+              left: right - (item.getSize()?.width ?? 0),
+              top: top - item.getVSpace(),
+              child: FishboneNodeDrag(
+                node: item,
+                isLast: false,
+                width: item.getSize()?.width ?? 0,
+                height: item.getVSpace().toDouble(),
+              ),
+            ),
+          );
+          if (item == items.last) {
+            list.add(
+              Positioned(
+                left: right - (item.getSize()?.width ?? 0),
+                top: top + (item.getSize()?.height ?? 0),
+                child: FishboneNodeDrag(
+                  node: item,
+                  isLast: true,
+                  width: item.getSize()?.width ?? 0,
+                  height: item.getVSpace().toDouble(),
+                ),
+              ),
+            );
+          }
+          list.addAll(getFinshboneNodes(item, width, height));
+          top = top + (item.getSize()?.height ?? 0) + item.getFishboneHeight();
+        }
+      }
+    } else {
+      if (node.getNodeType() == NodeType.root) {
+        List<IMindMapNode> items = [];
+        for (var item in node.getRightItems()) {
+          items.add(item);
+        }
+        for (int i = 0; i < node.getLeftItems().length; i++) {
+          IMindMapNode item = node
+              .getLeftItems()[node.getLeftItems().length - i - 1];
+          items.add(item);
+        }
+        double w = 0;
+        int ii = 0;
+        for (IMindMapNode item in items) {
+          if (ii == 0) {
+            w = (item.getSize()?.width ?? 0) / 2;
+          } else {
+            w = w < (item.getSize()?.width ?? 0) / 2
+                ? (item.getSize()?.width ?? 0) / 2
+                : w;
+          }
+          ii++;
+          if (ii > 1) {
+            break;
+          }
+        }
+
+        double left = (node.getSize()?.width ?? 0) + w;
+        double dragX = (node.getSize()?.width ?? 0);
+        double tw = 0;
+        int index = 0;
+
+        for (IMindMapNode item in items) {
+          double w1 = (item.getSize()?.width ?? 0) / 2;
+          double h = item.getFishboneHeight();
+          if (index % 2 == 0) {
+            item.setFishboneNodeMode(FishboneNodeMode.up);
+            item.setFishbonePosition(
+              Offset(left + h - w1, height - h - (item.getSize()?.height ?? 0)),
+            );
+            list.add(
+              Positioned(
+                left: left + h - w1,
+                top: height - h - (item.getSize()?.height ?? 0),
+                child: item as Widget,
+              ),
+            );
+
+            //add drag
+            list.add(
+              Positioned(
+                left: dragX,
+                top: height - node.getVSpace() / 2,
+                child: FishboneNodeDrag(
+                  node: item,
+                  isLast: false,
+                  width: left - dragX,
+                  height: node.getVSpace() + node.getLinkWidth(),
+                ),
+              ),
+            );
+            if (item == items.last) {
+              list.add(
+                Positioned(
+                  left: left,
+                  top: height - node.getVSpace() / 2,
+                  child: FishboneNodeDrag(
+                    node: item,
+                    isLast: false,
+                    width: width - dragX,
+                    height: node.getVSpace() + node.getLinkWidth(),
+                  ),
+                ),
+              );
+            }
+            dragX = left + node.getHSpace();
+            //add child
+            List<IMindMapNode> children = [];
+            children.addAll(item.getRightItems());
+            children.addAll(item.getLeftItems());
+            double ctop = height - h + item.getVSpace();
+            for (IMindMapNode child in children) {
+              double cleft = left + (height - ctop) + item.getHSpace();
+              child.setFishbonePosition(Offset(cleft, ctop));
+              list.add(
+                Positioned(left: cleft, top: ctop, child: child as Widget),
+              );
+
+              //add drag
+              list.add(
+                Positioned(
+                  left: cleft,
+                  top: ctop - item.getVSpace(),
+                  child: FishboneNodeDrag(
+                    node: child,
+                    isLast: false,
+                    width: child.getSize()?.width ?? 0,
+                    height: item.getVSpace().toDouble(),
+                  ),
+                ),
+              );
+              if (child == children.last) {
+                list.add(
+                  Positioned(
+                    left: cleft,
+                    top: ctop + (child.getSize()?.height ?? 0),
+                    child: FishboneNodeDrag(
+                      node: child,
+                      isLast: true,
+                      width: child.getSize()?.width ?? 0,
+                      height: item.getVSpace().toDouble(),
+                    ),
+                  ),
+                );
+              }
+              list.addAll(getFinshboneNodes(child, width, height));
+              ctop =
+                  ctop +
+                  (child.getSize()?.height ?? 0) +
+                  child.getFishboneHeight();
+            }
+
+            tw = item.getFishboneWidth() + (item.getSize()?.width ?? 0) / 2;
+            left = left + node.getHSpace();
+
+            //w = left + h + w1;
+          } else {
+            item.setFishboneNodeMode(FishboneNodeMode.down);
+            item.setFishbonePosition(
+              Offset(
+                left + h - w1,
+                height +
+                    h +
+                    (widget.getMindMap()?.getRootNode().getLinkWidth() ?? 0),
+              ),
+            );
+            list.add(
+              Positioned(
+                left: left + h - w1,
+                top:
+                    height +
+                    h +
+                    (widget.getMindMap()?.getRootNode().getLinkWidth() ?? 0),
+                child: item as Widget,
+              ),
+            );
+
+            //add drag
+            list.add(
+              Positioned(
+                left: left - node.getHSpace(),
+                top: height - node.getVSpace() / 2,
+                child: FishboneNodeDrag(
+                  node: item,
+                  isLast: false,
+                  width: node.getHSpace().toDouble(),
+                  height: node.getVSpace().toDouble() + node.getLinkWidth(),
+                ),
+              ),
+            );
+            if (item == items.last) {
+              list.add(
+                Positioned(
+                  left: left,
+                  top: height - node.getVSpace() / 2,
+                  child: FishboneNodeDrag(
+                    node: item,
+                    isLast: false,
+                    width: width - dragX - node.getHSpace(),
+                    height: node.getVSpace() + node.getLinkWidth(),
+                  ),
+                ),
+              );
+            }
+            //add child
+            List<IMindMapNode> children = [];
+            children.addAll(item.getRightItems());
+            children.addAll(item.getLeftItems());
+            double ctop =
+                height +
+                item.getVSpace() +
+                (widget.getMindMap()?.getRootNode().getLinkWidth() ?? 0);
+            for (IMindMapNode child in children) {
+              double cleft =
+                  left +
+                  (ctop -
+                      height -
+                      (widget.getMindMap()?.getRootNode().getLinkWidth() ??
+                          0)) +
+                  (child.getSize()?.height ?? 0) +
+                  child.getFishboneHeight() +
+                  item.getHSpace();
+              child.setFishbonePosition(Offset(cleft, ctop));
+              list.add(
+                Positioned(left: cleft, top: ctop, child: child as Widget),
+              );
+              list.addAll(getFinshboneNodes(child, width, height));
+
+              //add drag
+              list.add(
+                Positioned(
+                  left: cleft,
+                  top: ctop - item.getVSpace(),
+                  child: FishboneNodeDrag(
+                    node: child,
+                    isLast: false,
+                    width: child.getSize()?.width ?? 0,
+                    height: item.getVSpace().toDouble(),
+                  ),
+                ),
+              );
+              if (child == children.last) {
+                list.add(
+                  Positioned(
+                    left: cleft,
+                    top: ctop + (child.getSize()?.height ?? 0),
+                    child: FishboneNodeDrag(
+                      node: child,
+                      isLast: true,
+                      width: child.getSize()?.width ?? 0,
+                      height: item.getVSpace().toDouble(),
+                    ),
+                  ),
+                );
+              }
+              ctop =
+                  ctop +
+                  (child.getSize()?.height ?? 0) +
+                  child.getFishboneHeight();
+            }
+            tw =
+                tw <
+                    item.getFishboneWidth() +
+                        node.getHSpace() +
+                        (item.getSize()?.width ?? 0) / 2
+                ? item.getFishboneWidth() +
+                      node.getHSpace() +
+                      (item.getSize()?.width ?? 0) / 2
+                : tw;
+            left = left + tw;
+          }
+          index++;
+          //list.addAll(getFinshboneNodes(item));
+        }
+      } else {
+        double top =
+            node.getFishbonePosition().dy +
+            (node.getSize()?.height ?? 0) +
+            node.getVSpace();
+        double left = node.getFishbonePosition().dx + node.getHSpace();
+        List<IMindMapNode> items = [];
+        items.addAll(node.getRightItems());
+        items.addAll(node.getLeftItems());
+        for (var item in items) {
+          item.setFishbonePosition(Offset(left, top));
+          list.add(Positioned(left: left, top: top, child: item as Widget));
+          list.addAll(getFinshboneNodes(item, width, height));
+
+          //add drag
+          list.add(
+            Positioned(
+              left: left,
+              top: top - item.getVSpace(),
+              child: FishboneNodeDrag(
+                node: item,
+                isLast: false,
+                width: item.getSize()?.width ?? 0,
+                height: item.getVSpace().toDouble(),
+              ),
+            ),
+          );
+          if (item == items.last) {
+            list.add(
+              Positioned(
+                left: left,
+                top: top + (item.getSize()?.height ?? 0),
+                child: FishboneNodeDrag(
+                  node: item,
+                  isLast: true,
+                  width: item.getSize()?.width ?? 0,
+                  height: item.getVSpace().toDouble(),
+                ),
+              ),
+            );
+          }
+
+          top = top + (item.getSize()?.height ?? 0) + item.getFishboneHeight();
+        }
+      }
+    }
+    return list;
+  }
+
+  List<Widget> getSelectedNodesButtons(IMindMapNode node) {
+    List<Widget> list = [];
+    if (widget.getMindMap()?.getFishboneMapType() ==
+        FishboneMapType.rightToLeft) {
+      if (node.getNodeType() == NodeType.root) {
+        if (!(widget.getMindMap()?.getReadOnly() ?? false)) {
+          list.add(
+            Positioned(
+              left:
+                  node.getFishbonePosition().dx -
+                  ((widget.getMindMap()?.getButtonWidth() ?? 24) + 12),
+              top:
+                  node.getFishbonePosition().dy +
+                  (node.getSize()?.height ?? 0) / 2 -
+                  ((widget.getMindMap()?.getButtonWidth() ?? 24) + 12) / 2,
+              child: SizedBox(
+                width: (widget.getMindMap()?.getButtonWidth() ?? 24) + 12,
+                height: (widget.getMindMap()?.getButtonWidth() ?? 24) + 12,
+                child: Center(
+                  //add button
+                  child: Container(
                     constraints: BoxConstraints(
-                      minWidth: widget.getHSpace().toDouble(),
-                      maxWidth: widget.getHSpace().toDouble(),
-                      minHeight: (widget.getMindMap()?.getButtonWidth() ?? 24)
+                      maxWidth: (widget.getMindMap()?.getButtonWidth() ?? 24)
+                          .toDouble(),
+                      maxHeight: (widget.getMindMap()?.getButtonWidth() ?? 24)
                           .toDouble(),
                     ),
-                    padding: EdgeInsets.fromLTRB(3, 0, 3, 0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        ...(widget.getSelected()
-                            ? (widget.getReadOnly()
-                                  ? (widget.getNodeType() == NodeType.right &&
-                                            widget.canExpand() &&
-                                            widget.getRightItems().isNotEmpty &&
-                                            (widget
-                                                        .getMindMap()
-                                                        ?.getExpandedLevel() ??
-                                                    0) <=
-                                                widget.getLevel() + 1
-                                        ? [
-                                            ///Right Expand Button
-                                            Container(
-                                              constraints: BoxConstraints(
-                                                maxHeight:
-                                                    (widget
-                                                            .getMindMap()
-                                                            ?.getButtonWidth() ??
-                                                        24) +
-                                                    widget
-                                                            .getLinkOutOffset()
-                                                            .abs() *
-                                                        2,
-                                              ),
-                                              padding: EdgeInsets.fromLTRB(
-                                                0,
-                                                widget.getLinkOutOffset() > 0
-                                                    ? widget.getLinkOutOffset() *
-                                                          2
-                                                    : 0,
-                                                0,
-                                                widget.getLinkOutOffset() < 0
-                                                    ? widget
-                                                              .getLinkOutOffset()
-                                                              .abs() *
-                                                          2
-                                                    : 0,
-                                              ),
-                                              child: Container(
-                                                constraints: BoxConstraints(
-                                                  maxWidth:
-                                                      (widget
-                                                                  .getMindMap()
-                                                                  ?.getButtonWidth() ??
-                                                              24)
-                                                          .toDouble(),
-                                                  maxHeight:
-                                                      (widget
-                                                                  .getMindMap()
-                                                                  ?.getButtonWidth() ??
-                                                              24)
-                                                          .toDouble(),
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  color:
-                                                      (widget
-                                                          .getMindMap()
-                                                          ?.getButtonBackground() ??
-                                                      Colors.white),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                        (widget
-                                                                    .getMindMap()
-                                                                    ?.getButtonWidth() ??
-                                                                24)
-                                                            .toDouble(),
-                                                      ),
-                                                ),
-                                                child: IconButton(
-                                                  onPressed: () {
-                                                    widget
-                                                        .getMindMap()
-                                                        ?.setSelectedNode(
-                                                          widget,
-                                                        );
-                                                    widget.setExpanded(
-                                                      !widget.getExpanded(),
-                                                    );
-                                                  },
-                                                  padding: EdgeInsets.zero,
-                                                  icon: Icon(
-                                                    widget.getExpanded()
-                                                        ? Icons
-                                                              .remove_circle_outline
-                                                        : Icons
-                                                              .add_circle_outline,
-                                                    size:
-                                                        (widget
-                                                                    .getMindMap()
-                                                                    ?.getButtonWidth() ??
-                                                                24)
-                                                            .toDouble(),
-                                                    color:
-                                                        (widget
-                                                            .getMindMap()
-                                                            ?.getButtonColor() ??
-                                                        Colors.black),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ]
-                                        : [])
-                                  : [
-                                      ///Edit Button
-                                      !(widget.getMindMap()?.hasTextField() ??
-                                                  true) &&
-                                              (widget
-                                                      .getMindMap()
-                                                      ?.hasEditButton() ??
-                                                  false)
-                                          ? Container(
-                                              constraints: BoxConstraints(
-                                                maxWidth:
-                                                    (widget
-                                                                .getMindMap()
-                                                                ?.getButtonWidth() ??
-                                                            24)
-                                                        .toDouble(),
-                                                maxHeight:
-                                                    (widget
-                                                                .getMindMap()
-                                                                ?.getButtonWidth() ??
-                                                            24)
-                                                        .toDouble(),
-                                              ),
-                                              decoration: BoxDecoration(
-                                                color:
-                                                    (widget
-                                                        .getMindMap()
-                                                        ?.getButtonBackground() ??
-                                                    Colors.white),
-                                                border: Border.all(
-                                                  color:
-                                                      (widget
-                                                          .getMindMap()
-                                                          ?.getButtonColor() ??
-                                                      Colors.black),
-                                                  width: 1,
-                                                ),
-                                                borderRadius: BorderRadius.circular(
-                                                  (widget
-                                                              .getMindMap()
-                                                              ?.getButtonWidth() ??
-                                                          24)
-                                                      .toDouble(),
-                                                ),
-                                              ),
-                                              child: IconButton(
-                                                onPressed: () {
-                                                  widget.getMindMap()?.onEdit(
-                                                    widget,
-                                                  );
-                                                },
-                                                hoverColor:
-                                                    Colors.blue.shade200,
-                                                highlightColor: Colors.blue,
-                                                padding: EdgeInsets.zero,
-                                                icon: Icon(
-                                                  Icons.edit_outlined,
-                                                  size:
-                                                      (widget
-                                                              .getMindMap()
-                                                              ?.getButtonWidth() ??
-                                                          24) -
-                                                      8,
-                                                  color:
-                                                      (widget
-                                                          .getMindMap()
-                                                          ?.getButtonColor() ??
-                                                      Colors.black),
-                                                ),
-                                              ),
-                                            )
-                                          : SizedBox(width: 0, height: 0),
-
-                                      ///Space
-                                      !(widget.getMindMap()?.hasTextField() ??
-                                                  true) &&
-                                              (widget
-                                                      .getMindMap()
-                                                      ?.hasEditButton() ??
-                                                  false)
-                                          ? SizedBox(width: 6)
-                                          : SizedBox(width: 0),
-
-                                      ///Right Delete Button
-                                      widget.getNodeType() == NodeType.root ||
-                                              (widget
-                                                      .getMindMap()
-                                                      ?.getShowRecycle() ??
-                                                  false)
-                                          ? SizedBox(width: 0, height: 0)
-                                          : Container(
-                                              constraints: BoxConstraints(
-                                                maxWidth:
-                                                    (widget
-                                                                .getMindMap()
-                                                                ?.getButtonWidth() ??
-                                                            24)
-                                                        .toDouble(),
-                                                maxHeight:
-                                                    (widget
-                                                                .getMindMap()
-                                                                ?.getButtonWidth() ??
-                                                            24)
-                                                        .toDouble(),
-                                              ),
-                                              decoration: BoxDecoration(
-                                                color:
-                                                    (widget
-                                                        .getMindMap()
-                                                        ?.getButtonBackground() ??
-                                                    Colors.white),
-                                                border: Border.all(
-                                                  color:
-                                                      (widget
-                                                          .getMindMap()
-                                                          ?.getButtonColor() ??
-                                                      Colors.black),
-                                                  width: 1,
-                                                ),
-                                                borderRadius: BorderRadius.circular(
-                                                  (widget
-                                                              .getMindMap()
-                                                              ?.getButtonWidth() ??
-                                                          24)
-                                                      .toDouble(),
-                                                ),
-                                              ),
-                                              child: IconButton(
-                                                onPressed: () {
-                                                  showDialog(
-                                                    context: context,
-                                                    builder: (context) {
-                                                      return AlertDialog(
-                                                        content: Text(
-                                                          widget
-                                                                  .getMindMap()
-                                                                  ?.getDeleteNodeString() ??
-                                                              "Delete this node?",
-                                                        ),
-                                                        actions: [
-                                                          TextButton(
-                                                            child: Text(
-                                                              widget
-                                                                      .getMindMap()
-                                                                      ?.getCancelString() ??
-                                                                  "Cancel",
-                                                            ),
-                                                            onPressed: () {
-                                                              Navigator.of(
-                                                                context,
-                                                              ).pop();
-                                                            },
-                                                          ),
-                                                          TextButton(
-                                                            child: Text(
-                                                              widget
-                                                                      .getMindMap()
-                                                                      ?.getOkString() ??
-                                                                  "OK",
-                                                            ),
-                                                            onPressed: () {
-                                                              widget
-                                                                  .getParentNode()
-                                                                  ?.removeRightItem(
-                                                                    widget,
-                                                                  );
-                                                              widget
-                                                                  .getMindMap()
-                                                                  ?.onChanged();
-                                                              Navigator.of(
-                                                                context,
-                                                              ).pop();
-                                                            },
-                                                          ),
-                                                        ],
-                                                      );
-                                                    },
-                                                  );
-                                                },
-                                                hoverColor: Colors.red.shade200,
-                                                highlightColor: Colors.red,
-                                                padding: EdgeInsets.zero,
-                                                icon: Icon(
-                                                  Icons.close_rounded,
-                                                  size:
-                                                      (widget
-                                                              .getMindMap()
-                                                              ?.getButtonWidth() ??
-                                                          24) -
-                                                      6,
-                                                  color:
-                                                      (widget
-                                                          .getMindMap()
-                                                          ?.getButtonColor() ??
-                                                      Colors.black),
-                                                ),
-                                              ),
-                                            ),
-
-                                      ///Sapce
-                                      widget.getNodeType() == NodeType.root ||
-                                              (widget
-                                                      .getMindMap()
-                                                      ?.getShowRecycle() ??
-                                                  false)
-                                          ? SizedBox(width: 0, height: 0)
-                                          : SizedBox(width: 6),
-
-                                      ///Right add Button
-                                      Container(
-                                        constraints: BoxConstraints(
-                                          maxWidth:
-                                              (widget
-                                                          .getMindMap()
-                                                          ?.getButtonWidth() ??
-                                                      24)
-                                                  .toDouble(),
-                                          maxHeight:
-                                              (widget
-                                                          .getMindMap()
-                                                          ?.getButtonWidth() ??
-                                                      24)
-                                                  .toDouble(),
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color:
-                                              (widget
-                                                  .getMindMap()
-                                                  ?.getButtonBackground() ??
-                                              Colors.white),
-                                          border: Border.all(
-                                            color:
-                                                (widget
-                                                    .getMindMap()
-                                                    ?.getButtonColor() ??
-                                                Colors.black),
-                                            width: 1,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            (widget
-                                                        .getMindMap()
-                                                        ?.getButtonWidth() ??
-                                                    24)
-                                                .toDouble(),
-                                          ),
-                                        ),
-                                        child: IconButton(
-                                          onPressed: () {
-                                            widget._focusNode.unfocus();
-                                            widget.addRightChildNode();
-                                          },
-                                          padding: EdgeInsets.zero,
-                                          hoverColor: Colors.green.shade200,
-                                          highlightColor: Colors.green,
-                                          icon: Icon(
-                                            Icons.add_rounded,
-                                            size:
-                                                (widget
-                                                        .getMindMap()
-                                                        ?.getButtonWidth() ??
-                                                    24) -
-                                                6,
-                                            color:
-                                                (widget
-                                                    .getMindMap()
-                                                    ?.getButtonColor() ??
-                                                Colors.black),
-                                          ),
-                                        ),
-                                      ),
-                                    ])
-                            : (widget.getReadOnly()
-                                  ? (widget.getNodeType() == NodeType.right &&
-                                            widget.canExpand() &&
-                                            !widget.getExpanded() &&
-                                            widget.getRightItems().isNotEmpty &&
-                                            (widget
-                                                        .getMindMap()
-                                                        ?.getExpandedLevel() ??
-                                                    0) <=
-                                                widget.getLevel() + 1
-                                        ? [
-                                            ///Right Expand Button
-                                            Container(
-                                              constraints: BoxConstraints(
-                                                maxHeight:
-                                                    (widget
-                                                            .getMindMap()
-                                                            ?.getButtonWidth() ??
-                                                        24) +
-                                                    widget
-                                                            .getLinkOutOffset()
-                                                            .abs() *
-                                                        2,
-                                              ),
-                                              padding: EdgeInsets.fromLTRB(
-                                                0,
-                                                widget.getLinkOutOffset() > 0
-                                                    ? widget.getLinkOutOffset() *
-                                                          2
-                                                    : 0,
-                                                0,
-                                                widget.getLinkOutOffset() < 0
-                                                    ? widget
-                                                              .getLinkOutOffset()
-                                                              .abs() *
-                                                          2
-                                                    : 0,
-                                              ),
-                                              child: Container(
-                                                constraints: BoxConstraints(
-                                                  maxWidth:
-                                                      (widget
-                                                                  .getMindMap()
-                                                                  ?.getButtonWidth() ??
-                                                              24)
-                                                          .toDouble(),
-                                                  maxHeight:
-                                                      (widget
-                                                                  .getMindMap()
-                                                                  ?.getButtonWidth() ??
-                                                              24)
-                                                          .toDouble(),
-                                                ),
-                                                decoration: BoxDecoration(
-                                                  color:
-                                                      (widget
-                                                          .getMindMap()
-                                                          ?.getButtonBackground() ??
-                                                      Colors.white),
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                        (widget
-                                                                    .getMindMap()
-                                                                    ?.getButtonWidth() ??
-                                                                24)
-                                                            .toDouble(),
-                                                      ),
-                                                ),
-                                                child: IconButton(
-                                                  onPressed: () {
-                                                    widget
-                                                        .getMindMap()
-                                                        ?.setSelectedNode(
-                                                          widget,
-                                                        );
-                                                    widget.setExpanded(
-                                                      !widget.getExpanded(),
-                                                    );
-                                                  },
-                                                  padding: EdgeInsets.zero,
-                                                  icon: Icon(
-                                                    Icons.add_circle_outline,
-                                                    size:
-                                                        (widget
-                                                                    .getMindMap()
-                                                                    ?.getButtonWidth() ??
-                                                                24)
-                                                            .toDouble(),
-                                                    color:
-                                                        (widget
-                                                            .getMindMap()
-                                                            ?.getButtonColor() ??
-                                                        Colors.black),
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          ]
-                                        : [])
-                                  : [])),
-                      ],
+                    decoration: BoxDecoration(
+                      color:
+                          (widget.getMindMap()?.getButtonBackground() ??
+                          Colors.white),
+                      border: Border.all(
+                        color:
+                            (widget.getMindMap()?.getButtonColor() ??
+                            Colors.black),
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(
+                        (widget.getMindMap()?.getButtonWidth() ?? 24)
+                            .toDouble(),
+                      ),
+                    ),
+                    child: IconButton(
+                      onPressed: () {
+                        IMindMapNode newnode = MindMapNode()
+                          ..setTitle("New Node");
+                        if (node.getLeftItems().isEmpty) {
+                          node.addRightItem(newnode);
+                        } else {
+                          node.insertLeftItem(newnode, 0);
+                        }
+                        widget.getMindMap()?.setSelectedNode(newnode);
+                        node.refresh();
+                      },
+                      padding: EdgeInsets.zero,
+                      hoverColor: Colors.green.shade200,
+                      highlightColor: Colors.green,
+                      icon: Icon(
+                        Icons.add_rounded,
+                        size: (widget.getMindMap()?.getButtonWidth() ?? 24) - 6,
+                        color:
+                            (widget.getMindMap()?.getButtonColor() ??
+                            Colors.black),
+                      ),
                     ),
                   ),
-                ]
-              : []),
+                ),
+              ),
+            ),
+          );
+        }
+      } else {
+        if (!(widget.getMindMap()?.getReadOnly() ?? false)) {
+          list.add(
+            Positioned(
+              left:
+                  node.getFishbonePosition().dx -
+                  ((widget.getMindMap()?.getButtonWidth() ?? 24) * 3 + 12 * 4),
+              top:
+                  node.getFishbonePosition().dy +
+                  (node.getSize()?.height ?? 0) / 2 -
+                  ((widget.getMindMap()?.getButtonWidth() ?? 24) + 12) / 2,
+              child: SizedBox(
+                width:
+                    (widget.getMindMap()?.getButtonWidth() ?? 24) * 3 + 12 * 4,
+                height: (widget.getMindMap()?.getButtonWidth() ?? 24) + 12,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    ///add Add Button
+                    Container(
+                      constraints: BoxConstraints(
+                        maxWidth: (widget.getMindMap()?.getButtonWidth() ?? 24)
+                            .toDouble(),
+                        maxHeight: (widget.getMindMap()?.getButtonWidth() ?? 24)
+                            .toDouble(),
+                      ),
+                      decoration: BoxDecoration(
+                        color:
+                            (widget.getMindMap()?.getButtonBackground() ??
+                            Colors.white),
+                        border: Border.all(
+                          color:
+                              (widget.getMindMap()?.getButtonColor() ??
+                              Colors.black),
+                          width: 1,
+                        ),
+                        borderRadius: BorderRadius.circular(
+                          (widget.getMindMap()?.getButtonWidth() ?? 24)
+                              .toDouble(),
+                        ),
+                      ),
+                      child: IconButton(
+                        onPressed: () {
+                          widget._focusNode.unfocus();
+                          if (node.getNodeType() == NodeType.left) {
+                            node.addLeftItem(
+                              MindMapNode()..setTitle("New Node"),
+                            );
+                          } else {
+                            node.addRightItem(
+                              MindMapNode()..setTitle("New Node"),
+                            );
+                          }
+                          widget.getMindMap()?.onChanged();
+                        },
+                        padding: EdgeInsets.zero,
+                        hoverColor: Colors.green.shade200,
+                        highlightColor: Colors.green,
+                        icon: Icon(
+                          Icons.add_rounded,
+                          size:
+                              (widget.getMindMap()?.getButtonWidth() ?? 24) - 6,
+                          color:
+                              (widget.getMindMap()?.getButtonColor() ??
+                              Colors.black),
+                        ),
+                      ),
+                    ),
 
-          ///Right Items
-          ...(rightItems.isEmpty ||
-                  (!widget.getExpanded() &&
-                      (widget.getMindMap()?.getReadOnly() ?? false))
-              ? []
-              : [
-                  Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    spacing: widget.getVSpace().toDouble(),
-                    children: rightItems,
+                    ///Sapce
+                    (widget.getMindMap()?.getShowRecycle() ?? false)
+                        ? SizedBox(width: 0, height: 0)
+                        : SizedBox(width: 6),
+
+                    ///Delete Button
+                    (widget.getMindMap()?.getShowRecycle() ?? false)
+                        ? SizedBox(width: 0, height: 0)
+                        : Container(
+                            constraints: BoxConstraints(
+                              maxWidth:
+                                  (widget.getMindMap()?.getButtonWidth() ?? 24)
+                                      .toDouble(),
+                              maxHeight:
+                                  (widget.getMindMap()?.getButtonWidth() ?? 24)
+                                      .toDouble(),
+                            ),
+                            decoration: BoxDecoration(
+                              color:
+                                  (widget.getMindMap()?.getButtonBackground() ??
+                                  Colors.white),
+                              border: Border.all(
+                                color:
+                                    (widget.getMindMap()?.getButtonColor() ??
+                                    Colors.black),
+                                width: 1,
+                              ),
+                              borderRadius: BorderRadius.circular(
+                                (widget.getMindMap()?.getButtonWidth() ?? 24)
+                                    .toDouble(),
+                              ),
+                            ),
+                            child: IconButton(
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      content: Text(
+                                        widget
+                                                .getMindMap()
+                                                ?.getDeleteNodeString() ??
+                                            "Delete this node?",
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          child: Text(
+                                            widget
+                                                    .getMindMap()
+                                                    ?.getCancelString() ??
+                                                "Cancel",
+                                          ),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                        TextButton(
+                                          child: Text(
+                                            widget
+                                                    .getMindMap()
+                                                    ?.getOkString() ??
+                                                "OK",
+                                          ),
+                                          onPressed: () {
+                                            node
+                                                .getParentNode()
+                                                ?.removeLeftItem(node);
+
+                                            node
+                                                .getParentNode()
+                                                ?.removeRightItem(node);
+
+                                            widget
+                                                .getMindMap()
+                                                ?.setSelectedNode(null);
+                                            widget
+                                                .getMindMap()
+                                                ?.getRootNode()
+                                                .refresh();
+                                            widget.getMindMap()?.onChanged();
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                              hoverColor: Colors.red.shade200,
+                              highlightColor: Colors.red,
+                              padding: EdgeInsets.zero,
+                              icon: Icon(
+                                Icons.close_rounded,
+                                size:
+                                    (widget.getMindMap()?.getButtonWidth() ??
+                                        24) -
+                                    6,
+                                color:
+                                    (widget.getMindMap()?.getButtonColor() ??
+                                    Colors.black),
+                              ),
+                            ),
+                          ),
+
+                    ///Space
+                    !(widget.getMindMap()?.hasTextField() ?? true) &&
+                            (widget.getMindMap()?.hasEditButton() ?? false)
+                        ? SizedBox(width: 6)
+                        : SizedBox(width: 0),
+
+                    ///Edit Button
+                    !(widget.getMindMap()?.hasTextField() ?? true) &&
+                            (widget.getMindMap()?.hasEditButton() ?? false)
+                        ? Container(
+                            constraints: BoxConstraints(
+                              maxWidth:
+                                  (widget.getMindMap()?.getButtonWidth() ?? 24)
+                                      .toDouble(),
+                              maxHeight:
+                                  (widget.getMindMap()?.getButtonWidth() ?? 24)
+                                      .toDouble(),
+                            ),
+                            decoration: BoxDecoration(
+                              color:
+                                  (widget.getMindMap()?.getButtonBackground() ??
+                                  Colors.white),
+                              border: Border.all(
+                                color:
+                                    (widget.getMindMap()?.getButtonColor() ??
+                                    Colors.black),
+                                width: 1,
+                              ),
+                              borderRadius: BorderRadius.circular(
+                                (widget.getMindMap()?.getButtonWidth() ?? 24)
+                                    .toDouble(),
+                              ),
+                            ),
+                            child: IconButton(
+                              onPressed: () {
+                                widget.getMindMap()?.onEdit(node);
+                              },
+                              hoverColor: Colors.blue.shade200,
+                              highlightColor: Colors.blue,
+                              padding: EdgeInsets.zero,
+                              icon: Icon(
+                                Icons.edit_outlined,
+                                size:
+                                    (widget.getMindMap()?.getButtonWidth() ??
+                                        24) -
+                                    8,
+                                color:
+                                    (widget.getMindMap()?.getButtonColor() ??
+                                    Colors.black),
+                              ),
+                            ),
+                          )
+                        : SizedBox(width: 0, height: 0),
+
+                    ///Sapce
+                    SizedBox(width: 6),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+      }
+    } else {
+      if (node.getNodeType() == NodeType.root) {
+        if (!(widget.getMindMap()?.getReadOnly() ?? false)) {
+          list.add(
+            Positioned(
+              left:
+                  node.getFishbonePosition().dx + (node.getSize()?.width ?? 0),
+              top:
+                  node.getFishbonePosition().dy +
+                  (node.getSize()?.height ?? 0) / 2 -
+                  ((widget.getMindMap()?.getButtonWidth() ?? 24) + 12) / 2,
+              child: SizedBox(
+                width: (widget.getMindMap()?.getButtonWidth() ?? 24) + 12,
+                height: (widget.getMindMap()?.getButtonWidth() ?? 24) + 12,
+                child: Center(
+                  //Add button
+                  child: Container(
+                    constraints: BoxConstraints(
+                      maxWidth: (widget.getMindMap()?.getButtonWidth() ?? 24)
+                          .toDouble(),
+                      maxHeight: (widget.getMindMap()?.getButtonWidth() ?? 24)
+                          .toDouble(),
+                    ),
+                    decoration: BoxDecoration(
+                      color:
+                          (widget.getMindMap()?.getButtonBackground() ??
+                          Colors.white),
+                      border: Border.all(
+                        color:
+                            (widget.getMindMap()?.getButtonColor() ??
+                            Colors.black),
+                        width: 1,
+                      ),
+                      borderRadius: BorderRadius.circular(
+                        (widget.getMindMap()?.getButtonWidth() ?? 24)
+                            .toDouble(),
+                      ),
+                    ),
+                    child: IconButton(
+                      onPressed: () {
+                        IMindMapNode newnode = MindMapNode()
+                          ..setTitle("New Node");
+                        if (node.getLeftItems().isEmpty) {
+                          node.addRightItem(newnode);
+                        } else {
+                          node.insertLeftItem(newnode, 0);
+                        }
+                        widget.getMindMap()?.setSelectedNode(newnode);
+                        node.refresh();
+                      },
+                      padding: EdgeInsets.zero,
+                      hoverColor: Colors.green.shade200,
+                      highlightColor: Colors.green,
+                      icon: Icon(
+                        Icons.add_rounded,
+                        size: (widget.getMindMap()?.getButtonWidth() ?? 24) - 6,
+                        color:
+                            (widget.getMindMap()?.getButtonColor() ??
+                            Colors.black),
+                      ),
+                    ),
                   ),
-                ]),
-        ],
-      ),
-    );
+                ),
+              ),
+            ),
+          );
+        }
+      } else {
+        if (!(widget.getMindMap()?.getReadOnly() ?? false)) {
+          list.add(
+            Positioned(
+              left:
+                  node.getFishbonePosition().dx + (node.getSize()?.width ?? 0),
+              top:
+                  node.getFishbonePosition().dy +
+                  (node.getSize()?.height ?? 0) / 2 -
+                  ((widget.getMindMap()?.getButtonWidth() ?? 24) + 12) / 2,
+              child: SizedBox(
+                width:
+                    (widget.getMindMap()?.getButtonWidth() ?? 24) * 3 + 12 * 4,
+                height: (widget.getMindMap()?.getButtonWidth() ?? 24) + 12,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    ///Sapce
+                    SizedBox(width: 6),
+
+                    ///Edit Button
+                    !(widget.getMindMap()?.hasTextField() ?? true) &&
+                            (widget.getMindMap()?.hasEditButton() ?? false)
+                        ? Container(
+                            constraints: BoxConstraints(
+                              maxWidth:
+                                  (widget.getMindMap()?.getButtonWidth() ?? 24)
+                                      .toDouble(),
+                              maxHeight:
+                                  (widget.getMindMap()?.getButtonWidth() ?? 24)
+                                      .toDouble(),
+                            ),
+                            decoration: BoxDecoration(
+                              color:
+                                  (widget.getMindMap()?.getButtonBackground() ??
+                                  Colors.white),
+                              border: Border.all(
+                                color:
+                                    (widget.getMindMap()?.getButtonColor() ??
+                                    Colors.black),
+                                width: 1,
+                              ),
+                              borderRadius: BorderRadius.circular(
+                                (widget.getMindMap()?.getButtonWidth() ?? 24)
+                                    .toDouble(),
+                              ),
+                            ),
+                            child: IconButton(
+                              onPressed: () {
+                                widget.getMindMap()?.onEdit(node);
+                              },
+                              hoverColor: Colors.blue.shade200,
+                              highlightColor: Colors.blue,
+                              padding: EdgeInsets.zero,
+                              icon: Icon(
+                                Icons.edit_outlined,
+                                size:
+                                    (widget.getMindMap()?.getButtonWidth() ??
+                                        24) -
+                                    8,
+                                color:
+                                    (widget.getMindMap()?.getButtonColor() ??
+                                    Colors.black),
+                              ),
+                            ),
+                          )
+                        : SizedBox(width: 0, height: 0),
+
+                    ///Space
+                    !(widget.getMindMap()?.hasTextField() ?? true) &&
+                            (widget.getMindMap()?.hasEditButton() ?? false)
+                        ? SizedBox(width: 6)
+                        : SizedBox(width: 0),
+
+                    ///Delete Button
+                    (widget.getMindMap()?.getShowRecycle() ?? false)
+                        ? SizedBox(width: 0, height: 0)
+                        : Container(
+                            constraints: BoxConstraints(
+                              maxWidth:
+                                  (widget.getMindMap()?.getButtonWidth() ?? 24)
+                                      .toDouble(),
+                              maxHeight:
+                                  (widget.getMindMap()?.getButtonWidth() ?? 24)
+                                      .toDouble(),
+                            ),
+                            decoration: BoxDecoration(
+                              color:
+                                  (widget.getMindMap()?.getButtonBackground() ??
+                                  Colors.white),
+                              border: Border.all(
+                                color:
+                                    (widget.getMindMap()?.getButtonColor() ??
+                                    Colors.black),
+                                width: 1,
+                              ),
+                              borderRadius: BorderRadius.circular(
+                                (widget.getMindMap()?.getButtonWidth() ?? 24)
+                                    .toDouble(),
+                              ),
+                            ),
+                            child: IconButton(
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    return AlertDialog(
+                                      content: Text(
+                                        widget
+                                                .getMindMap()
+                                                ?.getDeleteNodeString() ??
+                                            "Delete this node?",
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          child: Text(
+                                            widget
+                                                    .getMindMap()
+                                                    ?.getCancelString() ??
+                                                "Cancel",
+                                          ),
+                                          onPressed: () {
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                        TextButton(
+                                          child: Text(
+                                            widget
+                                                    .getMindMap()
+                                                    ?.getOkString() ??
+                                                "OK",
+                                          ),
+                                          onPressed: () {
+                                            node
+                                                .getParentNode()
+                                                ?.removeLeftItem(node);
+
+                                            node
+                                                .getParentNode()
+                                                ?.removeRightItem(node);
+
+                                            widget
+                                                .getMindMap()
+                                                ?.setSelectedNode(null);
+                                            widget
+                                                .getMindMap()
+                                                ?.getRootNode()
+                                                .refresh();
+                                            widget.getMindMap()?.onChanged();
+                                            Navigator.of(context).pop();
+                                          },
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                );
+                              },
+                              hoverColor: Colors.red.shade200,
+                              highlightColor: Colors.red,
+                              padding: EdgeInsets.zero,
+                              icon: Icon(
+                                Icons.close_rounded,
+                                size:
+                                    (widget.getMindMap()?.getButtonWidth() ??
+                                        24) -
+                                    6,
+                                color:
+                                    (widget.getMindMap()?.getButtonColor() ??
+                                    Colors.black),
+                              ),
+                            ),
+                          ),
+
+                    ///Sapce
+                    (widget.getMindMap()?.getShowRecycle() ?? false)
+                        ? SizedBox(width: 0, height: 0)
+                        : SizedBox(width: 6),
+
+                    ///add Add Button
+                    Container(
+                      constraints: BoxConstraints(
+                        maxWidth: (widget.getMindMap()?.getButtonWidth() ?? 24)
+                            .toDouble(),
+                        maxHeight: (widget.getMindMap()?.getButtonWidth() ?? 24)
+                            .toDouble(),
+                      ),
+                      decoration: BoxDecoration(
+                        color:
+                            (widget.getMindMap()?.getButtonBackground() ??
+                            Colors.white),
+                        border: Border.all(
+                          color:
+                              (widget.getMindMap()?.getButtonColor() ??
+                              Colors.black),
+                          width: 1,
+                        ),
+                        borderRadius: BorderRadius.circular(
+                          (widget.getMindMap()?.getButtonWidth() ?? 24)
+                              .toDouble(),
+                        ),
+                      ),
+                      child: IconButton(
+                        onPressed: () {
+                          widget._focusNode.unfocus();
+                          if (node.getNodeType() == NodeType.left) {
+                            node.addLeftItem(
+                              MindMapNode()..setTitle("New Node"),
+                            );
+                          } else {
+                            node.addRightItem(
+                              MindMapNode()..setTitle("New Node"),
+                            );
+                          }
+                          widget.getMindMap()?.onChanged();
+                        },
+                        padding: EdgeInsets.zero,
+                        hoverColor: Colors.green.shade200,
+                        highlightColor: Colors.green,
+                        icon: Icon(
+                          Icons.add_rounded,
+                          size:
+                              (widget.getMindMap()?.getButtonWidth() ?? 24) - 6,
+                          color:
+                              (widget.getMindMap()?.getButtonColor() ??
+                              Colors.black),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        }
+      }
+    }
+    return list;
   }
 
   RenderObject? getRenderObject() {
@@ -2984,6 +4655,147 @@ class MindMapNodeState extends State<MindMapNode> {
     if (mounted) {
       setState(() {});
     }
+  }
+}
+
+// ignore: must_be_immutable
+class FishboneNodeDrag extends StatefulWidget {
+  FishboneNodeDrag({
+    super.key,
+    required this.node,
+    this.isLast = false,
+    this.width = 0,
+    this.height = 0,
+  });
+  IMindMapNode node;
+  bool isLast = false;
+  double width = 0;
+  double height = 0;
+  @override
+  State<StatefulWidget> createState() => FishboneNodeDragState();
+}
+
+class FishboneNodeDragState extends State<FishboneNodeDrag> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
+  bool isDragging = false;
+
+  bool isParent(IMindMapNode node, IMindMapNode dragNode) {
+    IMindMapNode? parent = dragNode;
+    while (parent != null) {
+      if (parent == node) {
+        return true;
+      }
+      parent = parent.getParentNode();
+    }
+    return false;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Opacity(
+      opacity: 0.3,
+      child: Container(
+        width: widget.width,
+        height: widget.height,
+        decoration: BoxDecoration(
+          color: isDragging
+              ? widget.node.getMindMap()?.getDragInBorderColor()
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(5),
+        ),
+        child: DragTarget(
+          onWillAcceptWithDetails: (details) {
+            if (details.data is IMindMapNode) {
+              if (details.data == widget.node) {
+                return false;
+              }
+              if (isParent(details.data as IMindMapNode, widget.node)) {
+                return false;
+              }
+              setState(() {
+                isDragging = true;
+              });
+              return true;
+            }
+            return false;
+          },
+          onAcceptWithDetails: (details) {
+            setState(() {
+              isDragging = false;
+            });
+            if (details.data is IMindMapNode) {
+              IMindMapNode dragNode = details.data as IMindMapNode;
+              if (widget.node.getParentNode() != null) {
+                IMindMapNode dragParent = dragNode.getParentNode()!;
+                dragParent.removeLeftItem(dragNode);
+                dragParent.removeRightItem(dragNode);
+
+                IMindMapNode parent = widget.node.getParentNode()!;
+                switch (parent.getNodeType()) {
+                  case NodeType.left:
+                    if (widget.isLast) {
+                      parent.addLeftItem(dragNode);
+                    } else {
+                      int index = parent.getLeftItems().indexOf(widget.node);
+                      parent.insertLeftItem(dragNode, index);
+                    }
+                    break;
+                  case NodeType.right:
+                    if (widget.isLast) {
+                      parent.addRightItem(dragNode);
+                    } else {
+                      int index = parent.getRightItems().indexOf(widget.node);
+                      parent.insertRightItem(dragNode, index);
+                    }
+                    break;
+                  case NodeType.root:
+                    if (widget.isLast) {
+                      if (parent.getLeftItems().isEmpty) {
+                        parent.addRightItem(dragNode);
+                      } else {
+                        parent.insertLeftItem(dragNode, 0);
+                      }
+                    } else {
+                      if (parent.getRightItems().contains(widget.node)) {
+                        int index = parent.getRightItems().indexOf(widget.node);
+                        parent.insertRightItem(dragNode, index);
+                      }
+                      if (parent.getLeftItems().contains(widget.node)) {
+                        int index = parent.getLeftItems().indexOf(widget.node);
+                        if (parent.getLeftItems().length > index + 1) {
+                          parent.insertLeftItem(dragNode, index + 1);
+                        } else {
+                          parent.addLeftItem(dragNode);
+                        }
+                      }
+                    }
+                    break;
+                }
+                widget.node.getMindMap()?.onChanged();
+                widget.node.getMindMap()?.getRootNode().refresh();
+              }
+            }
+          },
+          onLeave: (data) {
+            setState(() {
+              isDragging = false;
+            });
+          },
+          builder: (context1, candidateData, rejectedData) {
+            return Container();
+          },
+        ),
+      ),
+    );
   }
 }
 
@@ -3095,7 +4907,8 @@ class MindMapNodeTitleState extends State<MindMapNodeTitle> {
         }
       },
       child:
-          (widget.node.getSelected() == false &&
+          ((Platform.isAndroid || Platform.isIOS) &&
+                  widget.node.getSelected() == false &&
                   !(widget.node.getMindMap()?.hasTextField() ?? false)) ||
               widget.node.getParentNode() == null ||
               widget.node.getMindMap()?.getReadOnly() == true ||
@@ -3116,7 +4929,30 @@ class MindMapNodeTitleState extends State<MindMapNodeTitle> {
                 scale: widget.node.getMindMap()?.getZoom() ?? 1.0,
                 child: Opacity(opacity: 0.88, child: getBody(border)),
               ),
-              child: getBody(border),
+              child:
+                  widget.node.getNodeType() == NodeType.root ||
+                      Platform.isMacOS ||
+                      Platform.isLinux ||
+                      Platform.isWindows ||
+                      widget.node.getSelected() == false
+                  ? getBody(border)
+                  : Stack(
+                      children: [
+                        getBody(border),
+                        Padding(
+                          padding: EdgeInsets.all(
+                            widget.node.getBorder().top.width + 1,
+                          ),
+                          child: Icon(
+                            Icons.control_camera_sharp,
+                            size: 14,
+                            color: widget.node
+                                .getMindMap()
+                                ?.getDragInBorderColor(),
+                          ),
+                        ),
+                      ],
+                    ),
             ),
     );
   }
