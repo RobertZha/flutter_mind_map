@@ -37,7 +37,8 @@ class JsonTheme implements IMindMapTheme {
             l["LinkColor"] = fromHex(theme["LinkColor"].toString());
           }
           if (theme.containsKey("LinkWidth")) {
-            l["LinkWidth"] = int.tryParse(theme["LinkWidth"].toString()) ?? 1;
+            l["LinkWidth"] =
+                double.tryParse(theme["LinkWidth"].toString()) ?? 1;
           }
           if (theme.containsKey("HSpace")) {
             l["HSpace"] = int.tryParse(theme["HSpace"].toString()) ?? 50;
@@ -188,7 +189,32 @@ class JsonTheme implements IMindMapTheme {
                 break;
             }
           }
+          if (theme.containsKey("Image")) {
+            l["Image"] = theme["Image"].toString();
+          }
+          if (theme.containsKey("ImageWidth")) {
+            l["ImageWidth"] =
+                int.tryParse(theme["ImageWidth"].toString()) ?? 16;
+          }
+          if (theme.containsKey("ImageHeight")) {
+            l["ImageHeight"] =
+                int.tryParse(theme["ImageHeight"].toString()) ?? 16;
+          }
+          if (theme.containsKey("ImageSpace")) {
+            l["ImageSpace"] = int.tryParse(theme["ImageSpace"].toString()) ?? 0;
+          }
 
+          if (theme.containsKey("Image2")) {
+            l["Image2"] = theme["Image2"].toString();
+          }
+          if (theme.containsKey("Image2Width")) {
+            l["Image2Width"] =
+                int.tryParse(theme["Image2Width"].toString()) ?? 16;
+          }
+          if (theme.containsKey("Image2Height")) {
+            l["Image2Height"] =
+                int.tryParse(theme["Image2Height"].toString()) ?? 16;
+          }
           jsonList[level] = l;
         }
       }

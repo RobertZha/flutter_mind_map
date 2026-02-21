@@ -61,7 +61,8 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
         : {
             "id": getID(),
             "content": getTitle(),
-            "image": getImage(),
+            "image": _image,
+            "iamge2": _image2,
             "extended": getExtended(),
             "leftNodes": leftlist,
             "nodes": list,
@@ -81,6 +82,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
       setID(json["id"].toString());
       setTitle(json["content"].toString());
       setImage(json["image"] ?? "");
+      setImage2(json["image2"] ?? "");
       setExtended(json["extended"] ?? "");
       List<dynamic> list = json["nodes"];
       if (list.isNotEmpty) {
@@ -176,10 +178,23 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     properties["Title"] = _title;
     properties["Extended"] = _extended;
     properties["Image"] = _image;
-    properties["ImageWidth"] = _imageWidth;
-    properties["ImageHeight"] = _imageHeight;
-    properties["ImageSpace"] = _imageSpace;
+    properties["Image2"] = _image2;
+    if (_image2Width != null) {
+      properties["ImageWidth"] = _imageWidth;
+    }
+    if (_imageHeight != null) {
+      properties["ImageHeight"] = _imageHeight;
+    }
+    if (_imageSpace != null) {
+      properties["ImageSpace"] = _imageSpace;
+    }
     properties["ImagePosition"] = _imagePosition.name;
+    if (_image2Width != null) {
+      properties["Image2Width"] = _image2Width;
+    }
+    if (_image2Height != null) {
+      properties["Image2Height"] = _image2Height;
+    }
     properties["Expanded"] = _expanded.toString();
     if (_link != null) {
       properties["Link"] = _link!.getName();
@@ -299,18 +314,16 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
         }
         if (proJson.containsKey("ImageWidth")) {
           setImageWidth(
-            double.tryParse(proJson["ImageWidth"].toString()) ?? 12,
+            double.tryParse(proJson["ImageWidth"].toString()) ?? 16,
           );
         }
         if (proJson.containsKey("ImageHeight")) {
           setImageHeight(
-            double.tryParse(proJson["ImageHeight"].toString()) ?? 12,
+            double.tryParse(proJson["ImageHeight"].toString()) ?? 16,
           );
         }
         if (proJson.containsKey("ImageSpace")) {
-          setImageSpace(
-            double.tryParse(proJson["ImageSpace"].toString()) ?? 12,
-          );
+          setImageSpace(double.tryParse(proJson["ImageSpace"].toString()) ?? 8);
         }
         if (proJson.containsKey("ImagePosition")) {
           for (var item in MindMapNodeImagePosition.values) {
@@ -319,6 +332,20 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
               break;
             }
           }
+        }
+
+        if (proJson.containsKey("Image2")) {
+          setImage2(proJson["Image2"].toString());
+        }
+        if (proJson.containsKey("Image2Width")) {
+          setImage2Width(
+            double.tryParse(proJson["Image2Width"].toString()) ?? 16,
+          );
+        }
+        if (proJson.containsKey("Image2Height")) {
+          setImage2Height(
+            double.tryParse(proJson["Image2Height"].toString()) ?? 16,
+          );
         }
         if (proJson.containsKey("Extended")) {
           setExtended(proJson["Extended"].toString());
@@ -973,7 +1000,19 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
 
   String _image = "";
   String getImage() {
-    return _image;
+    if (_image.isEmpty) {
+      return (getMindMap()?.getTheme() != null &&
+              getMindMap()?.getTheme()?.getThemeByLevel(getLevel()) != null &&
+              getMindMap()?.getTheme()?.getThemeByLevel(getLevel())!["Image"] !=
+                  null
+          ? getMindMap()!
+                .getTheme()!
+                .getThemeByLevel(getLevel())!["Image"]!
+                .toString()
+          : "");
+    } else {
+      return _image;
+    }
   }
 
   void setImage(String value) {
@@ -992,6 +1031,12 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   MindMapNodeImagePosition _imagePosition = MindMapNodeImagePosition.left;
 
   MindMapNodeImagePosition getImagePosition() {
+    if (getMindMap()?.getMapType() == MapType.fishbone &&
+        getNodeType() == NodeType.root) {
+      return getMindMap()?.getFishboneMapType() == FishboneMapType.leftToRight
+          ? MindMapNodeImagePosition.right
+          : MindMapNodeImagePosition.left;
+    }
     return _imagePosition;
   }
 
@@ -1006,9 +1051,28 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     }
   }
 
-  double _imageWidth = 16;
+  double? _imageWidth;
   double getImageWidth() {
-    return _imageWidth;
+    if (getImage().isEmpty) {
+      return 0;
+    }
+    return _imageWidth != null
+        ? _imageWidth!
+        : (getMindMap()?.getTheme() != null &&
+                  getMindMap()?.getTheme()?.getThemeByLevel(getLevel()) !=
+                      null &&
+                  getMindMap()?.getTheme()?.getThemeByLevel(
+                        getLevel(),
+                      )!["ImageWidth"] !=
+                      null
+              ? double.tryParse(
+                      getMindMap()!
+                          .getTheme()!
+                          .getThemeByLevel(getLevel())!["ImageWidth"]!
+                          .toString(),
+                    ) ??
+                    0
+              : 16);
   }
 
   void setImageWidth(double value) {
@@ -1022,9 +1086,28 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     }
   }
 
-  double _imageHeight = 16;
+  double? _imageHeight;
   double getImageHeight() {
-    return _imageHeight;
+    if (getImage().isEmpty) {
+      return 0;
+    }
+    return _imageHeight != null
+        ? _imageHeight!
+        : (getMindMap()?.getTheme() != null &&
+                  getMindMap()?.getTheme()?.getThemeByLevel(getLevel()) !=
+                      null &&
+                  getMindMap()?.getTheme()?.getThemeByLevel(
+                        getLevel(),
+                      )!["ImageHeight"] !=
+                      null
+              ? double.tryParse(
+                      getMindMap()!
+                          .getTheme()!
+                          .getThemeByLevel(getLevel())!["ImageHeight"]!
+                          .toString(),
+                    ) ??
+                    0
+              : 16);
   }
 
   void setImageHeight(double value) {
@@ -1038,14 +1121,138 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
     }
   }
 
-  double _imageSpace = 8;
+  double? _imageSpace;
   double getImageSpace() {
-    return _imageSpace;
+    if (getImage().isEmpty) {
+      return 0;
+    }
+    return _imageSpace != null
+        ? _imageSpace!
+        : (getMindMap()?.getTheme() != null &&
+                  getMindMap()?.getTheme()?.getThemeByLevel(getLevel()) !=
+                      null &&
+                  getMindMap()?.getTheme()?.getThemeByLevel(
+                        getLevel(),
+                      )!["ImageSpace"] !=
+                      null
+              ? double.tryParse(
+                      getMindMap()!
+                          .getTheme()!
+                          .getThemeByLevel(getLevel())!["ImageSpace"]!
+                          .toString(),
+                    ) ??
+                    0
+              : 0);
   }
 
   void setImageSpace(double value) {
     if (_imageSpace != value) {
       _imageSpace = value;
+      refresh();
+      getMindMap()?.refresh();
+      if (!_isLoading) {
+        getMindMap()?.onChanged();
+      }
+    }
+  }
+
+  String _oldImage2Base64 = "";
+  Uint8List? image2;
+
+  String _image2 = "";
+  String getImage2() {
+    if (_image2.isEmpty) {
+      return (getMindMap()?.getTheme() != null &&
+              getMindMap()?.getTheme()?.getThemeByLevel(getLevel()) != null &&
+              getMindMap()?.getTheme()?.getThemeByLevel(
+                    getLevel(),
+                  )!["Image2"] !=
+                  null
+          ? getMindMap()!
+                .getTheme()!
+                .getThemeByLevel(getLevel())!["Image2"]!
+                .toString()
+          : "");
+    } else {
+      return _image2;
+    }
+  }
+
+  void setImage2(String value) {
+    if (_image2 != value) {
+      _oldImage2Base64 = "";
+      image2 = null;
+      _image2 = value;
+      refresh();
+      getMindMap()?.refresh();
+      if (!_isLoading) {
+        getMindMap()?.onChanged();
+      }
+    }
+  }
+
+  double? _image2Width;
+  double getImage2Width() {
+    if (getImage2().isEmpty) {
+      return 0;
+    }
+    return _image2Width != null
+        ? _image2Width!
+        : (getMindMap()?.getTheme() != null &&
+                  getMindMap()?.getTheme()?.getThemeByLevel(getLevel()) !=
+                      null &&
+                  getMindMap()?.getTheme()?.getThemeByLevel(
+                        getLevel(),
+                      )!["Image2Width"] !=
+                      null
+              ? double.tryParse(
+                      getMindMap()!
+                          .getTheme()!
+                          .getThemeByLevel(getLevel())!["Image2Width"]!
+                          .toString(),
+                    ) ??
+                    0
+              : 16);
+  }
+
+  void setImage2Width(double value) {
+    if (_image2Width != value) {
+      _image2Width = value;
+      refresh();
+      getMindMap()?.refresh();
+      if (!_isLoading) {
+        getMindMap()?.onChanged();
+      }
+    }
+  }
+
+  double? _image2Height;
+  double getImage2Height() {
+    if (getImage2().isEmpty) {
+      return 0;
+    }
+    return _image2Height != null
+        ? _image2Height!
+        : (getMindMap()?.getTheme() != null &&
+                  getMindMap()?.getTheme()?.getThemeByLevel(getLevel()) !=
+                      null &&
+                  getMindMap()?.getTheme()?.getThemeByLevel(
+                        getLevel(),
+                      )!["Image2Height"] !=
+                      null
+              ? double.tryParse(
+                      getMindMap()!
+                          .getTheme()!
+                          .getThemeByLevel(getLevel())!["Image2Height"]!
+                          .toString(),
+                    ) ??
+                    0
+              : 16);
+  }
+
+  void setImage2Height(double value) {
+    if (_image2Height != value) {
+      _image2Height = value;
       refresh();
       getMindMap()?.refresh();
       if (!_isLoading) {
@@ -1942,17 +2149,18 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   double getLinkInOffset() {
     if (getLinkInOffsetMode() == MindMapNodeLinkOffsetMode.top) {
       return 0 -
-          getSize()!.height / 2 +
-          ((getBorderRadius() as BorderRadius).topLeft.x > getSize()!.height / 2
-              ? getSize()!.height / 2
+          (getSize()?.height ?? 0) / 2 +
+          ((getBorderRadius() as BorderRadius).topLeft.x >
+                  (getSize()?.height ?? 0) / 2
+              ? (getSize()?.height ?? 0) / 2
               : (getBorderRadius() as BorderRadius).topLeft.x) +
           getBorder().top.width / 2;
     }
     if (getLinkInOffsetMode() == MindMapNodeLinkOffsetMode.bottom) {
-      return getSize()!.height / 2 -
+      return (getSize()?.height ?? 0) / 2 -
           ((getBorderRadius() as BorderRadius).bottomLeft.x >
-                  getSize()!.height / 2
-              ? getSize()!.height / 2
+                  (getSize()?.height ?? 0) / 2
+              ? (getSize()?.height ?? 0) / 2
               : (getBorderRadius() as BorderRadius).bottomLeft.x) -
           getBorder().bottom.width / 2;
     }
@@ -2000,18 +2208,18 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
   double getLinkOutOffset() {
     if (getLinkOutOffsetMode() == MindMapNodeLinkOffsetMode.top) {
       return 0 -
-          getSize()!.height / 2 +
+          (getSize()?.height ?? 0) / 2 +
           ((getBorderRadius() as BorderRadius).topRight.x >
-                  getSize()!.height / 2
-              ? getSize()!.height / 2
+                  (getSize()?.height ?? 0) / 2
+              ? (getSize()?.height ?? 0) / 2
               : (getBorderRadius() as BorderRadius).topRight.x) +
           getBorder().top.width / 2;
     }
     if (getLinkOutOffsetMode() == MindMapNodeLinkOffsetMode.bottom) {
-      return getSize()!.height / 2 -
+      return (getSize()?.height ?? 0) / 2 -
           ((getBorderRadius() as BorderRadius).bottomRight.x >
-                  getSize()!.height / 2
-              ? getSize()!.height / 2
+                  (getSize()?.height ?? 0) / 2
+              ? (getSize()?.height ?? 0) / 2
               : (getBorderRadius() as BorderRadius).bottomRight.x) -
           getBorder().bottom.width / 2;
     }
@@ -3214,7 +3422,8 @@ class MindMapNodeState extends State<MindMapNode> {
                 (widget.getSize()?.width ?? 0) +
                 widget.getHSpace() +
                 (widget.getMindMap()?.getButtonWidth() ?? 0) +
-                12;
+                12 +
+                widget.getImage2Width();
             maxHeight =
                 (widget.getSize()?.height ?? 0) + widget.getVSpace() * 2;
           } else {
@@ -3416,6 +3625,39 @@ class MindMapNodeState extends State<MindMapNode> {
 
           list.addAll(getFinshboneNodes(widget, maxWidth, maxHeight));
 
+          if (widget.image2 != null) {
+            list.add(
+              Positioned(
+                left:
+                    widget.getMindMap()?.getFishboneMapType() ==
+                        FishboneMapType.rightToLeft
+                    ? 0
+                    : maxWidth - widget.getImage2Width(),
+                top:
+                    maxHeight +
+                    widget.getLinkWidth() / 2 -
+                    widget.getImage2Height() / 2,
+                child:
+                    widget.getMindMap()?.getFishboneMapType() ==
+                        FishboneMapType.leftToRight
+                    ? Transform.flip(
+                        flipX: true,
+                        child: Image.memory(
+                          widget.image2!,
+                          width: widget.getImage2Width(),
+                          height: widget.getImage2Height(),
+                          fit: BoxFit.fill,
+                        ),
+                      )
+                    : Image.memory(
+                        widget.image2!,
+                        width: widget.getImage2Width(),
+                        height: widget.getImage2Height(),
+                        fit: BoxFit.fill,
+                      ),
+              ),
+            );
+          }
           widget.getMindMap()?.setFishboneSize(Size(maxWidth, maxHeight * 2));
           if (widget.getMindMap()?.getSelectedNode() != null) {
             list.addAll(
@@ -3482,6 +3724,7 @@ class MindMapNodeState extends State<MindMapNode> {
                 right - h - w1,
                 height +
                     h +
+                    (widget.getMindMap()?.getRootNode().getLinkWidth() ?? 0) +
                     (widget.getMindMap()?.getRootNode().getLinkWidth() ?? 0),
               ),
             );
@@ -3491,6 +3734,7 @@ class MindMapNodeState extends State<MindMapNode> {
                 top:
                     height +
                     h +
+                    (widget.getMindMap()?.getRootNode().getLinkWidth() ?? 0) +
                     (widget.getMindMap()?.getRootNode().getLinkWidth() ?? 0),
                 child: item as Widget,
               ),
@@ -3594,13 +3838,20 @@ class MindMapNodeState extends State<MindMapNode> {
             item.setFishbonePosition(
               Offset(
                 right - h - w1,
-                height - h - (item.getSize()?.height ?? 0),
+                height -
+                    h -
+                    (item.getSize()?.height ?? 0) -
+                    (widget.getMindMap()?.getRootNode().getLinkWidth() ?? 0),
               ),
             );
             list.add(
               Positioned(
                 left: right - h - w1,
-                top: height - h - (item.getSize()?.height ?? 0),
+                top:
+                    height -
+                    h -
+                    (item.getSize()?.height ?? 0) -
+                    (widget.getMindMap()?.getRootNode().getLinkWidth() ?? 0),
                 child: item as Widget,
               ),
             );
@@ -3609,7 +3860,11 @@ class MindMapNodeState extends State<MindMapNode> {
             List<IMindMapNode> children = [];
             children.addAll(item.getRightItems());
             children.addAll(item.getLeftItems());
-            double ctop = height - h + item.getVSpace();
+            double ctop =
+                height -
+                h +
+                item.getVSpace() -
+                (widget.getMindMap()?.getRootNode().getLinkWidth() ?? 0);
             for (IMindMapNode child in children) {
               double cright = right - (height - ctop) - item.getHSpace();
               child.setFishbonePosition(
@@ -3777,12 +4032,22 @@ class MindMapNodeState extends State<MindMapNode> {
           if (index % 2 == 0) {
             item.setFishboneNodeMode(FishboneNodeMode.up);
             item.setFishbonePosition(
-              Offset(left + h - w1, height - h - (item.getSize()?.height ?? 0)),
+              Offset(
+                left + h - w1,
+                height -
+                    h -
+                    (item.getSize()?.height ?? 0) -
+                    (widget.getMindMap()?.getRootNode().getLinkWidth() ?? 0),
+              ),
             );
             list.add(
               Positioned(
                 left: left + h - w1,
-                top: height - h - (item.getSize()?.height ?? 0),
+                top:
+                    height -
+                    h -
+                    (item.getSize()?.height ?? 0) -
+                    (widget.getMindMap()?.getRootNode().getLinkWidth() ?? 0),
                 child: item as Widget,
               ),
             );
@@ -3819,7 +4084,11 @@ class MindMapNodeState extends State<MindMapNode> {
             List<IMindMapNode> children = [];
             children.addAll(item.getRightItems());
             children.addAll(item.getLeftItems());
-            double ctop = height - h + item.getVSpace();
+            double ctop =
+                height -
+                h +
+                item.getVSpace() -
+                (widget.getMindMap()?.getRootNode().getLinkWidth() ?? 0);
             for (IMindMapNode child in children) {
               double cleft = left + (height - ctop) + item.getHSpace();
               child.setFishbonePosition(Offset(cleft, ctop));
@@ -3872,6 +4141,7 @@ class MindMapNodeState extends State<MindMapNode> {
                 left + h - w1,
                 height +
                     h +
+                    (widget.getMindMap()?.getRootNode().getLinkWidth() ?? 0) +
                     (widget.getMindMap()?.getRootNode().getLinkWidth() ?? 0),
               ),
             );
@@ -3881,6 +4151,7 @@ class MindMapNodeState extends State<MindMapNode> {
                 top:
                     height +
                     h +
+                    (widget.getMindMap()?.getRootNode().getLinkWidth() ?? 0) +
                     (widget.getMindMap()?.getRootNode().getLinkWidth() ?? 0),
                 child: item as Widget,
               ),
@@ -4974,6 +5245,22 @@ class MindMapNodeTitleState extends State<MindMapNodeTitle> {
         widget.node.image = null;
       }
     }
+    if (widget.node.getImage2() != widget.node._oldImage2Base64) {
+      if (widget.node.getImage2().isNotEmpty) {
+        if (await Base64ImageValidator.isValidImage(
+          widget.node.getImage2(),
+          checkHeader: true,
+          tryDecode: true,
+        )) {
+          widget.node.image2 = Base64Decoder().convert(widget.node.getImage2());
+          widget.node._oldImage2Base64 = widget.node.getImage2();
+        } else {
+          widget.node.image2 = null;
+        }
+      } else {
+        widget.node.image2 = null;
+      }
+    }
   }
 
   Widget getBody(BoxBorder border) {
@@ -5043,12 +5330,34 @@ class MindMapNodeTitleState extends State<MindMapNodeTitle> {
                                   mainAxisAlignment: MainAxisAlignment.start,
                                   crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    Image.memory(
-                                      widget.node.image!,
-                                      width: widget.node.getImageWidth(),
-                                      height: widget.node.getImageHeight(),
-                                      fit: BoxFit.fill,
-                                    ),
+                                    widget.node.getNodeType() ==
+                                                NodeType.root &&
+                                            widget.node
+                                                    .getMindMap()
+                                                    ?.getMapType() ==
+                                                MapType.fishbone &&
+                                            widget.node
+                                                    .getMindMap()
+                                                    ?.getFishboneMapType() ==
+                                                FishboneMapType.leftToRight
+                                        ? Transform.flip(
+                                            flipX: true,
+                                            child: Image.memory(
+                                              widget.node.image!,
+                                              width: widget.node
+                                                  .getImageWidth(),
+                                              height: widget.node
+                                                  .getImageHeight(),
+                                              fit: BoxFit.fill,
+                                            ),
+                                          )
+                                        : Image.memory(
+                                            widget.node.image!,
+                                            width: widget.node.getImageWidth(),
+                                            height: widget.node
+                                                .getImageHeight(),
+                                            fit: BoxFit.fill,
+                                          ),
                                     SizedBox(
                                       width: widget.node.getImageSpace(),
                                     ),
@@ -5073,15 +5382,38 @@ class MindMapNodeTitleState extends State<MindMapNodeTitle> {
                                           SizedBox(
                                             width: widget.node.getImageSpace(),
                                           ),
-                                          Image.memory(
-                                            Base64Decoder().convert(
-                                              widget.node.getImage(),
-                                            ),
-                                            width: widget.node.getImageWidth(),
-                                            height: widget.node
-                                                .getImageHeight(),
-                                            fit: BoxFit.fill,
-                                          ),
+                                          widget.node.getNodeType() ==
+                                                      NodeType.root &&
+                                                  widget.node
+                                                          .getMindMap()
+                                                          ?.getMapType() ==
+                                                      MapType.fishbone &&
+                                                  widget.node
+                                                          .getMindMap()
+                                                          ?.getFishboneMapType() ==
+                                                      FishboneMapType
+                                                          .leftToRight
+                                              ? Transform.flip(
+                                                  flipX: true,
+                                                  child: Image.memory(
+                                                    widget.node.image!,
+                                                    width: widget.node
+                                                        .getImageWidth(),
+                                                    height: widget.node
+                                                        .getImageHeight(),
+                                                    fit: BoxFit.fill,
+                                                  ),
+                                                )
+                                              : Image.memory(
+                                                  Base64Decoder().convert(
+                                                    widget.node.getImage(),
+                                                  ),
+                                                  width: widget.node
+                                                      .getImageWidth(),
+                                                  height: widget.node
+                                                      .getImageHeight(),
+                                                  fit: BoxFit.fill,
+                                                ),
                                         ],
                                       ))
                                     : (widget.node.getImagePosition() ==

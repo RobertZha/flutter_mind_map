@@ -375,6 +375,7 @@ class CustomPageState extends State<CustomPage> {
           Uint8List bytes = await file.readAsBytes();
           String base64 = base64Encode(bytes);
           node.setImage(base64);
+          print(base64);
         }
       }
     }

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mind_map/mind_map.dart';
 import 'package:flutter_mind_map_example/custom_page.dart';
 import 'package:flutter_mind_map_example/fishbone_page.dart';
 import 'package:flutter_mind_map_example/theme_page.dart';

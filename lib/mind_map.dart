@@ -115,6 +115,7 @@ class MindMap extends StatefulWidget {
   void setMapType(MapType value) {
     if (_mapType != value) {
       _mapType = value;
+      refresh();
       onMapTypeChanged();
       onChanged();
     }
@@ -356,6 +357,7 @@ class MindMap extends StatefulWidget {
     Map<String, dynamic> json = {
       "MapType": getMapType().name,
       "MindMapType": getMindMapType().name,
+      "FishboneMapType": getFishboneMapType().name,
       "RootNode": getRootNode().toJson(),
       "Zoom": getZoom().toString(),
       "ExpandedLevel": getExpandedLevel(),
@@ -395,6 +397,16 @@ class MindMap extends StatefulWidget {
         }
       }
       setMindMapType(mindMapType);
+    }
+    if (json.containsKey("FishboneMapType")) {
+      FishboneMapType fishboneMapType = FishboneMapType.leftToRight;
+      for (FishboneMapType type in FishboneMapType.values) {
+        if (type.name == json["FishboneMapType"].toString()) {
+          fishboneMapType = type;
+          break;
+        }
+      }
+      setFishboneMapType(fishboneMapType);
     }
     if (json.containsKey("Zoom")) {
       setZoom(double.tryParse(json["Zoom"].toString()) ?? 1.0);
@@ -2007,8 +2019,25 @@ class FishbonePainter extends CustomPainter {
       double top =
           offset.dy + (mindMap.getRootNode().getSize()?.height ?? 0) / 2;
       canvas.drawLine(
-        Offset(left + dx, top + dy),
-        Offset(mindMap.getFishboneSize().width + dx, top + dy),
+        Offset(
+          left +
+              dx +
+              (mindMap.getRootNode() is MindMapNode
+                  ? ((mindMap.getRootNode() as MindMapNode).getBorder()
+                            as Border)
+                        .left
+                        .width
+                  : 0),
+          top + dy,
+        ),
+        Offset(
+          mindMap.getFishboneSize().width -
+              (mindMap.getRootNode() is MindMapNode
+                  ? (mindMap.getRootNode() as MindMapNode).getImage2Width()
+                  : 0) +
+              dx,
+          top + dy,
+        ),
         paint,
       );
       List<IMindMapNode> items = [];
@@ -2028,9 +2057,7 @@ class FishbonePainter extends CustomPainter {
           Paint paint1 = Paint()
             ..style = PaintingStyle.stroke
             ..strokeCap = StrokeCap.round
-            ..strokeWidth = mindMap.getRootNode().getLinkWidth() <= 0
-                ? 2
-                : mindMap.getRootNode().getLinkWidth()
+            ..strokeWidth = node.getLinkWidth() <= 0 ? 2 : node.getLinkWidth()
             ..color = node.getLinkColor() == Colors.transparent
                 ? Colors.black
                 : node.getLinkColor();
@@ -2039,7 +2066,14 @@ class FishbonePainter extends CustomPainter {
           double t =
               node.getFishbonePosition().dy + (node.getSize()?.height ?? 0);
           double h = top - t - dy;
-          Offset p1 = Offset(l + dx, t + dy);
+          Offset p1 = Offset(
+            l +
+                dx -
+                (node is MindMapNode ? (node.getBorder().bottom.width) : 0),
+            t +
+                dy +
+                (node is MindMapNode ? (node.getBorder().bottom.width) : 0),
+          );
           Offset p2 = Offset(l + dx - h, top);
           canvas.drawLine(p1, p2, paint1);
           //Child Line
@@ -2050,7 +2084,9 @@ class FishbonePainter extends CustomPainter {
             Paint paint2 = Paint()
               ..style = PaintingStyle.stroke
               ..strokeCap = StrokeCap.round
-              ..strokeWidth = node.getLinkWidth() <= 0 ? 2 : node.getLinkWidth()
+              ..strokeWidth = child.getLinkWidth() <= 0
+                  ? 2
+                  : child.getLinkWidth()
               ..color = child.getLinkColor() == Colors.transparent
                   ? Colors.black
                   : child.getLinkColor();
@@ -2063,8 +2099,21 @@ class FishbonePainter extends CustomPainter {
                 (child.getSize()?.height ?? 0) / 2 +
                 child.getLinkInOffset();
             canvas.drawLine(
-              Offset(child.getFishbonePosition().dx - h1 + dx, t2 + dy),
-              Offset(child.getFishbonePosition().dx + dx, t2 + dy),
+              Offset(
+                child.getFishbonePosition().dx -
+                    h1 +
+                    dx -
+                    mindMap.getRootNode().getLinkWidth(),
+                t2 + dy,
+              ),
+              Offset(
+                child.getFishbonePosition().dx +
+                    dx -
+                    (child is MindMapNode
+                        ? ((child.getBorder() as Border).left.width)
+                        : 0),
+                t2 + dy,
+              ),
               paint2,
             );
             drawChildLine(child, canvas);
@@ -2073,9 +2122,7 @@ class FishbonePainter extends CustomPainter {
           Paint paint1 = Paint()
             ..style = PaintingStyle.stroke
             ..strokeCap = StrokeCap.round
-            ..strokeWidth = mindMap.getRootNode().getLinkWidth() <= 0
-                ? 2
-                : mindMap.getRootNode().getLinkWidth()
+            ..strokeWidth = node.getLinkWidth() <= 0 ? 2 : node.getLinkWidth()
             ..color = node.getLinkColor() == Colors.transparent
                 ? Colors.black
                 : node.getLinkColor();
@@ -2083,7 +2130,14 @@ class FishbonePainter extends CustomPainter {
               node.getFishbonePosition().dx + (node.getSize()?.width ?? 0) / 2;
           double t = node.getFishbonePosition().dy;
           double h = t + dy - top;
-          Offset p1 = Offset(l + dx, t + dy);
+          Offset p1 = Offset(
+            l +
+                dx -
+                (node is MindMapNode ? (node.getBorder().bottom.width) : 0),
+            t +
+                dy -
+                (node is MindMapNode ? (node.getBorder().bottom.width) : 0),
+          );
           Offset p2 = Offset(l + dx - h, top);
           canvas.drawLine(p1, p2, paint1);
           //Child Line
@@ -2094,7 +2148,9 @@ class FishbonePainter extends CustomPainter {
             Paint paint2 = Paint()
               ..style = PaintingStyle.stroke
               ..strokeCap = StrokeCap.round
-              ..strokeWidth = node.getLinkWidth() <= 0 ? 2 : node.getLinkWidth()
+              ..strokeWidth = child.getLinkWidth() <= 0
+                  ? 2
+                  : child.getLinkWidth()
               ..color = child.getLinkColor() == Colors.transparent
                   ? Colors.black
                   : child.getLinkColor();
@@ -2108,8 +2164,21 @@ class FishbonePainter extends CustomPainter {
                 child.getLinkInOffset() +
                 child.getFishboneHeight();
             canvas.drawLine(
-              Offset(child.getFishbonePosition().dx - h1 + dx, t2 + dy),
-              Offset(child.getFishbonePosition().dx + dx, t2 + dy),
+              Offset(
+                child.getFishbonePosition().dx -
+                    h1 +
+                    dx -
+                    mindMap.getRootNode().getLinkWidth(),
+                t2 + dy,
+              ),
+              Offset(
+                child.getFishbonePosition().dx +
+                    dx -
+                    (child is MindMapNode
+                        ? ((child.getBorder() as Border).left.width)
+                        : 0),
+                t2 + dy,
+              ),
               paint2,
             );
             drawChildLine(child, canvas);
@@ -2134,7 +2203,25 @@ class FishbonePainter extends CustomPainter {
       double right = offset.dx;
       double top =
           offset.dy + (mindMap.getRootNode().getSize()?.height ?? 0) / 2;
-      canvas.drawLine(Offset(right, top), Offset(0, top), paint);
+      canvas.drawLine(
+        Offset(
+          right -
+              (mindMap.getRootNode() is MindMapNode
+                  ? ((mindMap.getRootNode() as MindMapNode).getBorder()
+                            as Border)
+                        .left
+                        .width
+                  : 0),
+          top,
+        ),
+        Offset(
+          (mindMap.getRootNode() is MindMapNode
+              ? (mindMap.getRootNode() as MindMapNode).getImage2Width()
+              : 0),
+          top,
+        ),
+        paint,
+      );
       List<IMindMapNode> items = [];
       items.addAll(mindMap.getRootNode().getLeftItems());
       for (int i = 0; i < mindMap.getRootNode().getRightItems().length; i++) {
@@ -2152,9 +2239,7 @@ class FishbonePainter extends CustomPainter {
           Paint paint1 = Paint()
             ..style = PaintingStyle.stroke
             ..strokeCap = StrokeCap.round
-            ..strokeWidth = mindMap.getRootNode().getLinkWidth() <= 0
-                ? 2
-                : mindMap.getRootNode().getLinkWidth()
+            ..strokeWidth = node.getLinkWidth() <= 0 ? 2 : node.getLinkWidth()
             ..color = node.getLinkColor() == Colors.transparent
                 ? Colors.black
                 : node.getLinkColor();
@@ -2164,7 +2249,14 @@ class FishbonePainter extends CustomPainter {
           double t =
               node.getFishbonePosition().dy + (node.getSize()?.height ?? 0);
           double h = top - t - dy;
-          Offset p1 = Offset(l + dx, t + dy);
+          Offset p1 = Offset(
+            l +
+                dx +
+                (node is MindMapNode ? (node.getBorder().bottom.width) : 0),
+            t +
+                dy +
+                (node is MindMapNode ? (node.getBorder().bottom.width) : 0),
+          );
           Offset p2 = Offset(l + dx + h, top);
           canvas.drawLine(p1, p2, paint1);
           //Child Line
@@ -2175,7 +2267,9 @@ class FishbonePainter extends CustomPainter {
             Paint paint2 = Paint()
               ..style = PaintingStyle.stroke
               ..strokeCap = StrokeCap.round
-              ..strokeWidth = node.getLinkWidth() <= 0 ? 2 : node.getLinkWidth()
+              ..strokeWidth = child.getLinkWidth() <= 0
+                  ? 2
+                  : child.getLinkWidth()
               ..color = child.getLinkColor() == Colors.transparent
                   ? Colors.black
                   : child.getLinkColor();
@@ -2191,11 +2285,16 @@ class FishbonePainter extends CustomPainter {
               Offset(
                 child.getFishbonePosition().dx +
                     (child.getSize()?.width ?? 0) +
-                    h1,
+                    h1 +
+                    mindMap.getRootNode().getLinkWidth(),
                 t2,
               ),
               Offset(
-                child.getFishbonePosition().dx + (child.getSize()?.width ?? 0),
+                child.getFishbonePosition().dx +
+                    (child.getSize()?.width ?? 0) +
+                    (child is MindMapNode
+                        ? ((child.getBorder() as Border).left.width)
+                        : 0),
                 t2,
               ),
               paint2,
@@ -2206,9 +2305,7 @@ class FishbonePainter extends CustomPainter {
           Paint paint1 = Paint()
             ..style = PaintingStyle.stroke
             ..strokeCap = StrokeCap.round
-            ..strokeWidth = mindMap.getRootNode().getLinkWidth() <= 0
-                ? 2
-                : mindMap.getRootNode().getLinkWidth()
+            ..strokeWidth = node.getLinkWidth() <= 0 ? 2 : node.getLinkWidth()
             ..color = node.getLinkColor() == Colors.transparent
                 ? Colors.black
                 : node.getLinkColor();
@@ -2216,7 +2313,14 @@ class FishbonePainter extends CustomPainter {
               node.getFishbonePosition().dx + (node.getSize()?.width ?? 0) / 2;
           double t = node.getFishbonePosition().dy;
           double h = t + dy - top;
-          Offset p1 = Offset(l + dx, t + dy);
+          Offset p1 = Offset(
+            l +
+                dx +
+                (node is MindMapNode ? (node.getBorder().bottom.width) : 0),
+            t +
+                dy -
+                (node is MindMapNode ? (node.getBorder().bottom.width) : 0),
+          );
           Offset p2 = Offset(l + dx + h, top);
           canvas.drawLine(p1, p2, paint1);
           //Child Line
@@ -2227,7 +2331,9 @@ class FishbonePainter extends CustomPainter {
             Paint paint2 = Paint()
               ..style = PaintingStyle.stroke
               ..strokeCap = StrokeCap.round
-              ..strokeWidth = node.getLinkWidth() <= 0 ? 2 : node.getLinkWidth()
+              ..strokeWidth = child.getLinkWidth() <= 0
+                  ? 2
+                  : child.getLinkWidth()
               ..color = child.getLinkColor() == Colors.transparent
                   ? Colors.black
                   : child.getLinkColor();
@@ -2244,11 +2350,16 @@ class FishbonePainter extends CustomPainter {
                 child.getFishbonePosition().dx +
                     (child.getSize()?.width ?? 0) +
                     h1 +
-                    node.getHSpace(),
+                    node.getHSpace() +
+                    mindMap.getRootNode().getLinkWidth(),
                 t2,
               ),
               Offset(
-                child.getFishbonePosition().dx + (child.getSize()?.width ?? 0),
+                child.getFishbonePosition().dx +
+                    (child.getSize()?.width ?? 0) +
+                    (child is MindMapNode
+                        ? ((child.getBorder() as Border).left.width)
+                        : 0),
                 t2,
               ),
               paint2,
@@ -2269,7 +2380,7 @@ class FishbonePainter extends CustomPainter {
       Paint paint = Paint()
         ..style = PaintingStyle.stroke
         ..strokeCap = StrokeCap.round
-        ..strokeWidth = node.getLinkWidth() <= 0 ? 2 : node.getLinkWidth()
+        ..strokeWidth = child.getLinkWidth() <= 0 ? 2 : child.getLinkWidth()
         ..color = child.getLinkColor() == Colors.transparent
             ? Colors.black
             : child.getLinkColor();
