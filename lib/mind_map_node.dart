@@ -1075,7 +1075,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
               : 16);
   }
 
-  void setImageWidth(double value) {
+  void setImageWidth(double? value) {
     if (_imageWidth != value) {
       _imageWidth = value;
       refresh();
@@ -1110,7 +1110,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
               : 16);
   }
 
-  void setImageHeight(double value) {
+  void setImageHeight(double? value) {
     if (_imageHeight != value) {
       _imageHeight = value;
       refresh();
@@ -1215,7 +1215,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
               : 16);
   }
 
-  void setImage2Width(double value) {
+  void setImage2Width(double? value) {
     if (_image2Width != value) {
       _image2Width = value;
       refresh();
@@ -1250,7 +1250,7 @@ class MindMapNode extends StatefulWidget implements IMindMapNode {
               : 16);
   }
 
-  void setImage2Height(double value) {
+  void setImage2Height(double? value) {
     if (_image2Height != value) {
       _image2Height = value;
       refresh();

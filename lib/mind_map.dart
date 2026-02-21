@@ -748,6 +748,23 @@ class MindMap extends StatefulWidget {
   void setTheme(IMindMapTheme? value) {
     getRootNode().clearStyle();
     _theme = value;
+    if (_theme != null) {
+      if (_theme!.getThemeByLevel(0)!.containsKey("Image")) {
+        if (getRootNode() is MindMapNode) {
+          (getRootNode() as MindMapNode).setImage("");
+          (getRootNode() as MindMapNode).setImageWidth(null);
+          (getRootNode() as MindMapNode).setImageHeight(null);
+        }
+      }
+      if (_theme!.getThemeByLevel(0)!.containsKey("Image2")) {
+        if (getRootNode() is MindMapNode) {
+          (getRootNode() as MindMapNode).setImage2("");
+          (getRootNode() as MindMapNode).setImage2Width(null);
+          (getRootNode() as MindMapNode).setImage2Height(null);
+        }
+      }
+    }
+    getRootNode().refresh();
     refresh();
     onChanged();
   }
